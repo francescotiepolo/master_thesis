@@ -1,12 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import networkx as nx
+from scipy.integrate import solve_ivp
 
 class BaseModel:
 
 
-    def __init__(self, n_products: int=15, n_countries: int=35, nestedness: float=0.6,
-                 connectance: float=0.15, forbidden_links: float=0.3, **params):
+    def __init__(self, n_products: int=10, n_countries: int=20, nestedness: float=0.6,
+                 connectance: float=0.25, forbidden_links: float=0.1, **params):
         '''
         Initialize the base model.
         Parameters:
@@ -40,7 +40,7 @@ class BaseModel:
         self.params.update(params)
 
         # Generate network and initialize
-        self.generate_network()
+        self.generate_feasible_network()
         self.initialize_parameters()
 
 
@@ -56,7 +56,7 @@ class BaseModel:
         # Countries
         country_degrees = np.random.power(2, self.SC) # Power-law distribution
         country_degrees = (country_degrees / country_degrees.max()) * self.SP * self.connectance # Normalize and scale by maximum number of possible links
-        country_degrees = np.maximum(country_degrees.astype(int), 1) # At least one connection
+        country_degrees = np.maximum(country_degrees.astype(int), 1) # At least 3 connections
 
         # Same for products
         product_degrees = np.random.power(2, self.SP)
@@ -82,6 +82,54 @@ class BaseModel:
         self.KC = adj_matrix.sum(axis=1) # Country degrees
         self.KP = adj_matrix.sum(axis=0) # Product degrees
 
+    def generate_feasible_network(self, max_param_tries: int=100, max_network_tries: int=10):
+        '''
+        Generate a feasible network following original paper methodology
+        '''
+
+        for network_try in range(max_network_tries):
+            self.generate_network()
+            
+            for param_try in range(max_param_tries):
+                self.initialize_parameters()
+                
+                if self.network_feasible():
+                    print(f"Feasible network found"
+                          f"(network attempt {network_try+1}/{max_network_tries}, "
+                          f"param attempt {param_try+1}/{max_param_tries})")
+                    return True
+            
+            print(f"Network {network_try+1}/{max_network_tries}: "
+                  f"No feasible parameters after {max_param_tries} tries")
+        
+        print(f"WARNING: Could not find feasible network after {max_network_tries} tries")
+
+    def network_feasible(self, extinction_threshold: float=0.01):
+        '''
+        Check if all species survive at equilibrium with no external stress (d_C=0)
+        '''
+
+        # Save current state
+        d_C_original = self.params['d_C']
+        lambda_original = self.params['lambda']
+        
+        # Set no stress
+        self.params['d_C'] = 0.0
+        self.params['lambda'] = 0.0
+        
+        # Run to equilibrium
+        result = self.simulate(t_max=1000)
+        
+        # Restore parameters
+        self.params['d_C'] = d_C_original
+        self.params['lambda'] = lambda_original
+        
+        # Check survival
+        products_alive = np.all(result['P'] > extinction_threshold)
+        countries_alive = np.all(result['C'] > extinction_threshold)
+        
+        return products_alive and countries_alive
+    
     def initialize_parameters(self):
         '''
         Initialize model parameters based on the generated network
@@ -92,9 +140,9 @@ class BaseModel:
         self.r_C = np.random.uniform(*self.params['r_C_range'], size=self.SC)
 
 
-        # Competition matrices
-        self.C_PP = np.ones((self.SP, self.SP)) * self.params['C_P']
-        self.C_CC = np.ones((self.SC, self.SC)) * self.params['C_C']
+        # Competition matrices (diagonal)
+        self.C_PP = np.eye(self.SP) * self.params["C_P"]
+        self.C_CC = np.eye(self.SC) * self.params["C_C"]
 
         # Initialize matching matrix beta
         self.beta_base = self.adj_matrix * np.random.uniform(0.5, 1.0, size=(self.SC, self.SP))
@@ -129,7 +177,7 @@ class BaseModel:
             if demand > 1e-10:
                 xi[i] = P[i] / (demand ** q)
             else:
-                xi[i] = 0.0
+                xi[i] = P[i]
 
         return xi
 
@@ -146,8 +194,8 @@ class BaseModel:
         Compute mutualistic benefits for countries and products
         
         Returns:
-        - rho_C : Country benefits
-        - rho_P : Product benefits
+        - rho_C: Country benefits
+        - rho_P: Product benefits
         '''
 
         rho_C = np.sum(alpha * self.beta_C * xi[np.newaxis, :], axis=1)
@@ -168,7 +216,7 @@ class BaseModel:
         # Ensure all values are positive
         P = np.maximum(P, 1e-10)
         C = np.maximum(C, 1e-10)
-        alpha = np.maximum(alpha, 1e-10)
+        alpha = np.maximum(alpha, 0)
 
         # Ensure alphas sum to 1 for each country
         for j in range(self.SC):
@@ -183,17 +231,12 @@ class BaseModel:
         
         # Product dynamics
         dP = np.zeros(self.SP)
-        for i in range(self.SP):
-            competition = np.sum(self.C_PP[i] * P)
-            mutualism = self.holling_function(rho_P[i])
-            dP[i] = P[i] * (self.r_P[i] - competition + mutualism) + self.params['mu']
+        competition_P = self.C_PP @ P 
+        dP = P * (self.r_P - competition_P + self.holling_function(rho_P)) + self.params['mu']
 
         # Country dynamics
-        dC = np.zeros(self.SC)
-        for i in range(self.SC):
-            competition = np.sum(self.C_CC[i] * C)
-            mutualism = self.holling_function(rho_C[i])
-            dC[i] = C[i] * (self.r_C[i] - d_C_t - competition + mutualism) + self.params['mu']
+        competition_C = self.C_CC @ C
+        dC = C * (self.r_C - d_C_t - competition_C + self.holling_function(rho_C)) + self.params['mu']
 
         # Adaptation dynamics
         nu = self.params['nu']
@@ -217,4 +260,103 @@ class BaseModel:
 
         return dy
     
+    def simulate(self, y0: np.ndarray=None, t_max: float=10, **solver_params):
+        '''
+        Simulate the ODE system
 
+        Returns:
+        - dict with keys 't', 'y', 'P', 'C', 'alpha', 'success'
+        '''
+
+        if y0 is None:
+            # Initial conditions: all set to 1
+            P0 = np.ones(self.SP)
+            C0 = np.ones(self.SC)
+            alpha0 = self.alpha_init.copy()
+            y0 = np.concatenate([P0, C0, alpha0.flatten()])
+
+        # Solve ODE
+        sol = solve_ivp(self.ODEs, (0, t_max), y0, method='LSODA', rtol=1e-3, atol=1e-6, **solver_params)
+        y_final = sol.y[:, -1]
+        P_final = y_final[:self.SP]
+        C_final = y_final[self.SP:self.SP + self.SC]
+        alpha_final = y_final[self.SP + self.SC:].reshape(self.SC, self.SP)
+
+        return {
+            't': sol.t,
+            'y': sol.y,
+            'P': P_final,
+            'C': C_final,
+            'alpha': alpha_final,
+            'success': sol.success,
+            'sol': sol
+        }
+    
+    def find_critical_points(self, d_C_min: float=0.0, d_C_max: float=3.0, step: float=0.05, extinction_threshold: float=0.01, continue_after_collapse: int=10):
+        '''
+        Find critical points by varying driver of decline d_C
+
+        Returns:
+        - dict with 'd_collapse', 'd_recovery', 'd_C_forward, 'C_forward', 'P_forward', ... (and same backward)
+        '''
+
+        # Forward pass: increasing d_C until collapse
+        d_C_values_forward = np.arange(d_C_min, d_C_max, step)
+        C_forward = []
+        P_forward = []
+        self.params['d_C'] = d_C_min
+        self.params['lambda'] = 0
+        result = self.simulate()
+        y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
+
+        d_collapse = None
+        collapse_counter = 0
+        for d_C in d_C_values_forward:
+            self.params['d_C'] = d_C
+            result = self.simulate(y0=y_current)
+            y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
+            C_forward.append(result['C'])
+            P_forward.append(result['P'])
+
+            n_alive = np.sum(result['C'] > extinction_threshold)
+            if d_collapse is None and n_alive == 0:
+                d_collapse = d_C
+            
+            # Continue for a bit after collapse
+            if d_collapse is not None:
+                collapse_counter += 1
+                if collapse_counter >= continue_after_collapse:
+                    break
+
+        if d_collapse is None:
+            d_collapse = d_C_max
+
+        # Backward pass: decreasing d_C from collapse point until recovery
+        d_C_values_backward = np.arange(d_collapse, d_C_min, -step)
+        C_backward = []
+        P_backward = []
+
+        d_recovery = None
+
+        for d_C in d_C_values_backward:
+            self.params['d_C'] = d_C
+            result = self.simulate(y0=y_current)
+            y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
+            C_backward.append(result['C'])
+            P_backward.append(result['P'])
+
+            n_alive = np.sum(result['C'] > extinction_threshold)
+            if d_recovery is None and n_alive > 0:
+                d_recovery = d_C
+                # Not break here to continue until d_C_min to check for full recovery
+
+        return {
+            'd_collapse': d_collapse,
+            'd_recovery': d_recovery if d_recovery is not None else d_C_min,
+            'd_C_forward': d_C_values_forward[:len(C_forward)],
+            'C_forward': np.array(C_forward),
+            'P_forward': np.array(P_forward),
+            'd_C_backward': d_C_values_backward[:len(C_backward)],
+            'C_backward': np.array(C_backward),
+            'P_backward': np.array(P_backward)
+        }
