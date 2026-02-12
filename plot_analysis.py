@@ -42,15 +42,6 @@ def verify_base_model():
     critical_data_adapt = model_adapt.find_critical_points()
     fig2 = plot_critical(model_adapt, critical_data_adapt, title='Hysteresis Diagram (with adaptive foraging)')
 
-    # Debug prints
-    print(f"C_forward shape: {critical_data_adapt['C_forward'].shape}")
-    print(f"C_forward at d_C=0: min={critical_data_adapt['C_forward'][0].min():.2f}, max={critical_data_adapt['C_forward'][0].max():.2f}")
-    print(f"C_forward at collapse: min={critical_data_adapt['C_forward'][-1].min():.2f}, max={critical_data_adapt['C_forward'][-1].max():.2f}")
-    print(f"Initial survival (d_C=0.0):")
-    print(f"  Countries alive: {(critical_data_adapt['C_forward'][0] > 0.01).sum()}/{model_adapt.SC}")
-    print(f"  Countries extinct: {(critical_data_adapt['C_forward'][0] <= 0.01).sum()}/{model_adapt.SC}")
-    print(f"  Survivor abundances: {critical_data_adapt['C_forward'][0][critical_data_adapt['C_forward'][0] > 0.01]}")
-
     print(f"No adaptive foraging: Collapse at d_C={critical_data_no_adapt['d_collapse']:.3f}, Recovery at d_C={critical_data_no_adapt['d_recovery']:.2f}")
     print(f"With adaptive foraging: Collapse at d_C={critical_data_adapt['d_collapse']:.3f}, Recovery at d_C={critical_data_adapt['d_recovery']:.2f}")
 
