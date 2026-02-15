@@ -5,8 +5,8 @@ from scipy.integrate import solve_ivp
 class BaseModel:
 
 
-    def __init__(self, n_products: int=10, n_countries: int=20, nestedness: float=0.6,
-                 connectance: float=0.25, forbidden_links: float=0.1, **params):
+    def __init__(self, n_products: int=15, n_countries: int=35, nestedness: float=0.6,
+                 connectance: float=0.15, forbidden_links: float=0.3, **params):
         '''
         Initialize the base model.
         Parameters:
@@ -25,15 +25,15 @@ class BaseModel:
         self.forbidden_links = forbidden_links
 
         self.params = {
-            'r_P_range': (0.4, 1.0),       # Product intrinsic growth rates
-            'r_C_range': (0.4, 1.0),       # Country intrinsic growth rates
+            'r_P_range': (0.1, 0.35),       # Product intrinsic growth rates
+            'r_C_range': (0.15, 0.3),       # Country intrinsic growth rates
             'h': 0.5,                      # Saturation parameter
-            'mu': 1e-6,                    # Migration rate
+            'mu': 1e-4,                    # Migration rate
             'eta': 0.5,                    # Specialization reward exponent
             'nu': 0.7,                     # Adaptation strength (1=no adaptation)
-            'q': 0.2,                      # Resource congestion
-            'C_P': 0.01,                   # Product-product competition
-            'C_C': 0.01,                   # Country-country competition
+            'q': 0.0,                      # Resource congestion
+            'C_P': 0.95,                   # Product-product competition
+            'C_C': 0.95,                   # Country-country competition
             'd_C': 0.0,                    # Driver of decline (not time dependent)
             'lambda': 0.0,                 # Rate of change of decline
         }
@@ -56,7 +56,7 @@ class BaseModel:
         # Countries
         country_degrees = np.random.power(2, self.SC) # Power-law distribution
         country_degrees = (country_degrees / country_degrees.max()) * self.SP * self.connectance # Normalize and scale by maximum number of possible links
-        country_degrees = np.maximum(country_degrees.astype(int), 1) # At least 3 connections
+        country_degrees = np.maximum(country_degrees.astype(int), 1) # At least 1 connections
 
         # Same for products
         product_degrees = np.random.power(2, self.SP)
@@ -145,7 +145,7 @@ class BaseModel:
         self.C_CC = np.eye(self.SC) * self.params["C_C"]
 
         # Initialize matching matrix beta
-        self.beta_base = self.adj_matrix * np.random.uniform(0.5, 1.0, size=(self.SC, self.SP))
+        self.beta_base = self.adj_matrix * np.random.uniform(0.8, 1.2, size=(self.SC, self.SP))
 
         # Initialize alphas (uniform distribution)
         self.alpha_init = self.adj_matrix.copy().astype(float)
@@ -260,7 +260,7 @@ class BaseModel:
 
         return dy
     
-    def simulate(self, y0: np.ndarray=None, t_max: float=10, **solver_params):
+    def simulate(self, y0: np.ndarray=None, t_max: float=100, **solver_params):
         '''
         Simulate the ODE system
 
@@ -304,6 +304,7 @@ class BaseModel:
         d_C_values_forward = np.arange(d_C_min, d_C_max, step)
         C_forward = []
         P_forward = []
+        alpha_forward = []
         self.params['d_C'] = d_C_min
         self.params['lambda'] = 0
         result = self.simulate()
@@ -317,6 +318,7 @@ class BaseModel:
             y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
             C_forward.append(result['C'])
             P_forward.append(result['P'])
+            alpha_forward.append(result['alpha'])
 
             n_alive = np.sum(result['C'] > extinction_threshold)
             if d_collapse is None and n_alive == 0:
@@ -335,6 +337,7 @@ class BaseModel:
         d_C_values_backward = np.arange(d_collapse, d_C_min, -step)
         C_backward = []
         P_backward = []
+        alpha_backward = []
 
         d_recovery = None
 
@@ -344,6 +347,7 @@ class BaseModel:
             y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
             C_backward.append(result['C'])
             P_backward.append(result['P'])
+            alpha_backward.append(result['alpha'])
 
             n_alive = np.sum(result['C'] > extinction_threshold)
             if d_recovery is None and n_alive > 0:
@@ -356,7 +360,9 @@ class BaseModel:
             'd_C_forward': d_C_values_forward[:len(C_forward)],
             'C_forward': np.array(C_forward),
             'P_forward': np.array(P_forward),
+            'alpha_forward': np.array(alpha_forward),
             'd_C_backward': d_C_values_backward[:len(C_backward)],
             'C_backward': np.array(C_backward),
-            'P_backward': np.array(P_backward)
+            'P_backward': np.array(P_backward),
+            'alpha_backward': np.array(alpha_backward)
         }

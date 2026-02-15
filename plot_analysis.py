@@ -26,7 +26,6 @@ def plot_critical(model: BaseModel, critical_data: dict, title: str='Hysteresis 
     ax.set_title(title)
     ax.legend()
     ax.grid()
-    ax.set_ylim(bottom=-5)
    
     return fig
 
@@ -51,6 +50,7 @@ def verify_base_model():
     }
 
 if __name__ == "__main__":
+    
     np.random.seed(133)
 
     results = verify_base_model()
