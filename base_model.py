@@ -1,368 +1,591 @@
+"""
+BaseModel: product-country model adapted from
+the original AdaptiveModel (Terpstra 2022, https://github.com/TerpstraS/pollcomm.git).
+
+Variable mapping  (from original):
+Plants            →  Products  (SP = 15, index 0..SP-1  in state vector)
+Pollinators       →  Countries (SC = 35, index SP..SP+SC-1 in state vector)
+
+The find_critical_points method is a direct port of experiments.hysteresis().
+"""
+
+import copy
 import numpy as np
-import networkx as nx
-from scipy.integrate import solve_ivp
+import numba
+from ode_solver import solve_ode    # Direct port from Terpstra 2022
+
 
 class BaseModel:
 
-
-    def __init__(self, n_products: int=15, n_countries: int=35, nestedness: float=0.6,
-                 connectance: float=0.15, forbidden_links: float=0.3, **params):
-        '''
-        Initialize the base model.
-        Parameters:
-        - n_products: Number of products (int)
-        - n_countries: Number of countries (int)
-        - nestedness: Desired nestedness level (float between 0 and 1)
-        - connectance: Desired connectance level (float between 0 and 1)
-        - forbidden_links: Fraction of forbidden links (float between 0 and 1)
-        - **params: Additional model parameters (dict)
-        '''
-
-        self.SP = n_products
+    def __init__(
+        self,
+        N_croducts: int = 15,           # Number of products (as plants in original)
+        n_countries: int = 35,          # Number of countries (as pollinators in original)
+        nestedness: float = 0.6,        # Nestedness of network (0 to 1)
+        connectance: float = 0.15,      # Connectance of network (0 to 1)
+        forbidden_links: float = 0.3,   # Proportion of forbidden links (0 to 1)
+        seed=None,                      # Random seed for reproducibility
+        nu: float = 1.0,                # 1 = no adaptation, <1 = adaptive foraging
+        G: float = 1.0,                 # Speed of adaptive foraging
+        q: float = 0.0,                 # Resource-congestion (supply/demand) exponent
+        mu: float = 0.0001,             # Immigration
+        beta_trade_off: float = 0.5,    # Eta variable in paper (0 = no trade-off, 1 = strong trade-off)
+        feasible: bool = True,          # Whether to enforce feasibility (all species alive at d_C=0) during initialization
+        feasible_iters: int = 100,      # Number of iterations to attempt to generate a feasible network
+    ):
+        self.SP = N_croducts
         self.SC = n_countries
+        self.N = self.SP + self.SC   # Total species
+
         self.nestedness = nestedness
         self.connectance = connectance
         self.forbidden_links = forbidden_links
+        self.seed = seed
+        self.rng = np.random.default_rng(seed)
 
-        self.params = {
-            'r_P_range': (0.1, 0.35),       # Product intrinsic growth rates
-            'r_C_range': (0.15, 0.3),       # Country intrinsic growth rates
-            'h': 0.5,                      # Saturation parameter
-            'mu': 1e-4,                    # Migration rate
-            'eta': 0.5,                    # Specialization reward exponent
-            'nu': 0.7,                     # Adaptation strength (1=no adaptation)
-            'q': 0.0,                      # Resource congestion
-            'C_P': 0.95,                   # Product-product competition
-            'C_C': 0.95,                   # Country-country competition
-            'd_C': 0.0,                    # Driver of decline (not time dependent)
-            'lambda': 0.0,                 # Rate of change of decline
-        }
-        self.params.update(params)
+        self.nu = nu
+        self.G = G
+        self.q = q
+        self.beta_trade_off = beta_trade_off
+        self.mu = mu
+        self.extinct_threshold = 0.01
 
-        # Generate network and initialize
+        self.feasible = feasible
+        self.feasible_iters = feasible_iters
+        self.is_feasible = None
+
+        # Solution storage
+        self.t         = None
+        self.y         = None        # Shape (SP+SC, n_timepoints) — P and C, NO alpha
+        self.y_partial = None        # Shape (SC*SP, n_timepoints_partial) — alpha only
+        self.y_all_end = None        # Full state [P, C, alpha] at final timepoint
+
         self.generate_feasible_network()
-        self.initialize_parameters()
 
 
-    def generate_network(self):
-        '''
-        Generate nested bipartite network
-        '''
 
-        # Create adjacency matrix
-        adj_matrix = np.zeros((self.SC, self.SP))
+    # Network generation
 
-        # Generate nested structure
-        # Countries
-        country_degrees = np.random.power(2, self.SC) # Power-law distribution
-        country_degrees = (country_degrees / country_degrees.max()) * self.SP * self.connectance # Normalize and scale by maximum number of possible links
-        country_degrees = np.maximum(country_degrees.astype(int), 1) # At least 1 connections
+    def random_network(self, max_iter: int = 1000):
+        """
+        Generate a random bipartite network (SC × SP).
+        """
+        N_c, N_p = self.SC, self.SP
+        for _ in range(max_iter):
+            net  = np.zeros((N_c, N_p)) # Adjacency matrix (SC × SP)
+            forb = np.zeros((N_c, N_p)) # Forbidden links matrix (SC × SP)
+            n_c  = int(self.connectance * N_c * N_p) # Number of links to create
+            n_f  = int(self.forbidden_links * N_c * N_p) # Number of forbidden links
 
-        # Same for products
-        product_degrees = np.random.power(2, self.SP)
-        product_degrees = (product_degrees / product_degrees.max()) * self.SC * self.connectance
-        product_degrees = np.maximum(product_degrees.astype(int), 1)
+            sel = self.rng.choice(N_c * N_p, size=n_c + n_f, replace=False) # Randomly select positions for links and forbidden links
+            i_c  = self.rng.choice(sel, size=n_c, replace=False) # Indices for links
+            i_f = np.setdiff1d(sel, i_c) # Indices for forbidden links
 
-        for i in range(self.SC):
-            # Countries with high degree connect to high-degree products (like in original paper)
-            n_connections = min(country_degrees[i], self.SP)
-            probs = product_degrees / product_degrees.sum()
-            products = np.random.choice(self.SP, size=n_connections, replace=False, p=probs)
-            adj_matrix[i, products] = 1
+            i_c = np.column_stack(np.unravel_index(i_c, (N_c, N_p))) # Convert flat indices to 2D indices
+            net[tuple(i_c.T)] = 1
 
-        # Apply forbidden links
-        n_forbidden = int(adj_matrix.sum() * self.forbidden_links)
-        existing_links = np.argwhere(adj_matrix == 1)            
-        if len(existing_links) > 0:
-            forbidden_idx = np.random.choice(len(existing_links), size=min(n_forbidden, len(existing_links)), replace=False)
-            for idx in forbidden_idx:
-                adj_matrix[existing_links[idx][0], existing_links[idx][1]] = 0
-            
-        self.adj_matrix = adj_matrix
-        self.KC = adj_matrix.sum(axis=1) # Country degrees
-        self.KP = adj_matrix.sum(axis=0) # Product degrees
+            if len(i_f):
+                i_f = np.column_stack(np.unravel_index(i_f, (N_c, N_p))) # Convert flat indices to 2D indices
+                forb[tuple(i_f.T)] = 1
 
-    def generate_feasible_network(self, max_param_tries: int=100, max_network_tries: int=10):
-        '''
-        Generate a feasible network following original paper methodology
-        '''
+            # Every species must have at least one interaction
+            if net.any(axis=0).all() and net.any(axis=1).all():
+                return net, forb
 
-        for network_try in range(max_network_tries):
-            self.generate_network()
-            
-            for param_try in range(max_param_tries):
-                self.initialize_parameters()
-                
-                if self.network_feasible():
-                    print(f"Feasible network found"
-                          f"(network attempt {network_try+1}/{max_network_tries}, "
-                          f"param attempt {param_try+1}/{max_param_tries})")
-                    return True
-            
-            print(f"Network {network_try+1}/{max_network_tries}: "
-                  f"No feasible parameters after {max_param_tries} tries")
-        
-        print(f"WARNING: Could not find feasible network after {max_network_tries} tries")
+        return self.random_network(max_iter)   # Retry if none found
 
-    def network_feasible(self, extinction_threshold: float=0.01):
-        '''
-        Check if all species survive at equilibrium with no external stress (d_C=0)
-        '''
+    def _is_connected(self, M) -> bool:
+        """
+        BFS connectivity check for bipartite adjacency matrix:
+        check if all nodes (countries and products) are reachable from each other.
+        """
+        N_c, N_p = M.shape
+        seen, frontier = set(), {0} # Set of nodes seen so far, set of nodes to explore
+        while frontier:
+            nxt = set()
+            for node in frontier:
+                if node not in seen:
+                    seen.add(node)
+                    # If node is a country, add connected products; if node is a product, add connected countries
+                    if node < N_c:
+                        nxt.update(N_c + j for j in range(N_p) if M[node, j] > 0)
+                    else:
+                        nxt.update(i for i in range(N_c) if M[i, node - N_c] > 0)
+            frontier = nxt
+        return len(seen) == N_c + N_p # True if all nodes are visited (connected)
 
-        # Save current state
-        d_C_original = self.params['d_C']
-        lambda_original = self.params['lambda']
-        
-        # Set no stress
-        self.params['d_C'] = 0.0
-        self.params['lambda'] = 0.0
-        
-        # Run to equilibrium
-        result = self.simulate(t_max=1000)
-        
-        # Restore parameters
-        self.params['d_C'] = d_C_original
-        self.params['lambda'] = lambda_original
-        
-        # Check survival
-        products_alive = np.all(result['P'] > extinction_threshold)
-        countries_alive = np.all(result['C'] > extinction_threshold)
-        
-        return products_alive and countries_alive
-    
+    def generate_network(self, max_iter: int = int(1e5)):
+        """
+        Generate a nested bipartite network (SC × SP).
+        """
+        N_c, N_p = self.SC, self.SP
+        net, forb = self.random_network()
+
+        converged = False
+        for _ in range(max_iter):
+            if _nestedness_fast(net) >= self.nestedness: # Check nestedness
+                converged = True
+                break
+
+            # If nestedness not reached, perform a random swap of the links
+            rows, cols = np.nonzero(net)
+            if len(rows) == 0:
+                break
+            idx  = self.rng.choice(len(rows)) # Randomly select a link to swap
+            a, b = int(rows[idx]), int(cols[idx])
+
+            if self.rng.choice([0, 1]) == 0: # Randomly decide to swap a country or a product
+                c = int(self.rng.integers(0, N_c)) # Randomly select a country
+                # Rewiring rule
+                if (
+                    net[c, b] == 0 and c != a and forb[c, b] == 0
+                    and net[a].sum() > 1 and net[c].sum() > net[a].sum()
+                ):
+                    # Swap the link from (a, b) to (c, b)
+                    net[c, b] = 1
+                    net[a, b] = 0
+            else: # Same for product
+                c = int(self.rng.integers(0, N_p))
+                if (
+                    net[a, c] == 0 and c != b and forb[a, c] == 0
+                    and net[:, b].sum() > 1 and net[:, c].sum() > net[:, b].sum()
+                ):
+                    net[a, c] = 1
+                    net[a, b] = 0
+
+        if not converged:
+            print("Nestedness not reached, retrying network...")
+            return self.generate_network(max_iter)
+        if not self._is_connected(net):
+            print("Network not connected, retrying network...")
+            return self.generate_network(max_iter)
+
+        self.adj_matrix = net 
+        self.forbidden_network = forb
+        self.KC = net.sum(axis=1) # Country degrees (row sums)
+        self.KP = net.sum(axis=0) # Product degrees (col sums)
+
+
+
+    # Parameter initialisation
+
     def initialize_parameters(self):
-        '''
-        Initialize model parameters based on the generated network
-        '''
+        """
+        Sample all ecological parameters.
+        """
+        # Competition matrices
+        self.C_PP = self.rng.uniform(0.01, 0.05, (self.SP, self.SP))
+        np.fill_diagonal(self.C_PP, self.rng.uniform(0.8, 1.1, self.SP))
+
+        self.C_CC = self.rng.uniform(0.01, 0.05, (self.SC, self.SC))
+        np.fill_diagonal(self.C_CC, self.rng.uniform(0.8, 1.1, self.SC))
+
+        # Saturation factors h
+        self.h_P = self.rng.uniform(0.15, 0.3, self.SP)
+        self.h_C = self.rng.uniform(0.15, 0.3, self.SC)
 
         # Intrinsic growth rates
-        self.r_P = np.random.uniform(*self.params['r_P_range'], size=self.SP)
-        self.r_C = np.random.uniform(*self.params['r_C_range'], size=self.SC)
+        self.r_P = self.rng.uniform(0.1, 0.35, self.SP)
+        self.r_C = self.rng.uniform(0.1, 0.35, self.SC)
 
+        # Initial foraging effort alpha (SC × SP)
+        with np.errstate(divide="ignore", invalid="ignore"): # Suppress warnings for zero-degree species (will be set to zero anyway)
+            row_sums = self.adj_matrix.sum(axis=1, keepdims=True)
+            self.alpha = np.where(
+                self.adj_matrix > 0,
+                self.adj_matrix / row_sums,
+                0.0
+            )
 
-        # Competition matrices (diagonal)
-        self.C_PP = np.eye(self.SP) * self.params["C_P"]
-        self.C_CC = np.eye(self.SC) * self.params["C_C"]
+        # Beta matrices
+        bt = self.beta_trade_off # Eta
+        low, high = 0.8, 1.2
 
-        # Initialize matching matrix beta
-        self.beta_base = self.adj_matrix * np.random.uniform(0.8, 1.2, size=(self.SC, self.SP))
+        beta_0_P = self.rng.uniform(low, high, (self.SC, self.SP))
+        beta_0_C = self.rng.uniform(low, high, (self.SC, self.SP))
 
-        # Initialize alphas (uniform distribution)
-        self.alpha_init = self.adj_matrix.copy().astype(float)
-        for i in range (self.SC):
-            if self.KC[i] > 0:
-                self.alpha_init[i] /= self.alpha_init[i].sum() # Normalize so that sum of alphas for each country is 1
+        self.beta_P = np.zeros((self.SC, self.SP))
+        self.beta_C = np.zeros((self.SC, self.SP))
 
-        # Normalize beta
-        eta = self.params['eta']
-        self.beta_C = np.zeros_like(self.beta_base)
-        self.beta_P = np.zeros_like(self.beta_base)
-
-        for i in range(self.SC):
+        for i in range(self.SC): # Normalize beta as explained in paper
             for j in range(self.SP):
                 if self.adj_matrix[i, j] > 0:
-                    self.beta_C[i, j] = self.beta_base[i, j] / (self.KP[j] ** eta * self.alpha_init[i, j])
-                    self.beta_P[i, j] = self.beta_base[i, j] / (self.KC[i] ** eta * self.alpha_init[i, j])
+                    self.beta_P[i, j] = (
+                        beta_0_P[i, j] / (self.KP[j] ** bt) / self.alpha[i, j]
+                    )
+                    self.beta_C[i, j] = (
+                        beta_0_C[i, j] / (self.KC[i] ** bt) / self.alpha[i, j]
+                    )
 
-    def compute_resource_availability(self, P: np.ndarray, C: np.ndarray, alpha: np.ndarray):
-        '''
-        Compute supply-demand ratio xi for each product
-        '''
 
-        q = self.params['q']
 
-        xi = np.zeros(self.SP)
-        for i in range(self.SP):
-            demand = np.sum(alpha[:, i] * self.beta_C[:, i] * C)
-            if demand > 1e-10:
-                xi[i] = P[i] / (demand ** q)
+    #  Feasibility
+
+    def generate_feasible_network(self, max_network_tries: int = 10):
+        """
+        Generate a nested network and sample parameters until all
+        species survive at equilibrium (d_C = 0).
+        """
+        for nt in range(max_network_tries):
+            self.generate_network()
+
+            if self.feasible:
+                for pt in range(self.feasible_iters):
+                    self._reset_sol()
+                    self.initialize_parameters()
+                    # Quick feasibility solve
+                    sol = self.solve(
+                        1000, n_steps=1000, d_C=0,
+                        stop_on_equilibrium=True,
+                        stop_on_collapse=True
+                    )
+                    self._set_sol(sol)
+                    if self._is_all_alive()[-1].all(): # If all species are alive at equilibrium, we have a feasible network
+                        self.is_feasible = True
+                        print(f"Feasible network found")
+                        return True
+                print(
+                    f"Network {nt+1}/{max_network_tries}: "
+                    f"no feasible params after {self.feasible_iters} tries."
+                )
             else:
-                xi[i] = P[i]
+                self.initialize_parameters()
+                return True
 
-        return xi
+        print("WARNING: could not find a feasible network.")
+        self.is_feasible = False
 
-    def holling_function(self, rho: np.ndarray):
-        '''
-        Holling type-II saturation function
-        '''
 
-        h = self.params['h']
-        return rho / (1 + rho / h)
-    
-    def mutualistic_benefits(self, P: np.ndarray, C: np.ndarray, alpha: np.ndarray, xi: np.ndarray):
-        '''
-        Compute mutualistic benefits for countries and products
-        
-        Returns:
-        - rho_C: Country benefits
-        - rho_P: Product benefits
-        '''
 
-        rho_C = np.sum(alpha * self.beta_C * xi[np.newaxis, :], axis=1)
-        rho_P = np.sum(alpha * self.beta_P * C[:, np.newaxis], axis=0)
+    # Solution management
 
-        return rho_C, rho_P
-    
-    def ODEs(self, t: float, y: np.ndarray):
-        '''
-        Compute derivatives for the ODE system
-        State vector y = [P_1, ..., P_SP, C_1, ..., C_SC, alpha_11, alpha_12, ...]
-        '''
+    def _reset_sol(self):
+        """
+        Reset solution storage.
+        """
+        self.t         = None
+        self.y         = None
+        self.y_partial = None
+        self.y_all_end = None
 
-        P = y[:self.SP]
-        C = y[self.SP:self.SP + self.SC]
-        alpha = y[self.SP + self.SC:].reshape(self.SC, self.SP)
+    def _set_sol(self, sol):
+        """
+        Set solution from results.
+        """
+        self.t = sol.t
+        self.y = sol.y # [P, C] without alpha
+        if sol.y_partial is not None and len(sol.y_partial) > 0: # If alpha was saved
+            self.y_partial = sol.y_partial # Alpha flattened
+            # Join full solution
+            self.y_all_end = np.concatenate(
+                (self.y[:, -1], self.y_partial[:, -1])
+            )
+        else:
+            self.y_all_end = copy.deepcopy(self.y[:, -1])
 
-        # Ensure all values are positive
-        P = np.maximum(P, 1e-10)
-        C = np.maximum(C, 1e-10)
-        alpha = np.maximum(alpha, 0)
+    def _is_all_alive(self):
+        """
+        Check if all species are above the extinction threshold.
+        """
+        if self.y is None:
+            return None
+        return self.y > self.extinct_threshold
 
-        # Ensure alphas sum to 1 for each country
-        for j in range(self.SC):
-            if alpha[j].sum() > 1e-10:
-                alpha[j] /= alpha[j].sum()
 
-        xi = self.compute_resource_availability(P, C, alpha)
-        rho_C, rho_P = self.mutualistic_benefits(P, C, alpha, xi)
 
-        # Driver of decline
-        d_C_t = self.params['d_C'] + self.params['lambda'] * t
-        
-        # Product dynamics
-        dP = np.zeros(self.SP)
-        competition_P = self.C_PP @ P 
-        dP = P * (self.r_P - competition_P + self.holling_function(rho_P)) + self.params['mu']
+    # ODE building blocks
 
-        # Country dynamics
-        competition_C = self.C_CC @ C
-        dC = C * (self.r_C - d_C_t - competition_C + self.holling_function(rho_C)) + self.params['mu']
+    def _phi(self, P, alpha_beta_C_prod):
+        """
+        Supply/demand ratio for each product.
 
-        # Adaptation dynamics
-        nu = self.params['nu']
-        dalpha = np.zeros((self.SC, self.SP))
+        phi[j] = P[j] / (sum_i alpha[i,j]*beta_C[i,j]*C[i])^q
+        """
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.nan_to_num(
+                P / (alpha_beta_C_prod ** self.q), copy=False, nan=0.0
+            )
 
-        for i in range(self.SC):
-            # Fitness for each product
-            fitness = self.beta_C[i] * xi
-            mean_fitness = np.sum(alpha[i] * fitness)
+    def _mutualism(self, rho, h):
+        """
+        Holling type-II function: rho / (1 + h*rho).
 
-            # Number of connected products
-            S_P_i = self.adj_matrix[i].sum()
+        Different from the one in paper!
+        """
+        return rho / (1.0 + h * rho)
 
-            for j in range(self.SP):
-                if self.adj_matrix[i, j] > 0:
-                    replicator = alpha[i, j] * (fitness[j] - mean_fitness)
-                    stabilizer = (1.0 / S_P_i) - alpha[i, j]
-                    dalpha[i, j] = replicator * (1 - nu) + stabilizer * nu
 
-        dy = np.concatenate([dP, dC, dalpha.flatten()])
 
-        return dy
-    
-    def simulate(self, y0: np.ndarray=None, t_max: float=100, **solver_params):
-        '''
-        Simulate the ODE system
+    # ODEs
 
-        Returns:
-        - dict with keys 't', 'y', 'P', 'C', 'alpha', 'success'
-        '''
+    def ODEs(self, t: float, z: np.ndarray, d_C: float) -> np.ndarray:
+        """
+        Full ODE system.
 
+        State vector  z = [P (SP) | C (SC) | alpha (SC×SP, flattened)]
+        """
+        P     = z[:self.SP]
+        C     = z[self.SP:self.N]
+        alpha = z[self.N:].reshape((self.SC, self.SP))
+
+        # Compute phi
+        alpha_beta_C_prod = (alpha * self.beta_C).T @ C # Shape (SP,)
+        phi = self._phi(P, alpha_beta_C_prod) # Shape (SP,)
+
+        alpha_beta_phi_prod = (alpha * self.beta_C) @ phi # Shape (SC,)
+
+        # Product ODEs
+        alpha_beta_P_C = (alpha * self.beta_P).T @ C # Shape (SP,)
+
+        dP = P * (
+            self.r_P
+            + self._mutualism(alpha_beta_P_C, self.h_P)
+            - self.C_PP @ P
+        ) + self.mu
+
+        # Country ODEs
+        dC = C * (
+            self.r_C - d_C
+            + self._mutualism(alpha_beta_phi_prod, self.h_C)
+            - self.C_CC @ C
+        ) + self.mu
+
+        # Alpha ODEs
+        if self.nu == 1.0 or self.G == 0.0: # In case of no adaptation, alpha doesn't change
+            dalpha = np.zeros((self.SC, self.SP))
+        else:
+            dalpha = self.G * (
+                (1.0 - self.nu) * alpha * (
+                    self.beta_C * phi[np.newaxis, :] # Fitness per product
+                    - alpha_beta_phi_prod[:, np.newaxis] # Mean fitness per country
+                )
+                + _nu_term(alpha, self.beta_C, self.SC, self.SP, self.nu) # Stabilising term
+            )
+
+        return np.concatenate((dP, dC, dalpha.flatten()))
+
+
+
+    # Simulation
+
+    def solve(
+        self,
+        t_end: float,
+        d_C: float = 0.0,
+        n_steps: int = int(1e4),
+        y0: np.ndarray = None,
+        save_period: int = 0,
+        stop_on_collapse: bool = False,
+        stop_on_equilibrium: bool = False,
+        equi_tol: float = 1e-7,
+        extinct_threshold: float = 0.01,
+    ):
+        """
+        Solve the ODE system using the same solver settings as Terpstra 2022.
+        """
         if y0 is None:
-            # Initial conditions: all set to 1
-            P0 = np.ones(self.SP)
-            C0 = np.ones(self.SC)
-            alpha0 = self.alpha_init.copy()
-            y0 = np.concatenate([P0, C0, alpha0.flatten()])
+            y0 = np.full(self.N, 1.0, dtype=float) # Initial state: all species at abundance 1.0
+            y0 = np.concatenate((y0, self.alpha.flatten()))
 
-        # Solve ODE
-        sol = solve_ivp(self.ODEs, (0, t_max), y0, method='LSODA', rtol=1e-3, atol=1e-6, **solver_params)
-        y_final = sol.y[:, -1]
-        P_final = y_final[:self.SP]
-        C_final = y_final[self.SP:self.SP + self.SC]
-        alpha_final = y_final[self.SP + self.SC:].reshape(self.SC, self.SP)
+        # alpha occupies indices [SP+SC  …  SP+SC+SC*SP-1] in the state vector
+        alpha_start = self.N
+        alpha_end   = y0.shape[0] - 1
 
-        return {
-            't': sol.t,
-            'y': sol.y,
-            'P': P_final,
-            'C': C_final,
-            'alpha': alpha_final,
-            'success': sol.success,
-            'sol': sol
+        save_partial = {
+            "ind":         (alpha_start, alpha_end),
+            "save_period": save_period,
         }
+
+        sol = solve_ode(
+            self.ODEs, (0, t_end), y0, n_steps,
+            args=(d_C,),
+            save_partial=save_partial,
+            rtol=1e-4, atol=1e-7,
+            method="LSODA",
+            stop_on_collapse=stop_on_collapse,
+            N_p=self.SP, N_a=self.SC, # N_a is number of countries, name chosen to match the original ODE solver by Terpstra 2022 in ode_solver.py
+            extinct_threshold=extinct_threshold,
+            stop_on_equilibrium=stop_on_equilibrium,
+            equi_tol=equi_tol,
+        )
+
+        self._reset_sol()
+        self._set_sol(sol)
+        return sol
     
-    def find_critical_points(self, d_C_min: float=0.0, d_C_max: float=3.0, step: float=0.05, extinction_threshold: float=0.01, continue_after_collapse: int=10):
-        '''
-        Find critical points by varying driver of decline d_C
 
-        Returns:
-        - dict with 'd_collapse', 'd_recovery', 'd_C_forward, 'C_forward', 'P_forward', ... (and same backward)
-        '''
 
-        # Forward pass: increasing d_C until collapse
-        d_C_values_forward = np.arange(d_C_min, d_C_max, step)
-        C_forward = []
-        P_forward = []
-        alpha_forward = []
-        self.params['d_C'] = d_C_min
-        self.params['lambda'] = 0
-        result = self.simulate()
-        y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
+    # Hysteresis study
 
-        d_collapse = None
-        collapse_counter = 0
-        for d_C in d_C_values_forward:
-            self.params['d_C'] = d_C
-            result = self.simulate(y0=y_current)
-            y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
-            C_forward.append(result['C'])
-            P_forward.append(result['P'])
-            alpha_forward.append(result['alpha'])
+    def find_critical_points(
+        self,
+        d_C_min: float = 0.0,
+        d_C_max: float = 3.0,
+        d_C_step: float = 0.02,
+        steps_after_collapse: int = 10,
+    ):
+        """
+        Forward and backward pass over d_C to map the hysteresis loop.
 
-            n_alive = np.sum(result['C'] > extinction_threshold)
-            if d_collapse is None and n_alive == 0:
-                d_collapse = d_C
-            
-            # Continue for a bit after collapse
-            if d_collapse is not None:
+        The forward pass stops `steps_after_collapse` steps after all
+        countries have collapsed. The backward pass then starts from
+        that same collapsed state.
+        """
+  
+        t_end  = int(1e4) # Time steps for initial step
+        t_step = int(1e4) # Time steps for subsequent steps
+
+        # Create d_C values for forward pass
+        dCs = np.linspace(
+            d_C_min, d_C_max,
+            int(round((d_C_max - d_C_min) / d_C_step)) + 1 # To have d_C_max included
+        )
+
+        # Storage lists
+        P_forward_list     = []
+        C_forward_list     = []
+        alpha_forward_list = []
+        dCs_forward_list   = []
+
+        # Initial equilibrium at d_C = 0 to start forward pass
+        self.solve(t_end, d_C=0, save_period=0, stop_on_equilibrium=True)
+        is_feasible = bool(self._is_all_alive()[-1].all())
+
+        # Forward pass increasing d_C
+        print("Forward pass...")
+        collapse_counter = 0 # To count steps after collapse for nice figures
+        collapsed = False
+        for i, d_C in enumerate(dCs):
+            print(f"{i+1}/{len(dCs)}  d_C = {d_C:.3f}")
+            y0 = np.concatenate((self.y[:, -1], self.y_partial[:, -1]))
+            self.solve(t_step, d_C=d_C, y0=y0, save_period=0,
+                       stop_on_equilibrium=True)
+
+            P_forward_list.append(self.y[:self.SP, -1].copy())
+            C_forward_list.append(self.y[self.SP:self.N, -1].copy())
+            alpha_forward_list.append(
+                self.y_partial[:, -1].reshape(self.SC, self.SP).copy()
+            )
+            dCs_forward_list.append(d_C)
+
+            # Check whether all countries have collapsed
+            all_collapsed = (
+                self.y[self.SP:self.N, -1] < self.extinct_threshold
+            ).all()
+            if all_collapsed:
+                if not collapsed:
+                    collapsed = True
+                    print(f"--- Full collapse at d_C = {d_C:.3f} ---")
                 collapse_counter += 1
-                if collapse_counter >= continue_after_collapse:
+                if collapse_counter >= steps_after_collapse:
                     break
 
-        if d_collapse is None:
+        # Convert forward lists to arrays
+        dCs_forward = np.array(dCs_forward_list)
+        P_forward = np.array(P_forward_list)
+        C_forward = np.array(C_forward_list)
+        alpha_forward = np.array(alpha_forward_list)
+
+        # Backward pass starts from whatever state the forward pass ended on
+        dCs_backward = np.flip(dCs_forward)
+
+        P_backward = np.zeros((len(dCs_backward), self.SP))
+        C_backward = np.zeros((len(dCs_backward), self.SC))
+        alpha_backward = np.zeros((len(dCs_backward), self.SC, self.SP))
+
+        # Backward pass decreasing d_C
+        print("Backward pass...")
+        for i, d_C in enumerate(dCs_backward):
+            print(f"{i+1}/{len(dCs_backward)}  d_C = {d_C:.3f}")
+            y0 = np.concatenate((self.y[:, -1], self.y_partial[:, -1]))
+            self.solve(t_step, d_C=d_C, y0=y0, save_period=0,
+                       stop_on_equilibrium=True)
+            P_backward[i] = self.y[:self.SP, -1]
+            C_backward[i] = self.y[self.SP:self.N, -1]
+            alpha_backward[i] = self.y_partial[:, -1].reshape(self.SC, self.SP)
+
+        # Collapse / recovery threshold
+        thresh = self.extinct_threshold
+
+        # Collapse: highest d_C at which all countries are extinct
+        collapsed_mask = (C_forward < thresh).any(axis=0)
+        if collapsed_mask.any():
+            col_idx = np.argmax(C_forward < thresh, axis=0)[collapsed_mask].max() # Get the index of the first occurrence of collapse for each country, then take the max to get the last collapse
+            d_collapse = float(dCs_forward[col_idx])
+        else:
             d_collapse = d_C_max
 
-        # Backward pass: decreasing d_C from collapse point until recovery
-        d_C_values_backward = np.arange(d_collapse, d_C_min, -step)
-        C_backward = []
-        P_backward = []
-        alpha_backward = []
-
-        d_recovery = None
-
-        for d_C in d_C_values_backward:
-            self.params['d_C'] = d_C
-            result = self.simulate(y0=y_current)
-            y_current = np.concatenate([result['P'], result['C'], result['alpha'].flatten()])
-            C_backward.append(result['C'])
-            P_backward.append(result['P'])
-            alpha_backward.append(result['alpha'])
-
-            n_alive = np.sum(result['C'] > extinction_threshold)
-            if d_recovery is None and n_alive > 0:
-                d_recovery = d_C
-                # Not break here to continue until d_C_min to check for full recovery
+        # Recovery: lowest d_C at which any country is alive again
+        recovered_mask = (C_backward > thresh).any(axis=0)
+        if recovered_mask.any():
+            rec_idx = np.argmax(C_backward > thresh, axis=0)[recovered_mask].min() # Get the index of the first occurrence of recovery for each country, then take the min to get the first recovery
+            d_recovery = float(dCs_backward[rec_idx])
+        else:
+            d_recovery = d_C_min
 
         return {
-            'd_collapse': d_collapse,
-            'd_recovery': d_recovery if d_recovery is not None else d_C_min,
-            'd_C_forward': d_C_values_forward[:len(C_forward)],
-            'C_forward': np.array(C_forward),
-            'P_forward': np.array(P_forward),
-            'alpha_forward': np.array(alpha_forward),
-            'd_C_backward': d_C_values_backward[:len(C_backward)],
-            'C_backward': np.array(C_backward),
-            'P_backward': np.array(P_backward),
-            'alpha_backward': np.array(alpha_backward)
+            "dCs":         dCs_forward,
+            "is_feasible": is_feasible,
+            "d_collapse":  d_collapse,
+            "d_recovery":  d_recovery,
+            # Forward
+            "d_C_forward":   dCs_forward,
+            "C_forward":     C_forward,
+            "P_forward":     P_forward,
+            "alpha_forward": alpha_forward,
+            # Backward
+            "d_C_backward":   dCs_backward,
+            "C_backward":     C_backward,
+            "P_backward":     P_backward,
+            "alpha_backward": alpha_backward,
         }
+
+
+
+# Numba functions
+
+@numba.njit()
+def _nestedness_fast(network):
+    """
+    Numba-accelerated nestedness metric.
+    """
+    N_c, N_p = network.shape
+    nest_c = 0.0 # Country nestedness
+    for i in range(N_c - 1): # Compare each pair of countries
+        for j in range(i + 1, N_c): 
+            ni = network[i].sum() # Number of products country i interacts with
+            nj = network[j].sum() # Number of products country j interacts with
+            nij = 0
+            for k in range(N_p): # Count shared products
+                if network[i, k] == 1 and network[j, k] == 1:
+                    nij += 1
+            if min(ni, nj) > 0:
+                nest_c += nij / min(ni, nj) # Proportion of shared interactions relative to the less connected country
+
+    nest_p = 0.0 # Same for product nestedness
+    for i in range(N_p - 1):
+        for j in range(i + 1, N_p):
+            ni  = network[:, i].sum()
+            nj  = network[:, j].sum()
+            nij = 0
+            for k in range(N_c):
+                if network[k, i] == 1 and network[k, j] == 1:
+                    nij += 1
+            if min(ni, nj) > 0:
+                nest_p += nij / min(ni, nj)
+
+    denom = N_c * (N_c - 1) / 2 + N_p * (N_p - 1) / 2 # Total number of pairs (as in original code)
+    return (nest_c + nest_p) / denom if denom > 0 else 0.0
+
+
+@numba.njit()
+def _nu_term(alpha, beta_C, SC, SP, nu):
+    """
+    Numba-accelerated stabilising (nu) term in the alpha ODE.
+    """
+    nu_term = np.zeros((SC, SP))
+    for i in range(SC):
+        for j in range(SP):
+            if beta_C[i, j] != 0:
+                nu_term[i, j] = 1.0 / np.count_nonzero(beta_C[i, :]) - alpha[i, j]
+    return nu_term * nu
