@@ -3,8 +3,8 @@ BaseModel: product-country model adapted from
 the original AdaptiveModel (Terpstra 2022, https://github.com/TerpstraS/pollcomm.git).
 
 Variable mapping  (from original):
-Plants            →  Products  (SP = 15, index 0..SP-1  in state vector)
-Pollinators       →  Countries (SC = 35, index SP..SP+SC-1 in state vector)
+Plants       →  Products  (SP = 15, index 0..SP-1  in state vector)
+Pollinators  →  Countries (SC = 35, index SP..SP+SC-1 in state vector)
 
 The find_critical_points method is a direct port of experiments.hysteresis().
 """
@@ -55,10 +55,10 @@ class BaseModel:
         self.is_feasible = None
 
         # Solution storage
-        self.t         = None
-        self.y         = None        # Shape (SP+SC, n_timepoints) — P and C, NO alpha
-        self.y_partial = None        # Shape (SC*SP, n_timepoints_partial) — alpha only
-        self.y_all_end = None        # Full state [P, C, alpha] at final timepoint
+        self.t = None
+        self.y = None # Shape (SP+SC, n_timepoints) — P and C, NO alpha
+        self.y_partial = None # Shape (SC*SP, n_timepoints_partial) — alpha only
+        self.y_all_end = None # Full state [P, C, alpha] at final timepoint
 
         self.generate_feasible_network()
 
@@ -72,13 +72,13 @@ class BaseModel:
         """
         N_c, N_p = self.SC, self.SP
         for _ in range(max_iter):
-            net  = np.zeros((N_c, N_p)) # Adjacency matrix (SC × SP)
+            net = np.zeros((N_c, N_p)) # Adjacency matrix (SC × SP)
             forb = np.zeros((N_c, N_p)) # Forbidden links matrix (SC × SP)
-            n_c  = int(self.connectance * N_c * N_p) # Number of links to create
-            n_f  = int(self.forbidden_links * N_c * N_p) # Number of forbidden links
+            n_c = int(self.connectance * N_c * N_p) # Number of links to create
+            n_f = int(self.forbidden_links * N_c * N_p) # Number of forbidden links
 
             sel = self.rng.choice(N_c * N_p, size=n_c + n_f, replace=False) # Randomly select positions for links and forbidden links
-            i_c  = self.rng.choice(sel, size=n_c, replace=False) # Indices for links
+            i_c = self.rng.choice(sel, size=n_c, replace=False) # Indices for links
             i_f = np.setdiff1d(sel, i_c) # Indices for forbidden links
 
             i_c = np.column_stack(np.unravel_index(i_c, (N_c, N_p))) # Convert flat indices to 2D indices
@@ -131,7 +131,7 @@ class BaseModel:
             rows, cols = np.nonzero(net)
             if len(rows) == 0:
                 break
-            idx  = self.rng.choice(len(rows)) # Randomly select a link to swap
+            idx = self.rng.choice(len(rows)) # Randomly select a link to swap
             a, b = int(rows[idx]), int(cols[idx])
 
             if self.rng.choice([0, 1]) == 0: # Randomly decide to swap a country or a product
@@ -263,8 +263,8 @@ class BaseModel:
         """
         Reset solution storage.
         """
-        self.t         = None
-        self.y         = None
+        self.t = None
+        self.y = None
         self.y_partial = None
         self.y_all_end = None
 
@@ -324,8 +324,8 @@ class BaseModel:
 
         State vector  z = [P (SP) | C (SC) | alpha (SC×SP, flattened)]
         """
-        P     = z[:self.SP]
-        C     = z[self.SP:self.N]
+        P = z[:self.SP]
+        C = z[self.SP:self.N]
         alpha = z[self.N:].reshape((self.SC, self.SP))
 
         # Compute phi
@@ -389,7 +389,7 @@ class BaseModel:
 
         # alpha occupies indices [SP+SC  …  SP+SC+SC*SP-1] in the state vector
         alpha_start = self.N
-        alpha_end   = y0.shape[0] - 1
+        alpha_end = y0.shape[0] - 1
 
         save_partial = {
             "ind":         (alpha_start, alpha_end),
@@ -432,7 +432,7 @@ class BaseModel:
         that same collapsed state.
         """
   
-        t_end  = int(1e4) # Time steps for initial step
+        t_end = int(1e4) # Time steps for initial step
         t_step = int(1e4) # Time steps for subsequent steps
 
         # Create d_C values for forward pass
@@ -442,8 +442,8 @@ class BaseModel:
         )
 
         # Storage lists
-        P_forward_list     = []
-        C_forward_list     = []
+        P_forward_list = []
+        C_forward_list = []
         alpha_forward_list = []
         dCs_forward_list   = []
 
@@ -518,25 +518,25 @@ class BaseModel:
         # Recovery: lowest d_C at which any country is alive again
         recovered_mask = (C_backward > thresh).any(axis=0)
         if recovered_mask.any():
-            rec_idx = np.argmax(C_backward > thresh, axis=0)[recovered_mask].min() # Get the index of the first occurrence of recovery for each country, then take the min to get the first recovery
+            rec_idx = np.argmax(C_backward > thresh, axis=0)[recovered_mask].min() - 1 # Get the index of the first occurrence of recovery for each country, then take the min to get the first recovery (-1 for nice plotting)
             d_recovery = float(dCs_backward[rec_idx])
         else:
             d_recovery = d_C_min
 
         return {
-            "dCs":         dCs_forward,
+            "dCs": dCs_forward,
             "is_feasible": is_feasible,
-            "d_collapse":  d_collapse,
-            "d_recovery":  d_recovery,
+            "d_collapse": d_collapse,
+            "d_recovery": d_recovery,
             # Forward
-            "d_C_forward":   dCs_forward,
-            "C_forward":     C_forward,
-            "P_forward":     P_forward,
+            "d_C_forward": dCs_forward,
+            "C_forward": C_forward,
+            "P_forward": P_forward,
             "alpha_forward": alpha_forward,
             # Backward
-            "d_C_backward":   dCs_backward,
-            "C_backward":     C_backward,
-            "P_backward":     P_backward,
+            "d_C_backward": dCs_backward,
+            "C_backward": C_backward,
+            "P_backward": P_backward,
             "alpha_backward": alpha_backward,
         }
 
@@ -565,8 +565,8 @@ def _nestedness_fast(network):
     nest_p = 0.0 # Same for product nestedness
     for i in range(N_p - 1):
         for j in range(i + 1, N_p):
-            ni  = network[:, i].sum()
-            nj  = network[:, j].sum()
+            ni = network[:, i].sum()
+            nj = network[:, j].sum()
             nij = 0
             for k in range(N_c):
                 if network[k, i] == 1 and network[k, j] == 1:
