@@ -310,7 +310,7 @@ class BaseModel:
         """
         Holling type-II function: rho / (1 + h*rho).
 
-        Different from the one in paper!
+        Different from the one in paper (which does not work)!
         """
         return rho / (1.0 + h * rho)
 

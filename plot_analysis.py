@@ -3,6 +3,45 @@ import numpy as np
 import os
 from base_model import BaseModel
 
+COL_FORWARD  = "#1f77b4"   # blue  – forward trajectory
+COL_BACKWARD = "#ff7f0e"   # orange – backward trajectory
+
+def plot_network_structure(model: BaseModel):
+    """
+    Display the adjacency matrix (nested network) and the forbidden-links matrix
+    for the given model's generated network.
+    Species are sorted by degree (descending) so the characteristic nested
+    triangular pattern is visible, matching Fig A of the supporting information.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(9, 4))
+
+    # Sort species by degree (descending) so the nested triangular pattern is visible
+    pollinator_order = np.argsort(-model.adj_matrix.sum(axis=1))  # SC indices, most connected first
+    plant_order      = np.argsort(-model.adj_matrix.sum(axis=0))  # SP indices, most connected first
+
+    for ax, mat, title in zip(
+        axes,
+        [model.adj_matrix, model.forbidden_network],
+        [f"Nestedness = {model.nestedness:.1f}",
+         f"Forbidden Links = {model.forbidden_links:.1f}"],
+    ):
+        # Reorder rows (pollinators) and columns (plants) by degree, then transpose
+        # so that plant species appear on y-axis and pollinator species on x-axis
+        sorted_mat = mat[pollinator_order, :][:, plant_order].T
+        ax.imshow(
+            sorted_mat, aspect="auto", cmap="Greys",
+            interpolation="none", vmin=0, vmax=1, origin="lower"
+        )
+        ax.set_xlabel("Pollinator species", fontsize=11)
+        ax.set_ylabel("Plant species",      fontsize=11)
+        ax.set_title(title,                 fontsize=12)
+
+    fig.suptitle(
+        f"Network structure  (nestedness={model.nestedness:.1f})",
+        fontsize=13,
+    )
+    fig.tight_layout()
+    return fig
 
 def plot_C_P_alpha_dynamics(model: BaseModel, critical_data: dict, title: str='System Dynamics'):
     """
@@ -16,26 +55,18 @@ def plot_C_P_alpha_dynamics(model: BaseModel, critical_data: dict, title: str='S
     # Panel 1: Country Dynamics
     ax = axes[0]
     
-    # Plot mean
-    C_forward_mean = critical_data['C_forward'].mean(axis=1)
-    C_backward_mean = critical_data['C_backward'].mean(axis=1)
-    ax.plot(critical_data['d_C_forward'], C_forward_mean, 
-            'b-', linewidth=2.5, label='Forward', zorder=3)
-    ax.plot(critical_data['d_C_backward'], C_backward_mean, 
-            'g-', linewidth=2.5, label='Backward', zorder=3)
-    
     # Plot individuals
     for i in range(critical_data['C_forward'].shape[1]):
-        ax.plot(critical_data['d_C_forward'], critical_data['C_forward'][:, i], 
-                'b-', alpha=0.15, linewidth=0.8, zorder=1)
+        ax.plot(critical_data['d_C_forward'], critical_data['C_forward'][:, i],
+                color=COL_FORWARD, alpha=0.7, linewidth=0.8, zorder=1)
     for i in range(critical_data['C_backward'].shape[1]):
-        ax.plot(critical_data['d_C_backward'], critical_data['C_backward'][:, i], 
-                'g-', alpha=0.15, linewidth=0.8, zorder=1)
+        ax.plot(critical_data['d_C_backward'], critical_data['C_backward'][:, i],
+                color=COL_BACKWARD, alpha=0.7, linewidth=0.8, ls='--', zorder=1)
     
     # Critical points
-    ax.axvline(critical_data['d_collapse'], color='orange', linestyle='--', 
+    ax.axvline(critical_data['d_collapse'], color='red', linestyle='--', 
               linewidth=2, label=f"Collapse", zorder=2)
-    ax.axvline(critical_data['d_recovery'], color='red', linestyle='--', 
+    ax.axvline(critical_data['d_recovery'], color='green', linestyle='--', 
               linewidth=2, label=f"Recovery", zorder=2)
     
     ax.set_ylabel('Country Activity (C)', fontsize=12, fontweight='bold')
@@ -47,26 +78,18 @@ def plot_C_P_alpha_dynamics(model: BaseModel, critical_data: dict, title: str='S
     # Panel 2: Product Dynamics
     ax = axes[1]
     
-    # Plot mean
-    P_forward_mean = critical_data['P_forward'].mean(axis=1)
-    P_backward_mean = critical_data['P_backward'].mean(axis=1)
-    ax.plot(critical_data['d_C_forward'], P_forward_mean, 
-            'b-', linewidth=2.5, label='Forward', zorder=3)
-    ax.plot(critical_data['d_C_backward'], P_backward_mean, 
-            'g-', linewidth=2.5, label='Backward', zorder=3)
-    
     # Plot individuals
     for i in range(critical_data['P_forward'].shape[1]):
-        ax.plot(critical_data['d_C_forward'], critical_data['P_forward'][:, i], 
-                'b-', alpha=0.15, linewidth=0.8, zorder=1)
+        ax.plot(critical_data['d_C_forward'], critical_data['P_forward'][:, i],
+                color=COL_FORWARD, alpha=0.7, linewidth=0.8, zorder=1)
     for i in range(critical_data['P_backward'].shape[1]):
-        ax.plot(critical_data['d_C_backward'], critical_data['P_backward'][:, i], 
-                'g-', alpha=0.15, linewidth=0.8, zorder=1)
+        ax.plot(critical_data['d_C_backward'], critical_data['P_backward'][:, i],
+                color=COL_BACKWARD, alpha=0.7, linewidth=0.8, ls='--', zorder=1)
     
     # Critical points
-    ax.axvline(critical_data['d_collapse'], color='orange', linestyle='--', 
+    ax.axvline(critical_data['d_collapse'], color='red', linestyle='--', 
               linewidth=2, zorder=2)
-    ax.axvline(critical_data['d_recovery'], color='red', linestyle='--', 
+    ax.axvline(critical_data['d_recovery'], color='green', linestyle='--', 
               linewidth=2, zorder=2)
     
     ax.set_ylabel('Product Output (P)', fontsize=12, fontweight='bold')
@@ -90,15 +113,16 @@ def plot_C_P_alpha_dynamics(model: BaseModel, critical_data: dict, title: str='S
     spec_forward = compute_mean_specialization(critical_data['alpha_forward'])
     spec_backward = compute_mean_specialization(critical_data['alpha_backward'])
     
-    ax.plot(critical_data['d_C_forward'], spec_forward, 
-            'b-', linewidth=2.5, label='Forward', zorder=3)
-    ax.plot(critical_data['d_C_backward'], spec_backward, 
-            'g-', linewidth=2.5, label='Backward', zorder=3)
+    ax.plot(critical_data['d_C_forward'],  spec_forward,
+            color=COL_FORWARD,  lw=2.0, label='forward trajectory', zorder=3)
+    ax.plot(critical_data['d_C_backward'], spec_backward,
+            color=COL_BACKWARD, lw=2.0, ls='--', label='backward trajectory', zorder=3)
+
     
     # Critical points
-    ax.axvline(critical_data['d_collapse'], color='orange', linestyle='--', 
+    ax.axvline(critical_data['d_collapse'], color='red', linestyle='--', 
               linewidth=2, zorder=2)
-    ax.axvline(critical_data['d_recovery'], color='red', linestyle='--', 
+    ax.axvline(critical_data['d_recovery'], color='green', linestyle='--', 
               linewidth=2, zorder=2)
     
     ax.set_xlabel('Driver of Decline (d_C)', fontsize=12, fontweight='bold')
@@ -131,6 +155,7 @@ def verify_base_model():
     q = 0.0
     print(f"Testing WITHOUT adaptive foraging (nu={nu}, q={q})...")
     model_no_adapt = BaseModel(nu=nu, q=q, seed=133)
+    fig_net_no_adapt = plot_network_structure(model_no_adapt)
     critical_data_no_adapt = model_no_adapt.find_critical_points()
     fig1 = plot_C_P_alpha_dynamics(
         model_no_adapt, 
@@ -139,7 +164,7 @@ def verify_base_model():
     )
 
     # With adaptive foraging
-    nu = 0.3
+    nu = 0.6
     q = 0.0
     print(f"Testing WITH adaptive foraging (nu={nu}, q={q})...")
     model_adapt = BaseModel(nu=nu, q=q, seed=133)
@@ -164,7 +189,7 @@ def verify_base_model():
     print(f"  Hysteresis = {critical_data_adapt['d_collapse'] - critical_data_adapt['d_recovery']:.3f}")
 
     return {
-        'figures': {'no_adapt': fig1, 'adapt': fig2},
+        'figures': {'no_adapt': fig1, 'adapt': fig2, 'network_no_adapt': fig_net_no_adapt},
         'data': {'no_adapt': critical_data_no_adapt, 'adapt': critical_data_adapt}
     }
 
@@ -177,6 +202,7 @@ if __name__ == "__main__":
     os.makedirs('Figures', exist_ok=True)
     
     # Save figures
+    results['figures']['network_no_adapt'].savefig('Figures/network_structure_no_adapt.png', dpi=300, bbox_inches='tight')
     results['figures']['no_adapt'].savefig('Figures/dynamics_no_adapt.png', dpi=300, bbox_inches='tight')
     results['figures']['adapt'].savefig('Figures/dynamics_adapt.png', dpi=300, bbox_inches='tight')
     
