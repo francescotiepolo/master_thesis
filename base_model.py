@@ -379,6 +379,8 @@ class BaseModel:
         stop_on_equilibrium: bool = False,
         equi_tol: float = 1e-7,
         extinct_threshold: float = 0.01,
+        rtol=1e-4,
+        atol=1e-7
     ):
         """
         Solve the ODE system using the same solver settings as Terpstra 2022.
@@ -400,7 +402,7 @@ class BaseModel:
             self.ODEs, (0, t_end), y0, n_steps,
             args=(d_C,),
             save_partial=save_partial,
-            rtol=1e-4, atol=1e-7,
+            rtol=rtol, atol=atol,
             method="LSODA",
             stop_on_collapse=stop_on_collapse,
             N_p=self.SP, N_a=self.SC, # N_a is number of countries, name chosen to match the original ODE solver by Terpstra 2022 in ode_solver.py
@@ -422,7 +424,7 @@ class BaseModel:
         d_C_min: float = 0.0,
         d_C_max: float = 3.0,
         d_C_step: float = 0.02,
-        steps_after_collapse: int = 10,
+        steps_after_collapse: int = 5,
     ):
         """
         Forward and backward pass over d_C to map the hysteresis loop.

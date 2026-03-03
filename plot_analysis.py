@@ -1,12 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from base_model import BaseModel
 
-COL_FORWARD  = "#1f77b4"   # blue  – forward trajectory
+model = "product_space" # "product_space" or "base"
+if model == "base":
+    from base_model import BaseModel
+    use_model = BaseModel
+elif model == "product_space":
+    from product_space_model import ProductSpaceModel
+    use_model = ProductSpaceModel
+
+COL_FORWARD  = "#1f77b4"   # blue – forward trajectory
 COL_BACKWARD = "#ff7f0e"   # orange – backward trajectory
 
-def plot_network_structure(model: BaseModel):
+def plot_network_structure(model: use_model):
     """
     Display the adjacency matrix (nested network) and the forbidden-links matrix
     for the given model's generated network.
@@ -43,7 +50,7 @@ def plot_network_structure(model: BaseModel):
     fig.tight_layout()
     return fig
 
-def plot_C_P_alpha_dynamics(model: BaseModel, critical_data: dict, title: str='System Dynamics'):
+def plot_C_P_alpha_dynamics(model: use_model, critical_data: dict, title: str='System Dynamics'):
     """
     Plot a 3-panel figure showing:
     - Panel 1: Country (C) dynamics
@@ -149,14 +156,12 @@ def verify_base_model():
     """
     Run verification and output 3-panel plots.
     """
-
     # Without adaptive foraging 
     nu = 1.0
-    q = 0.0
-    print(f"Testing WITHOUT adaptive foraging (nu={nu}, q={q})...")
-    model_no_adapt = BaseModel(nu=nu, q=q, seed=133)
+    print(f"Testing WITHOUT adaptive foraging (nu={nu})...")
+    model_no_adapt = use_model(nu=nu, seed=133)
     fig_net_no_adapt = plot_network_structure(model_no_adapt)
-    critical_data_no_adapt = model_no_adapt.find_critical_points()
+    critical_data_no_adapt = model_no_adapt.find_critical_points(d_C_max=7.0 if model == "product_space" else 3.0, d_C_step=0.1 if model == "product_space" else 0.02)
     fig1 = plot_C_P_alpha_dynamics(
         model_no_adapt, 
         critical_data_no_adapt, 
@@ -165,10 +170,9 @@ def verify_base_model():
 
     # With adaptive foraging
     nu = 0.6
-    q = 0.0
-    print(f"Testing WITH adaptive foraging (nu={nu}, q={q})...")
-    model_adapt = BaseModel(nu=nu, q=q, seed=133)
-    critical_data_adapt = model_adapt.find_critical_points()
+    print(f"Testing WITH adaptive foraging (nu={nu})...")
+    model_adapt = use_model(nu=nu, seed=133)
+    critical_data_adapt = model_adapt.find_critical_points(d_C_max=7.0 if model == "product_space" else 3.0, d_C_step=0.1 if model == "product_space" else 0.02)
     fig2 = plot_C_P_alpha_dynamics(
         model_adapt, 
         critical_data_adapt,
@@ -196,14 +200,15 @@ def verify_base_model():
 
 if __name__ == "__main__":
     
+    print(f"Running verification for model: {model}")
     results = verify_base_model()
     
     # Folder for figures
     os.makedirs('Figures', exist_ok=True)
     
     # Save figures
-    results['figures']['network_no_adapt'].savefig('Figures/network_structure_no_adapt.png', dpi=300, bbox_inches='tight')
-    results['figures']['no_adapt'].savefig('Figures/dynamics_no_adapt.png', dpi=300, bbox_inches='tight')
-    results['figures']['adapt'].savefig('Figures/dynamics_adapt.png', dpi=300, bbox_inches='tight')
+    results['figures']['network_no_adapt'].savefig(f'Figures/network_structure_no_adapt_{model}.png', dpi=300, bbox_inches='tight')
+    results['figures']['no_adapt'].savefig(f'Figures/dynamics_no_adapt_{model}.png', dpi=300, bbox_inches='tight')
+    results['figures']['adapt'].savefig(f'Figures/dynamics_adapt_{model}.png', dpi=300, bbox_inches='tight')
     
     print("Figures saved")
