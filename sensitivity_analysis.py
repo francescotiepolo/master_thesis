@@ -13,7 +13,6 @@ Three analyses:
 
 import os
 import csv
-import time
 import warnings
 import contextlib
 import io
@@ -27,9 +26,6 @@ from SALib.analyze import sobol
 
 from base_model import BaseModel
 from product_space_model import ProductSpaceModel
-
-warnings.filterwarnings("ignore")
-
 
 # Configuration
 N_SOBOL = 64 # Saltelli draws N*(2D+2) samples per model
@@ -49,7 +45,7 @@ RESULTS_DIR = "sa_results"
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # Fixed parameters for both models
-FIXED_NESTEDNESS  = 0.6
+FIXED_NESTEDNESS = 0.6
 FIXED_CONNECTANCE = 0.15
 
 # Parameter definitions
