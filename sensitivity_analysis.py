@@ -56,23 +56,23 @@ FIXED_CONNECTANCE = 0.15
 SHARED_PARAMS = {
     "names":  ["nu", "G", "q", "mu", "beta_trade_off"],
     "bounds": [
-        [0.1, 1.0 ], # nu
-        [0.1, 2.0 ], # G
-        [0.0, 0.5 ], # q
+        [0.1, 1.0], # nu
+        [0.1, 2.0], # G
+        [0.0, 1.0], # q
         [1e-5, 1e-3], # mu
-        [0.1, 0.9 ], # beta_trade_off
+        [0.1, 0.9], # beta_trade_off
     ],
 }
 
 PS_ONLY_PARAMS = {
     "names":  ["s", "c", "c_prime", "gamma", "kappa", "sigma"],
     "bounds": [
-        [0.0, 0.1 ], # s
-        [0.001,0.1 ], # c
+        [0.0, 0.1], # s
+        [0.001,0.1], # c
         [0.0, 0.05], # c_prime
-        [0.0, 0.2 ], # gamma
-        [0.0, 0.2 ], # kappa
-        [0.5, 2.0 ], # sigma
+        [0.0, 0.2], # gamma
+        [0.0, 0.2], # kappa
+        [0.5, 2.0], # sigma
     ],
 }
 
@@ -236,13 +236,11 @@ def run_sobol(model_name, problem, eval_fn, n=N_SOBOL):
     param_values = saltelli.sample(problem, n, calc_second_order=False) # Generate Sobol sampling matrix (n_runs, num_params)
     seeds = BASE_SEED + np.arange(param_values.shape[0]) # Unique seed per run
 
-    # Run evaluations in parallel and print time
-    t0 = time.time()
+    # Run evaluations in parallel
     results = Parallel(n_jobs=N_JOBS, backend="loky", verbose=5)(
         delayed(eval_fn)(param_values[i], int(seeds[i]))
         for i in range(param_values.shape[0])
     )
-    print(f"Done in {(time.time()-t0)/60:.1f} min")
 
     Y = np.array(results)
 
