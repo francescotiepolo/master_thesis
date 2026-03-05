@@ -204,18 +204,14 @@ class BaseModel:
         beta_0_P = self.rng.uniform(low, high, (self.SC, self.SP))
         beta_0_C = self.rng.uniform(low, high, (self.SC, self.SP))
 
-        self.beta_P = np.zeros((self.SC, self.SP))
-        self.beta_C = np.zeros((self.SC, self.SP))
+        mask = self.adj_matrix > 0                 
 
-        for i in range(self.SC): # Normalize beta as explained in paper
-            for j in range(self.SP):
-                if self.adj_matrix[i, j] > 0:
-                    self.beta_P[i, j] = (
-                        beta_0_P[i, j] / (self.KP[j] ** bt) / self.alpha[i, j]
-                    )
-                    self.beta_C[i, j] = (
-                        beta_0_C[i, j] / (self.KC[i] ** bt) / self.alpha[i, j]
-                    )
+        KP_bt = self.KP[np.newaxis, :] ** bt # (1,  SP)
+        KC_bt = self.KC[:, np.newaxis] ** bt # (SC, 1)
+
+        with np.errstate(divide="ignore", invalid="ignore"):
+            self.beta_P = np.where(mask, beta_0_P / (KP_bt * self.alpha), 0.0)
+            self.beta_C = np.where(mask, beta_0_C / (KC_bt * self.alpha), 0.0)
 
 
 
@@ -230,7 +226,7 @@ class BaseModel:
             self.generate_network()
 
             if self.feasible:
-                for pt in range(self.feasible_iters):
+                for _ in range(self.feasible_iters):
                     self._reset_sol()
                     self.initialize_parameters()
                     # Quick feasibility solve
@@ -298,8 +294,6 @@ class BaseModel:
     def _phi(self, P, alpha_beta_C_prod):
         """
         Supply/demand ratio for each product.
-
-        phi[j] = P[j] / (sum_i alpha[i,j]*beta_C[i,j]*C[i])^q
         """
         with np.errstate(divide="ignore", invalid="ignore"):
             return np.nan_to_num(
@@ -312,7 +306,7 @@ class BaseModel:
 
         Different from the one in paper (which does not work)!
         """
-        return rho / (1.0 + h * rho)
+        return rho / (1.0 + rho/h)
 
 
 
@@ -328,41 +322,20 @@ class BaseModel:
         C = z[self.SP:self.N]
         alpha = z[self.N:].reshape((self.SC, self.SP))
 
-        # Compute phi
-        alpha_beta_C_prod = (alpha * self.beta_C).T @ C # Shape (SP,)
-        phi = self._phi(P, alpha_beta_C_prod) # Shape (SP,)
-
-        alpha_beta_phi_prod = (alpha * self.beta_C) @ phi # Shape (SC,)
-
-        # Product ODEs
-        alpha_beta_P_C = (alpha * self.beta_P).T @ C # Shape (SP,)
-
-        dP = P * (
-            self.r_P
-            + self._mutualism(alpha_beta_P_C, self.h_P)
-            - self.C_PP @ P
-        ) + self.mu
-
-        # Country ODEs
-        dC = C * (
-            self.r_C - d_C
-            + self._mutualism(alpha_beta_phi_prod, self.h_C)
-            - self.C_CC @ C
-        ) + self.mu
-
-        # Alpha ODEs
-        if self.nu == 1.0 or self.G == 0.0: # In case of no adaptation, alpha doesn't change
-            dalpha = np.zeros((self.SC, self.SP))
-        else:
-            dalpha = self.G * (
-                (1.0 - self.nu) * alpha * (
-                    self.beta_C * phi[np.newaxis, :] # Fitness per product
-                    - alpha_beta_phi_prod[:, np.newaxis] # Mean fitness per country
-                )
-                + _nu_term(alpha, self.beta_C, self.SC, self.SP, self.nu) # Stabilising term
-            )
-
-        return np.concatenate((dP, dC, dalpha.flatten()))
+        dP, dC, dalpha = _odes_inner_base(
+            np.ascontiguousarray(P),
+            np.ascontiguousarray(C),
+            np.ascontiguousarray(alpha),
+            self.r_P, self.r_C,
+            np.ascontiguousarray(self.C_PP),
+            np.ascontiguousarray(self.C_CC),
+            np.ascontiguousarray(self.beta_C),
+            np.ascontiguousarray(self.beta_P),
+            self.h_P, self.h_C,
+            self.mu, self.nu, self.G, self.q,
+            d_C,
+        )
+        return np.concatenate((dP, dC, dalpha.ravel()))
 
 
 
@@ -447,7 +420,7 @@ class BaseModel:
         P_forward_list = []
         C_forward_list = []
         alpha_forward_list = []
-        dCs_forward_list   = []
+        dCs_forward_list = []
 
         # Initial equilibrium at d_C = 0 to start forward pass
         self.solve(t_end, d_C=0, save_period=0, stop_on_equilibrium=True)
@@ -553,7 +526,7 @@ def _nestedness_fast(network):
     """
     N_c, N_p = network.shape
     nest_c = 0.0 # Country nestedness
-    for i in range(N_c - 1): # Compare each pair of countries
+    for i in numba.prange(N_c - 1): # Compare each pair of countries
         for j in range(i + 1, N_c): 
             ni = network[i].sum() # Number of products country i interacts with
             nj = network[j].sum() # Number of products country j interacts with
@@ -565,7 +538,7 @@ def _nestedness_fast(network):
                 nest_c += nij / min(ni, nj) # Proportion of shared interactions relative to the less connected country
 
     nest_p = 0.0 # Same for product nestedness
-    for i in range(N_p - 1):
+    for i in numba.prange(N_p - 1):
         for j in range(i + 1, N_p):
             ni = network[:, i].sum()
             nj = network[:, j].sum()
@@ -591,3 +564,67 @@ def _nu_term(alpha, beta_C, SC, SP, nu):
             if beta_C[i, j] != 0:
                 nu_term[i, j] = 1.0 / np.count_nonzero(beta_C[i, :]) - alpha[i, j]
     return nu_term * nu
+
+
+@numba.njit(cache=True)
+def _odes_inner_base(
+    P, C, alpha,
+    r_P, r_C,
+    C_PP, C_CC,
+    beta_C, beta_P,
+    h_P, h_C,
+    mu, nu, G, q,
+    d_C,
+):
+    """
+    Numba-compiled ODEs.
+    """
+    SP = P.shape[0]
+    SC = C.shape[0]
+
+    alpha_beta_C = alpha * beta_C
+    alpha_beta_C_prod = alpha_beta_C.T @ C
+
+    # Phi_i
+    phi = np.empty(SP)
+    for i in range(SP):
+        x = alpha_beta_C_prod[i]
+        if x > 0.0:
+            phi[i] = P[i] / (x ** q)
+        else:
+            phi[i] = 0.0
+
+    # Mutualistic benefit per country
+    alpha_beta_phi = alpha_beta_C @ phi
+    # Mutualistic benefit per product
+    alpha_beta_P_C = (alpha * beta_P).T @ C
+
+    # Product dynamics
+    comp_P = C_PP @ P
+    dP = np.empty(SP)
+    for i in range(SP):
+        mut_P  = alpha_beta_P_C[i] / (1.0 + h_P[i] * alpha_beta_P_C[i])
+        dP[i]  = P[i] * (r_P[i] + mut_P - comp_P[i]) + mu
+
+    # Country dynamics
+    comp_C = C_CC @ C
+    dC = np.empty(SC)
+    for j in range(SC):
+        mut_C  = alpha_beta_phi[j] / (1.0 + h_C[j] * alpha_beta_phi[j])
+        dC[j]  = C[j] * (r_C[j] - d_C + mut_C - comp_C[j]) + mu
+
+    # Adaptive foraging dynamics
+    dalpha = np.zeros((SC, SP))
+    if nu != 1.0 and G != 0.0:
+        nu_term = _nu_term(alpha, beta_C, SC, SP, nu)
+        for j in range(SC):
+            for i in range(SP):
+                if beta_C[j, i] != 0.0:
+                    dalpha[j, i] = G * (
+                        (1.0 - nu) * alpha[j, i] * (
+                            beta_C[j, i] * phi[i] - alpha_beta_phi[j]
+                        )
+                        + nu_term[j, i]
+                    )
+
+    return dP, dC, dalpha

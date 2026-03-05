@@ -42,7 +42,6 @@ class ProductSpaceModel(BaseModel):
         kappa: float = 0.05,           # Proximity competition parameter
         sigma: float = 1.0,            # Diminishing returns to effort
         phi_space: np.ndarray = None,  # (SP × SP) proximity matrix; generated if None
-        prod_space_steps: int = 100,   # Steps to bring product space into feasibility check
     ):
         self.s = s
         self.c = c
@@ -51,7 +50,6 @@ class ProductSpaceModel(BaseModel):
         self.kappa = kappa
         self.sigma = sigma
         self._phi_space_init = phi_space  # Will be set properly after network exists
-        self.prod_space_steps = prod_space_steps
 
         super().__init__(
             N_croducts=N_croducts,
@@ -103,10 +101,10 @@ class ProductSpaceModel(BaseModel):
         
         # Proximity-dependent competition matrix θ_{ii'} (SP × SP)
         self.theta = self.phi_space * self.c + (1.0 - self.phi_space) * self.c_prime
-        np.fill_diagonal(self.theta, 0.0)  # no self-competition via theta
+        np.fill_diagonal(self.theta, 0.0)  # No self-competition via theta
 
-        # Row-normalised proximity for density (sum_i' ϕ_{ii'})
-        self.phi_row_sum = self.phi_space.sum(axis=1)  # Shape (SP,)
+        # Row sums of phi for density calculation
+        self.phi_row_sum = self.phi_space.sum(axis=1) 
 
 
 
@@ -121,7 +119,7 @@ class ProductSpaceModel(BaseModel):
         """
         Adapts _set_sol for product space model
         """
-        # Fix 1: ensure sol.y is a 2-D numpy array of shape (N, n_timepoints)
+        # Ensure sol.y is a 2-D numpy array of shape (N, n_timepoints)
         if not isinstance(sol.y, np.ndarray) or sol.y.ndim < 2:
             y_2 = (
                 np.clip(self.y[:, -1], 0, None)
@@ -133,57 +131,9 @@ class ProductSpaceModel(BaseModel):
 
         super()._set_sol(sol)
 
-        # Fix 2: ensure y_partial is never None
+        # Ensure y_partial is never None
         if self.y_partial is None or self.y_partial.shape[1] == 0:
             self.y_partial = self.alpha.flatten()[:, np.newaxis]
-
-
-    # ODE building blocks
-
-    def _xi(self, P, alpha, C):
-        """
-        Proximity-dependent resource availability ξ_i.
-        """
-        # E_i: shape (SP,)
-        E = (alpha * self.beta_C).T @ C  # Same as alpha_beta_C_prod in base
-
-        effort_per_product = alpha.T @ C  # shape (SP,)
-
-        # Avoid division by zero when a product has no effort devoted to it
-        with np.errstate(divide="ignore", invalid="ignore"):
-            phi_weighted_effort = self.phi_space @ effort_per_product # Shape (SP,)
-            competition_ratio = np.where(
-                effort_per_product > 0,
-                phi_weighted_effort / effort_per_product,
-                0.0,
-            )
-
-        X = 1.0 + self.kappa * competition_ratio # Shape (SP,)
-
-        eps = 1e-10
-        with np.errstate(divide="ignore", invalid="ignore"):
-            xi = np.where(
-                (E * X) > eps,
-                (P / ((E * X) ** self.q)) ** self.sigma, # q kept here to study dynamics similar to base model
-                0.0,
-            )
-        return np.nan_to_num(xi, nan=0.0, posinf=0.0, neginf=0.0)
-
-    def _density(self, alpha):
-        """
-        Density of country j in the product space around product i.
-        """
-        numerator = alpha @ self.phi_space.T # Shape (SC, SP)
-
-        denominator = self.phi_row_sum # Shape (SP,)
-
-        with np.errstate(divide="ignore", invalid="ignore"):
-            density = np.where(
-                denominator > 0,
-                numerator / denominator[np.newaxis, :],
-                0.0,
-            )
-        return density # Shape (SC, SP)
 
 
 
@@ -195,73 +145,141 @@ class ProductSpaceModel(BaseModel):
 
         State vector  z = [P (SP) | C (SC) | alpha (SC×SP, flattened)]
         """
-        P = z[:self.SP]
-        C = z[self.SP:self.N]
+        P     = z[:self.SP]
+        C     = z[self.SP:self.N]
         alpha = z[self.N:].reshape((self.SC, self.SP))
 
-        # Ensure non-negativity of P, C, and alpha to avoid numerical issues in the ODEs
-        P = np.clip(P, 0.0, None)
-        C = np.clip(C, 0.0, None)
-        alpha = np.clip(alpha, 0.0, 1.0)
-
-        # Resource availability ξ_i
-        xi = self._xi(P, alpha, C) # Shape (SP,)
-
-        # Mutualistic benefits
-        rho_C = (alpha * self.beta_C) @ xi # Shape (SC,)
-        rho_P = (alpha * self.beta_P).T @ C # Shape (SP,)
-
-        # Knowledge spillovers
-        spillovers = self.s * (self.phi_space @ P) # Shape (SP,)
-
-        # Product dynamics
-        C_PP_eff = self.C_PP * self.theta # Off-diagonal weighted
-        np.fill_diagonal(C_PP_eff, np.diag(self.C_PP)) # Restore self-competition
-        competition_P = C_PP_eff @ P # Shape (SP,)
-
-        dP = P * (
-            self.r_P
-            - competition_P
-            + self._mutualism(rho_P + spillovers, self.h_P)
-        ) + self.mu
-
-        # Capability accumulation Cap_j
-        density = self._density(alpha) # Shape (SC, SP)
-        Cap = (alpha * density).sum(axis=1) # Shape (SC,)
-
-        # Country dynamics
-        dC = C * (
-            self.r_C - d_C
-            - self.C_CC @ C
-            + self._mutualism(rho_C + self.gamma * Cap, self.h_C)
-        ) + self.mu
-
-        # Adaptive specialization
-        if self.nu == 1.0 or self.G == 0.0:
-            dalpha = np.zeros((self.SC, self.SP))
-        else:
-            dalpha = self.G * (
-                (1.0 - self.nu) * alpha * (
-                    self.beta_C * xi[np.newaxis, :] # Fitness per product
-                    - rho_C[:, np.newaxis] # Mean fitness per country
-                )
-                + _nu_term(alpha, self.beta_C, self.SC, self.SP, self.nu)  # Stabilising term
-            )
-
+        dP, dC, dalpha = _odes_inner(
+            P, C, alpha,
+            self.r_P, self.r_C,
+            self.C_PP, self.C_CC, self.theta,
+            self.beta_C, self.beta_P,
+            self.phi_space, self.phi_row_sum,
+            self.h_P, self.h_C,
+            self.mu, self.nu, self.G,
+            self.gamma, self.kappa, self.q, self.sigma, self.s,
+            d_C,
+        )
         return np.concatenate((dP, dC, dalpha.flatten()))
 
 
 
-# Numba helper function
+# Numba functions
 
 @numba.njit()
-def _nu_term(alpha, beta_C, SC, SP, nu):
+def _xi_numba(P, alpha, beta_C, C, phi_space, kappa, q, sigma):
     """
-    Numba-accelerated stabilising (nu) term in the alpha ODE.
+    Proximity-dependent resource availability ξ_i.
     """
-    nu_term = np.zeros((SC, SP))
-    for i in range(SC):
-        for j in range(SP):
-            if beta_C[i, j] != 0:
-                nu_term[i, j] = 1.0 / np.count_nonzero(beta_C[i, :]) - alpha[i, j]
-    return nu_term * nu
+    SP = P.shape[0]
+
+    E = (alpha * beta_C).T @ C
+    effort = alpha.T @ C
+    phi_w  = phi_space @ effort 
+
+    xi = np.empty(SP)
+    eps = 1e-10
+    for i in range(SP):
+        cr = phi_w[i] / effort[i] if effort[i] > 0.0 else 0.0
+        X  = 1.0 + kappa * cr
+        EX = E[i] * X
+        if EX > eps:
+            xi[i] = (P[i] / (EX ** q)) ** sigma
+        else:
+            xi[i] = 0.0
+    return xi
+
+
+@numba.njit()
+def _density_numba(alpha, phi_space, phi_row_sum):
+    """
+    Density of country j in the product space around product i.
+    """
+    numerator = alpha @ phi_space.T
+    SC, SP = alpha.shape
+    density = np.empty((SC, SP))
+    for i in range(SP):
+        denom = phi_row_sum[i]
+        for j in range(SC):
+            density[j, i] = numerator[j, i] / denom if denom > 0.0 else 0.0
+    return density
+
+
+@numba.njit()
+def _odes_inner(
+    P, C, alpha,
+    r_P, r_C,
+    C_PP, C_CC, theta,
+    beta_C, beta_P,
+    phi_space, phi_row_sum,
+    h_P, h_C,
+    mu, nu, G,
+    gamma, kappa, q, sigma, s,
+    d_C,
+):
+    """
+    Full product-space ODEs
+    """
+    SP = P.shape[0]
+    SC = C.shape[0]
+
+    # Ensure non-negativity
+    P = np.maximum(P, 0.0)
+    C = np.maximum(C, 0.0)
+    alpha = np.minimum(np.maximum(alpha, 0.0), 1.0)
+
+    # ξ_i
+    xi = _xi_numba(P, alpha, beta_C, C, phi_space, kappa, q, sigma)
+
+    # Mutualistic benefits
+    rho_C = (alpha * beta_C) @ xi 
+    rho_P = (alpha * beta_P).T @ C
+
+    # Knowledge spillovers
+    spillovers = s * (phi_space @ P)
+
+    # Product dynamics
+    # Proximity-weighted competition matrix (off-diagonal scaled by theta)
+    C_PP_eff = C_PP * theta
+    for i in range(SP):
+        C_PP_eff[i, i] = C_PP[i, i] # Restore self-competition on diagonal
+    competition_P = C_PP_eff @ P
+
+    # Mutualism term for products
+    rho_P_total = rho_P + spillovers
+    mut_P = rho_P_total / (1.0 + h_P * rho_P_total)
+
+    dP = P * (r_P - competition_P + mut_P) + mu
+
+    # Capability accumulation
+    density = _density_numba(alpha, phi_space, phi_row_sum)
+    Cap = np.zeros(SC)
+    for j in range(SC):
+        for i in range(SP):
+            Cap[j] += alpha[j, i] * density[j, i]
+
+    # Country dynamics
+    # Mutualism term for countries
+    rho_C_total = rho_C + gamma * Cap
+    mut_C = rho_C_total / (1.0 + h_C * rho_C_total)
+
+    dC = C * (r_C - d_C - C_CC @ C + mut_C) + mu
+
+    # Adaptive specialisation
+    dalpha = np.zeros((SC, SP))
+    if nu != 1.0 and G != 0.0:
+        for j in range(SC):
+            n_active = np.count_nonzero(beta_C[j, :])
+            if n_active == 0:
+                continue
+            for i in range(SP):
+                if beta_C[j, i] != 0.0:
+                    nu_stab = (1.0 / n_active - alpha[j, i]) * nu
+                    dalpha[j, i] = G * (
+                        (1.0 - nu) * alpha[j, i] * (
+                            beta_C[j, i] * xi[i] - rho_C[j]
+                        )
+                        + nu_stab
+                    )
+
+    return dP, dC, dalpha
