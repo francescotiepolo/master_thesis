@@ -85,7 +85,6 @@ class ProductSpaceModel(BaseModel):
             # Generate a random symmetric proximity matrix from Uniform(0,1), in case data is not used
             raw = self.rng.uniform(0.0, 1.0, (self.SP, self.SP))
             sym = (raw + raw.T) / 2.0
-            sym[sym < 0.6] = 0.0   # Only keep strong proximities???
             np.fill_diagonal(sym, 0.0)
             self.phi_space = sym
 
@@ -166,7 +165,7 @@ class ProductSpaceModel(BaseModel):
 
 # Numba functions
 
-@numba.njit()
+@numba.njit(cache=True)
 def _xi_numba(P, alpha, beta_C, C, phi_space, kappa, q, sigma):
     """
     Proximity-dependent resource availability ξ_i.
@@ -190,7 +189,7 @@ def _xi_numba(P, alpha, beta_C, C, phi_space, kappa, q, sigma):
     return xi
 
 
-@numba.njit()
+@numba.njit(cache=True)
 def _density_numba(alpha, phi_space, phi_row_sum):
     """
     Density of country j in the product space around product i.
@@ -198,14 +197,14 @@ def _density_numba(alpha, phi_space, phi_row_sum):
     numerator = alpha @ phi_space.T
     SC, SP = alpha.shape
     density = np.empty((SC, SP))
-    for i in range(SP):
+    for i in numba.prange(SP):
         denom = phi_row_sum[i]
         for j in range(SC):
             density[j, i] = numerator[j, i] / denom if denom > 0.0 else 0.0
     return density
 
 
-@numba.njit()
+@numba.njit(cache=True)
 def _odes_inner(
     P, C, alpha,
     r_P, r_C,

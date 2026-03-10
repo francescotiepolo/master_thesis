@@ -519,14 +519,14 @@ class BaseModel:
 
 # Numba functions
 
-@numba.njit()
+@numba.njit(cache=True)
 def _nestedness_fast(network):
     """
     Numba-accelerated nestedness metric.
     """
     N_c, N_p = network.shape
     nest_c = 0.0 # Country nestedness
-    for i in numba.prange(N_c - 1): # Compare each pair of countries
+    for i in range(N_c - 1): # Compare each pair of countries
         for j in range(i + 1, N_c): 
             ni = network[i].sum() # Number of products country i interacts with
             nj = network[j].sum() # Number of products country j interacts with
@@ -538,7 +538,7 @@ def _nestedness_fast(network):
                 nest_c += nij / min(ni, nj) # Proportion of shared interactions relative to the less connected country
 
     nest_p = 0.0 # Same for product nestedness
-    for i in numba.prange(N_p - 1):
+    for i in range(N_p - 1):
         for j in range(i + 1, N_p):
             ni = network[:, i].sum()
             nj = network[:, j].sum()
@@ -553,13 +553,13 @@ def _nestedness_fast(network):
     return (nest_c + nest_p) / denom if denom > 0 else 0.0
 
 
-@numba.njit()
+@numba.njit(cache=True)
 def _nu_term(alpha, beta_C, SC, SP, nu):
     """
     Numba-accelerated stabilising (nu) term in the alpha ODE.
     """
     nu_term = np.zeros((SC, SP))
-    for i in range(SC):
+    for i in numba.prange(SC):
         for j in range(SP):
             if beta_C[i, j] != 0:
                 nu_term[i, j] = 1.0 / np.count_nonzero(beta_C[i, :]) - alpha[i, j]
