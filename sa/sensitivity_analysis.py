@@ -10,7 +10,9 @@ Three analyses:
   2. ProductSpaceModel - 5 shared + 6 PS-only parameters (13 total)
   3. Comparison of shared parameters across both models
 
-Choose option "fix_q_1" to test is hysteresis still feasible with full rivalry over available market (SA run over every other parameter)
+- Choose option "fix_q_1" to test is hysteresis still feasible
+  with full rivalry over available market (SA run over every other parameter)
+- Choose option "second_order" to compute second-order Sobol indices
 """
 
 import os
@@ -33,13 +35,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from base_model import BaseModel
 from product_space_model import ProductSpaceModel
 
-# Choose is full SA or fix q=1
+# Choose if full SA or fix q=1
 FIX_Q_1 = False
+# Choose if second-order indices should be calculated 
+SECOND_ORDER = True 
 
 # Configuration
-N_SOBOL = 64 # Saltelli draws N*(2D+2) samples per model
+N_SOBOL = 2048 # Saltelli draws N*(2D+2) samples per model
 N_JOBS = -1 # -1 = all cores, 1 = serial 
-BASE_SEED = 42 # Each sample gets BASE_SEED + sample_index
+BASE_SEED = 133 # Each sample gets BASE_SEED + sample_index
 
 # Hysteresis settings
 D_C_MIN = 0.0
@@ -51,34 +55,34 @@ T_STEP = 2_000 # Integration time per d_C step
 
 # Directory for results
 ON_CLUSTER = "snellius" in socket.gethostname()
-RESULTS_DIR = ("sa_results_q_fix" if FIX_Q_1 else "sa_results") + ("_cluster" if ON_CLUSTER else "")
-os.makedirs(RESULTS_DIR, exist_ok=True)
+_base_dir = "sa_results_q_fix" if FIX_Q_1 else "sa_results"
+RESULTS_DIR = _base_dir + ("_cluster" if ON_CLUSTER else "")
 
 # Fixed parameters for both models
 FIXED_NESTEDNESS = 0.6
 FIXED_CONNECTANCE = 0.15
 
 # Parameter definitions
-_SHARED_NAMES_BASE = ["nu", "G", "mu", "beta_trade_off",
+_SHARED_NAMES_BASE = ["nu", "G", "log10_mu", "beta_trade_off",
                       "h_mean", "r_mean", "C_diag_mean"]
 _SHARED_BOUNDS_BASE = [
-    [0.1, 1.0 ],  # nu
-    [0.1, 2.0 ],  # G
-    [1e-5, 1e-3], # mu
+    [0.0, 1.0],   # nu
+    [0.1, 2.0],   # G
+    [-5, -3],     # log10_mu
     [0.1, 0.9 ],  # beta_trade_off
     [0.15, 0.30], # h_mean — h_P and h_C vectors set uniformly to this value
     [0.10, 0.35], # r_mean — r_P and r_C vectors set uniformly to this value
     [0.80, 1.10], # C_diag_mean — diagonal of C_PP and C_CC set uniformly
 ]
 
-_SHARED_NAMES_FULL  = ["nu", "G", "q", "mu", "beta_trade_off",
+_SHARED_NAMES_FULL  = ["nu", "G", "q", "log10_mu", "beta_trade_off",
                        "h_mean", "r_mean", "C_diag_mean"]
 _SHARED_BOUNDS_FULL = [
-    [0.1, 1.0 ],  # nu
-    [0.1, 2.0 ],  # G
-    [0.0, 1.0 ],  # q
-    [1e-5, 1e-3], # mu
-    [0.1, 0.9 ],  # beta_trade_off
+    [0.0, 1.0],   # nu
+    [0.1, 2.0],   # G
+    [0.0, 0.5],   # q
+    [-5, -3],     # log10_mu
+    [0.1, 0.9],   # beta_trade_off
     [0.15, 0.30], # h_mean
     [0.10, 0.35], # r_mean
     [0.80, 1.10], # C_diag_mean
@@ -98,7 +102,7 @@ PS_ONLY_PARAMS = {
         [0.0, 0.05],  # c_prime
         [0.0, 0.20],  # gamma
         [0.0, 0.20],  # kappa
-        [0.5, 2.0 ],  # sigma
+        [0.5, 2.0],   # sigma
     ],
 }
 
@@ -133,10 +137,11 @@ def _unpack_shared(params_row):
     Set to 1.0 when FIX_Q_1.
     """
     if FIX_Q_1:
-        nu, G, mu, beta_trade_off, h_mean, r_mean, C_diag_mean = params_row
+        nu, G, log10_mu, beta_trade_off, h_mean, r_mean, C_diag_mean = params_row
         q = 1.0
     else:
-        nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean = params_row
+        nu, G, q, log10_mu, beta_trade_off, h_mean, r_mean, C_diag_mean = params_row
+    mu = 10.0 ** log10_mu
     return nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean
 
 def _apply_shared_overrides(m, h_mean, r_mean, C_diag_mean):
@@ -239,7 +244,7 @@ def _evaluate_base(params_row, seed): # For base model
     try:
         with contextlib.redirect_stdout(io.StringIO()): # Suppress printouts from model
             m = BaseModel(
-                N_croducts=15, n_countries=35,
+                N_products=15, n_countries=35,
                 nestedness=FIXED_NESTEDNESS, connectance=FIXED_CONNECTANCE,
                 nu=float(nu), G=float(G), q=float(q),
                 mu=float(mu), beta_trade_off=float(beta_trade_off),
@@ -265,12 +270,11 @@ def _evaluate_ps(params_row, seed): # For product space model (same as for base 
     nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean = _unpack_shared(shared_row)
     s, c, c_prime, gamma, kappa, sigma = ps_row
 
-
     nan_out = np.full(len(OUTPUT_NAMES), np.nan)
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             m = ProductSpaceModel(
-                N_croducts=15, n_countries=35,
+                N_products=15, n_countries=35,
                 nestedness=FIXED_NESTEDNESS, connectance=FIXED_CONNECTANCE,
                 nu=float(nu), G=float(G), q=float(q),
                 mu=float(mu), beta_trade_off=float(beta_trade_off),
@@ -281,19 +285,23 @@ def _evaluate_ps(params_row, seed): # For product space model (same as for base 
         _apply_shared_overrides(m, float(h_mean), float(r_mean), float(C_diag_mean))
         r = _run_hysteresis(m)
         return np.array([r["d_collapse"], r["d_recovery"], r["hysteresis_width"]])
-    except Exception:
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return nan_out
 
 
 # Sobol analysis
 
 def run_sobol(model_name, problem, eval_fn, n=N_SOBOL):
-    param_values = saltelli.sample(problem, n, calc_second_order=False)
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    param_values = saltelli.sample(problem, n, calc_second_order=SECOND_ORDER)
     n_runs = len(param_values)
     n_dC = len(np.arange(D_C_MIN, D_C_MAX + D_C_STEP / 2, D_C_STEP))
     print(f"{'='*60}")
     print(f"Sobol SA  {model_name}")
-    print(f"Params: {problem['num_vars']}   N: {n}   Runs: {n_runs}")
+    print(f"Params: {problem['num_vars']}   N: {n}   Runs: {n_runs}"
+          + ("  [second-order]" if SECOND_ORDER else ""))
     print(f"d_C steps per run: ~{n_dC * 2}  (fwd + bwd)")
     print(f"{'='*60}")
 
@@ -321,7 +329,7 @@ def run_sobol(model_name, problem, eval_fn, n=N_SOBOL):
     # Perform Sobol analysis for each output metric
     si_dict = {}
     for k, out_name in enumerate(OUTPUT_NAMES):
-        Si = sobol.analyze(problem, Y[:, k], calc_second_order=False, print_to_console=False)
+        Si = sobol.analyze(problem, Y[:, k], calc_second_order=SECOND_ORDER, print_to_console=False)
         si_dict[out_name] = Si
         print(f"\n  [{out_name}]")
         print(f"    {'Param':<18}  S1 +/- conf      ST +/- conf")
@@ -352,21 +360,65 @@ def _bar_pair(ax, names, S1, S1c, ST, STc, title, c1, c2):
 
 def plot_single_model(result, model_name):
     problem = result["problem"]
-    names = problem["names"]
-    Si = result["Si"]
+    names   = problem["names"]
+    Si      = result["Si"]
     fig, axes = plt.subplots(len(OUTPUT_NAMES), 1,
                              figsize=(max(10, len(names) * 0.95), len(OUTPUT_NAMES) * 3.8))
-    fig.suptitle(f"Sobol Sensitivity {model_name}" + (" - q = 1.0" if FIX_Q_1 else ""), fontsize=13, fontweight="bold", y=1.01)
+    title_suffix = " - q = 1.0" if FIX_Q_1 else (" [second-order]" if SECOND_ORDER else "")
+    fig.suptitle(f"Sobol Sensitivity {model_name}{title_suffix}",
+                 fontsize=13, fontweight="bold", y=1.01)
     for out_name, ax in zip(OUTPUT_NAMES, axes):
         s = Si[out_name]
         c1, c2 = COLORS[out_name]
-        _bar_pair(ax, names, s["S1"], s["S1_conf"], s["ST"], s["ST_conf"], f"Output: {out_name}", c1, c2)
+        _bar_pair(ax, names, s["S1"], s["S1_conf"], s["ST"], s["ST_conf"],
+                  f"Output: {out_name}", c1, c2)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     path = os.path.join(RESULTS_DIR, f"{model_name}_sobol.png")
     plt.savefig(path, dpi=150, bbox_inches="tight")
     print(f"Saved: {path}")
     plt.close()
 
+def plot_s2_heatmap(result, model_name):
+    if not SECOND_ORDER:
+        return
+    problem = result["problem"]
+    names = problem["names"]
+    n = len(names)
+    Si = result["Si"]
+
+    fig, axes = plt.subplots(1, len(OUTPUT_NAMES),
+                             figsize=(len(OUTPUT_NAMES) * max(5, n * 0.55 + 1),
+                             max(5, n * 0.55 + 1)))
+    fig.suptitle(f"S2 Second-Order Sobol Indices — {model_name}" +
+                 (" (q = 1.0)" if FIX_Q_1 else ""),
+                 fontsize=13, fontweight="bold")
+    if len(OUTPUT_NAMES) == 1:
+        axes = [axes]
+
+    for ax, out_name in zip(axes, OUTPUT_NAMES):
+        S2 = Si[out_name]["S2"]
+        # SALib only fills upper triangle, symmetrise for display
+        S2_sym = np.where(np.isnan(S2), S2.T, S2)
+        np.fill_diagonal(S2_sym, np.nan)
+        im = ax.imshow(S2_sym, vmin=0, vmax=1, cmap="YlOrRd", aspect="auto")
+        ax.set_xticks(range(n))
+        ax.set_yticks(range(n))
+        ax.set_xticklabels(names, rotation=45, ha="right", fontsize=8)
+        ax.set_yticklabels(names, fontsize=8)
+        ax.set_title(f"{out_name}", fontsize=10, fontweight="bold")
+        for i in range(n):
+            for j in range(n):
+                val = S2_sym[i, j]
+                if not np.isnan(val):
+                    ax.text(j, i, f"{val:.2f}", ha="center", va="center",
+                            fontsize=6, color="black" if val < 0.5 else "white")
+        plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="S2")
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    path = os.path.join(RESULTS_DIR, f"{model_name}_sobol_S2.png")
+    plt.savefig(path, dpi=150, bbox_inches="tight")
+    print(f"Saved: {path}")
+    plt.close()
 
 def plot_comparison(result_base, result_ps):
     shared_names = SHARED_PARAMS["names"]
@@ -451,6 +503,7 @@ def plot_output_distributions(result_base, result_ps):
 
 def save_indices_csv(result, model_name):
     path = os.path.join(RESULTS_DIR, f"{model_name}_sobol_indices.csv")
+    names = result["problem"]["names"]
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["output", "parameter", "S1", "S1_conf", "ST", "ST_conf"])
@@ -460,28 +513,45 @@ def save_indices_csv(result, model_name):
                 writer.writerow([out_name, pname,
                                   round(Si["S1"][j], 5), round(Si["S1_conf"][j], 5),
                                   round(Si["ST"][j], 5), round(Si["ST_conf"][j], 5)])
+        if SECOND_ORDER:
+            writer.writerow([])
+            writer.writerow(["output", "param_i", "param_j", "S2", "S2_conf"])
+            for out_name in OUTPUT_NAMES:
+                Si = result["Si"][out_name]
+                for i, pi in enumerate(names):
+                    for j, pj in enumerate(names):
+                        if j > i:
+                            writer.writerow([out_name, pi, pj,
+                                              round(Si["S2"][i, j], 5),
+                                              round(Si["S2_conf"][i, j], 5)])
     print(f"Saved: {path}")
 
 
 # Run analysis
 
 if __name__ == "__main__":
+    os.makedirs(RESULTS_DIR, exist_ok=True)
     print("HYSTERESIS SENSITIVITY ANALYSIS")
-    print(f"N_SOBOL  = {N_SOBOL}")
-    print(f"N_JOBS   = {N_JOBS}")
-    print(f"d_C      = {D_C_MIN} to {D_C_MAX}, step={D_C_STEP}")
-    print(f"T_INIT   = {T_INIT},  T_STEP = {T_STEP}")
-    pv_base = saltelli.sample(PROBLEM_BASE, N_SOBOL, calc_second_order=False)
-    pv_ps   = saltelli.sample(PROBLEM_PS,   N_SOBOL, calc_second_order=False)
+    print(f"N_SOBOL       = {N_SOBOL}")
+    print(f"N_JOBS        = {N_JOBS}")
+    print(f"SECOND_ORDER  = {SECOND_ORDER}")
+    print(f"d_C           = {D_C_MIN} to {D_C_MAX}, step={D_C_STEP}")
+    print(f"T_INIT        = {T_INIT},  T_STEP = {T_STEP}")
+    pv_base = saltelli.sample(PROBLEM_BASE, N_SOBOL, calc_second_order=SECOND_ORDER)
+    pv_ps = saltelli.sample(PROBLEM_PS,   N_SOBOL, calc_second_order=SECOND_ORDER)
     print(f"BaseModel runs     : {len(pv_base)}")
     print(f"ProdSpaceModel runs: {len(pv_ps)}")
 
     result_base = run_sobol("BaseModel", PROBLEM_BASE, _evaluate_base, n=N_SOBOL)
     plot_single_model(result_base, "BaseModel")
+    if SECOND_ORDER:
+        plot_s2_heatmap(result_base, "BaseModel")
     save_indices_csv(result_base, "BaseModel")
 
     result_ps = run_sobol("ProductSpaceModel", PROBLEM_PS, _evaluate_ps, n=N_SOBOL)
     plot_single_model(result_ps, "ProductSpaceModel")
+    if SECOND_ORDER:
+        plot_s2_heatmap(result_ps, "ProductSpaceModel")
     save_indices_csv(result_ps, "ProductSpaceModel")
 
     plot_comparison(result_base, result_ps)

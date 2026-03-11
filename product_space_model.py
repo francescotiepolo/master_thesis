@@ -21,7 +21,7 @@ class ProductSpaceModel(BaseModel):
     def __init__(
         self,
         # Base model parameters
-        N_croducts: int = 15,
+        N_products: int = 15,
         n_countries: int = 35,
         nestedness: float = 0.6,
         connectance: float = 0.15,
@@ -52,7 +52,7 @@ class ProductSpaceModel(BaseModel):
         self._phi_space_init = phi_space  # Will be set properly after network exists
 
         super().__init__(
-            N_croducts=N_croducts,
+            N_products=N_products,
             n_countries=n_countries,
             nestedness=nestedness,
             connectance=connectance,

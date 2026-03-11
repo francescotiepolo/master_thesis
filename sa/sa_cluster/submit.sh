@@ -12,13 +12,13 @@
 # Configuration
 PARTITION="rome"
 ACCOUNT="cpuucl002"
-TIME_GENERATE="00:10:00"
-TIME_ARRAY="04:00:00"
-TIME_COLLECT="00:30:00"
+TIME_GENERATE="01:00:00"
+TIME_ARRAY="10:00:00"
+TIME_COLLECT="01:00:00"
 MEM="4G"
 PYTHON_MODULE="Python/3.11.3-GCCcore-12.3.0"
 VENV="$HOME/envs/thesis"
-CHUNK_SIZE=5  # Number of samples per array job
+CHUNK_SIZE=20  # Number of samples per array job
 
 # Directories
 CLUSTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # sa/sa_cluster/
@@ -37,9 +37,9 @@ BOUNDS=$(python3 - <<'EOF'
 import sys
 sys.path.insert(0, ".")
 from SALib.sample import saltelli
-from sensitivity_analysis import PROBLEM_BASE, PROBLEM_PS, N_SOBOL
-pv_base = saltelli.sample(PROBLEM_BASE, N_SOBOL, calc_second_order=False)
-pv_ps   = saltelli.sample(PROBLEM_PS,   N_SOBOL, calc_second_order=False)
+from sensitivity_analysis import PROBLEM_BASE, PROBLEM_PS, N_SOBOL, SECOND_ORDER
+pv_base = saltelli.sample(PROBLEM_BASE, N_SOBOL, calc_second_order=SECOND_ORDER)
+pv_ps   = saltelli.sample(PROBLEM_PS,   N_SOBOL, calc_second_order=SECOND_ORDER)
 print(f"{len(pv_base)-1} {len(pv_ps)-1}")
 EOF
 )

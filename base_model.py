@@ -19,7 +19,7 @@ class BaseModel:
 
     def __init__(
         self,
-        N_croducts: int = 15,           # Number of products (as plants in original)
+        N_products: int = 15,           # Number of products (as plants in original)
         n_countries: int = 35,          # Number of countries (as pollinators in original)
         nestedness: float = 0.6,        # Nestedness of network (0 to 1)
         connectance: float = 0.15,      # Connectance of network (0 to 1)
@@ -33,7 +33,7 @@ class BaseModel:
         feasible: bool = True,          # Whether to enforce feasibility (all species alive at d_C=0) during initialization
         feasible_iters: int = 100,      # Number of iterations to attempt to generate a feasible network
     ):
-        self.SP = N_croducts
+        self.SP = N_products
         self.SC = n_countries
         self.N = self.SP + self.SC   # Total species
 

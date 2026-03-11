@@ -11,8 +11,8 @@ from SALib.analyze import sobol
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 from sensitivity_analysis import (
-    RESULTS_DIR, OUTPUT_NAMES, PROBLEM_BASE, PROBLEM_PS,
-    plot_single_model, plot_comparison, plot_ps_only,
+    RESULTS_DIR, OUTPUT_NAMES, PROBLEM_BASE, PROBLEM_PS, SECOND_ORDER,
+    plot_single_model, plot_s2_heatmap, plot_comparison, plot_ps_only,
     plot_output_distributions, save_indices_csv,
 )
 
@@ -70,10 +70,11 @@ def run_analysis(model_name, problem):
     # Sobol analysis
     si_dict = {}
     for k, out_name in enumerate(OUTPUT_NAMES):
-        Si = sobol.analyze(problem, Y[:, k], calc_second_order=False, print_to_console=False)
+        Si = sobol.analyze(problem, Y[:, k], calc_second_order=SECOND_ORDER,
+                           print_to_console=False)
         si_dict[out_name] = Si
         print(f"   [{out_name}]")
-        print(f"    {'Param':<18}  S1 +/- conf      ST +/- conf")
+        print(f"   {'Param':<18}  S1 +/- conf      ST +/- conf")
         for j, pname in enumerate(problem["names"]):
             print(f"  {pname:<18}"
                   f"  {Si['S1'][j]:+.3f} +/- {Si['S1_conf'][j]:.3f}"
@@ -87,10 +88,14 @@ if __name__ == "__main__":
     result_ps   = run_analysis("ProductSpaceModel", PROBLEM_PS)
 
     plot_single_model(result_base, "BaseModel")
-    save_indices_csv(result_base,  "BaseModel")
+    if SECOND_ORDER:
+        plot_s2_heatmap(result_base, "BaseModel")
+    save_indices_csv(result_base, "BaseModel")
 
-    plot_single_model(result_ps,   "ProductSpaceModel")
-    save_indices_csv(result_ps,    "ProductSpaceModel")
+    plot_single_model(result_ps, "ProductSpaceModel")
+    if SECOND_ORDER:
+        plot_s2_heatmap(result_ps, "ProductSpaceModel")
+    save_indices_csv(result_ps, "ProductSpaceModel")
 
     plot_comparison(result_base, result_ps)
     plot_ps_only(result_ps)

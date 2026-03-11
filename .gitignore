@@ -1,0 +1,7 @@
+sa/logs/
+sa/__pycache__/
+sa/sa_results_cluster/BaseModel/
+sa/sa_results_cluster/ProductSpaceModel/
+sa/sa_results_second_order_cluster/BaseModel/
+sa/sa_results_second_order_cluster/ProductSpaceModel/
+__pycache__/
