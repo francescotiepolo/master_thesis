@@ -47,8 +47,8 @@ BASE_SEED = 133 # Each sample gets BASE_SEED + sample_index
 
 # Hysteresis settings
 D_C_MIN = 0.0
-D_C_MAX = 3.0
-D_C_STEP = 0.1 
+D_C_MAX = 5.0
+D_C_STEP = 0.2
 STEPS_AFTER_COLLAPSE = 3 
 T_INIT = 2_000 # Integration time for initial equilibrium
 T_STEP = 2_000 # Integration time per d_C step
@@ -69,7 +69,7 @@ _SHARED_BOUNDS_BASE = [
     [0.0, 1.0],   # nu
     [0.1, 2.0],   # G
     [-5, -3],     # log10_mu
-    [0.1, 0.9 ],  # beta_trade_off
+    [0.1, 0.9],  # beta_trade_off
     [0.15, 0.30], # h_mean — h_P and h_C vectors set uniformly to this value
     [0.10, 0.35], # r_mean — r_P and r_C vectors set uniformly to this value
     [0.80, 1.10], # C_diag_mean — diagonal of C_PP and C_CC set uniformly
