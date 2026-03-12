@@ -24,6 +24,7 @@ CHUNK_SIZE=20  # Number of samples per array job
 CLUSTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # sa/sa_cluster/
 SA_DIR="$(dirname "$CLUSTER_DIR")" # sa/
 cd "$SA_DIR"
+export ON_CLUSTER=1
 find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
 find . -name "*.pyc" -delete 2>/dev/null
 echo "Working directory: $(pwd)"

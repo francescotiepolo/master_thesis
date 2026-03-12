@@ -54,7 +54,7 @@ T_INIT = 2_000 # Integration time for initial equilibrium
 T_STEP = 2_000 # Integration time per d_C step
 
 # Directory for results
-ON_CLUSTER = "snellius" in socket.gethostname()
+ON_CLUSTER = os.environ.get("ON_CLUSTER", "0") == "1" # Flag if running on cluster
 _base_dir = "sa_results_q_fix" if FIX_Q_1 else "sa_results"
 RESULTS_DIR = _base_dir + ("_cluster" if ON_CLUSTER else "")
 
