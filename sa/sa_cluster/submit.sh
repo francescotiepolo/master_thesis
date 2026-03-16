@@ -70,6 +70,7 @@ JOB_GENERATE=$(sbatch --parsable \
     --output=logs/generate.out \
     --error=logs/generate.err \
     --wrap="
+        export ON_CLUSTER=1
         module load 2023
         module load $PYTHON_MODULE
         ${VENV:+source $VENV/bin/activate}
@@ -92,6 +93,7 @@ JOB_BASE=$(sbatch --parsable \
     --error=logs/base_%A_%a.err \
     --dependency=afterok:$JOB_GENERATE \
     --wrap="
+        export ON_CLUSTER=1
         module load 2023
         module load $PYTHON_MODULE
         ${VENV:+source $VENV/bin/activate}
@@ -114,6 +116,7 @@ JOB_PS=$(sbatch --parsable \
     --error=logs/ps_%A_%a.err \
     --dependency=afterok:$JOB_GENERATE \
     --wrap="
+        export ON_CLUSTER=1
         module load 2023
         module load $PYTHON_MODULE
         ${VENV:+source $VENV/bin/activate}
@@ -135,6 +138,7 @@ JOB_COLLECT=$(sbatch --parsable \
     --error=logs/collect.err \
     --dependency=afterok:${JOB_BASE}:${JOB_PS} \
     --wrap="
+        export ON_CLUSTER=1
         module load 2023
         module load $PYTHON_MODULE
         ${VENV:+source $VENV/bin/activate}
