@@ -18,7 +18,7 @@ TIME_COLLECT="01:00:00"
 MEM="4G"
 PYTHON_MODULE="Python/3.11.3-GCCcore-12.3.0"
 VENV="$HOME/envs/thesis"
-CHUNK_SIZE=20  # Number of samples per array job
+CHUNK_SIZE=100  # Number of samples per array job
 
 # Directories
 CLUSTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # sa/sa_cluster/
@@ -136,7 +136,7 @@ JOB_COLLECT=$(sbatch --parsable \
     --chdir=$CHDIR \
     --output=logs/collect.out \
     --error=logs/collect.err \
-    --dependency=afterok:${JOB_BASE}:${JOB_PS} \
+    --dependency=afterany:${JOB_BASE}:${JOB_PS} \
     --wrap="
         export ON_CLUSTER=1
         module load 2023

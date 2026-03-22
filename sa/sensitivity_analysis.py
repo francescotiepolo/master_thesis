@@ -17,9 +17,7 @@ Three analyses:
 
 import os
 import sys
-import socket
 import csv
-import warnings
 import contextlib
 import io
 import numpy as np
@@ -27,7 +25,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from joblib import Parallel, delayed
 
-from SALib.sample import saltelli
+from SALib.sample import sobol as saltelli
 from SALib.analyze import sobol
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -41,14 +39,14 @@ FIX_Q_1 = False
 SECOND_ORDER = True 
 
 # Configuration
-N_SOBOL = 2048 # Saltelli draws N*(2D+2) samples per model
+N_SOBOL = 16384 # Saltelli draws N*(2D+2) samples per model
 N_JOBS = -1 # -1 = all cores, 1 = serial 
 BASE_SEED = 133 # Each sample gets BASE_SEED + sample_index
 
 # Hysteresis settings
 D_C_MIN = 0.0
 D_C_MAX = 5.0
-D_C_STEP = 0.2
+D_C_STEP = 0.05
 STEPS_AFTER_COLLAPSE = 3 
 T_INIT = 2_000 # Integration time for initial equilibrium
 T_STEP = 2_000 # Integration time per d_C step
@@ -64,28 +62,30 @@ FIXED_CONNECTANCE = 0.15
 
 # Parameter definitions
 _SHARED_NAMES_BASE = ["nu", "G", "log10_mu", "beta_trade_off",
-                      "h_mean", "r_mean", "C_diag_mean"]
+                      "h_mean", "r_mean", "C_diag_mean", "C_offdiag_mean"]
 _SHARED_BOUNDS_BASE = [
     [0.0, 1.0],   # nu
     [0.1, 2.0],   # G
     [-5, -3],     # log10_mu
-    [0.1, 0.9],  # beta_trade_off
-    [0.15, 0.30], # h_mean — h_P and h_C vectors set uniformly to this value
-    [0.10, 0.35], # r_mean — r_P and r_C vectors set uniformly to this value
-    [0.80, 1.10], # C_diag_mean — diagonal of C_PP and C_CC set uniformly
+    [0.0, 1.0],   # beta_trade_off
+    [0.05, 1.0],  # h_mean — h_P and h_C vectors set uniformly to this value
+    [0.05, 0.5],  # r_mean — r_P and r_C vectors set uniformly to this value
+    [0.1, 2.0],   # C_diag_mean — diagonal of C_PP and C_CC set uniformly
+    [0.001, 0.5], # C_offdiag_mean — off-diagonal of C_PP and C_CC set uniformly
 ]
 
 _SHARED_NAMES_FULL  = ["nu", "G", "q", "log10_mu", "beta_trade_off",
-                       "h_mean", "r_mean", "C_diag_mean"]
+                       "h_mean", "r_mean", "C_diag_mean", "C_offdiag_mean"]
 _SHARED_BOUNDS_FULL = [
     [0.0, 1.0],   # nu
     [0.1, 2.0],   # G
     [0.0, 0.5],   # q
     [-5, -3],     # log10_mu
-    [0.1, 0.9],   # beta_trade_off
-    [0.15, 0.30], # h_mean
-    [0.10, 0.35], # r_mean
-    [0.80, 1.10], # C_diag_mean
+    [0.0, 1.0],   # beta_trade_off
+    [0.05, 1.0],  # h_mean
+    [0.05, 0.5],  # r_mean
+    [0.1, 2.0],   # C_diag_mean
+    [0.001, 0.5], # C_offdiag_mean
 ]
 
 SHARED_PARAMS = (
@@ -97,12 +97,12 @@ SHARED_PARAMS = (
 PS_ONLY_PARAMS = {
     "names":  ["s", "c", "c_prime", "gamma", "kappa", "sigma"],
     "bounds": [
-        [0.0, 0.10],  # s
-        [0.001,0.10], # c
-        [0.0, 0.05],  # c_prime
-        [0.0, 0.20],  # gamma
-        [0.0, 0.20],  # kappa
-        [0.5, 2.0],   # sigma
+        [0.0, 1.0],   # s
+        [0.001, 2.0], # c
+        [0.0, 2.0],   # c_prime
+        [0.0, 5.0],   # gamma
+        [0.0, 1.0],   # kappa
+        [0.1, 2.0],   # sigma
     ],
 }
 
@@ -137,14 +137,14 @@ def _unpack_shared(params_row):
     Set to 1.0 when FIX_Q_1.
     """
     if FIX_Q_1:
-        nu, G, log10_mu, beta_trade_off, h_mean, r_mean, C_diag_mean = params_row
+        nu, G, log10_mu, beta_trade_off, h_mean, r_mean, C_diag_mean, C_offdiag_mean = params_row
         q = 1.0
     else:
-        nu, G, q, log10_mu, beta_trade_off, h_mean, r_mean, C_diag_mean = params_row
+        nu, G, q, log10_mu, beta_trade_off, h_mean, r_mean, C_diag_mean, C_offdiag_mean = params_row
     mu = 10.0 ** log10_mu
-    return nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean
+    return nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean, C_offdiag_mean
 
-def _apply_shared_overrides(m, h_mean, r_mean, C_diag_mean):
+def _apply_shared_overrides(m, h_mean, r_mean, C_diag_mean, C_offdiag_mean):
     """
     Override sampled parameters.
     """
@@ -152,7 +152,9 @@ def _apply_shared_overrides(m, h_mean, r_mean, C_diag_mean):
     m.h_C[:] = h_mean
     m.r_P[:] = r_mean
     m.r_C[:] = r_mean
+    m.C_PP[:] = C_offdiag_mean
     np.fill_diagonal(m.C_PP, C_diag_mean)
+    m.C_CC[:] = C_offdiag_mean
     np.fill_diagonal(m.C_CC, C_diag_mean)
 
 
@@ -239,7 +241,7 @@ def _evaluate_base(params_row, seed): # For base model
     """
     One BaseModel hysteresis evaluation.
     """
-    nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean = _unpack_shared(params_row)
+    nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean, C_offdiag_mean = _unpack_shared(params_row)
     nan_out = np.full(len(OUTPUT_NAMES), np.nan)
     try:
         with contextlib.redirect_stdout(io.StringIO()): # Suppress printouts from model
@@ -250,7 +252,7 @@ def _evaluate_base(params_row, seed): # For base model
                 mu=float(mu), beta_trade_off=float(beta_trade_off),
                 feasible=False, seed=int(seed),
             )
-        _apply_shared_overrides(m, float(h_mean), float(r_mean), float(C_diag_mean))
+        _apply_shared_overrides(m, float(h_mean), float(r_mean), float(C_diag_mean), float(C_offdiag_mean))
         r = _run_hysteresis(m) # Run hysteresis analysis and extract critical points
         return np.array([r["d_collapse"], r["d_recovery"], r["hysteresis_width"]])
     except Exception as e:
@@ -267,7 +269,7 @@ def _evaluate_ps(params_row, seed): # For product space model (same as for base 
     shared_row = params_row[:n_shared]
     ps_row = params_row[n_shared:]
 
-    nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean = _unpack_shared(shared_row)
+    nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean, C_offdiag_mean = _unpack_shared(shared_row)
     s, c, c_prime, gamma, kappa, sigma = ps_row
 
     nan_out = np.full(len(OUTPUT_NAMES), np.nan)
@@ -282,7 +284,7 @@ def _evaluate_ps(params_row, seed): # For product space model (same as for base 
                 s=float(s), c=float(c), c_prime=float(c_prime),
                 gamma=float(gamma), kappa=float(kappa), sigma=float(sigma),
             )
-        _apply_shared_overrides(m, float(h_mean), float(r_mean), float(C_diag_mean))
+        _apply_shared_overrides(m, float(h_mean), float(r_mean), float(C_diag_mean), float(C_offdiag_mean))
         r = _run_hysteresis(m)
         return np.array([r["d_collapse"], r["d_recovery"], r["hysteresis_width"]])
     except Exception as e:

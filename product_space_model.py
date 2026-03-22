@@ -34,11 +34,12 @@ class ProductSpaceModel(BaseModel):
         beta_trade_off: float = 0.5,
         feasible: bool = True,
         feasible_iters: int = 100,
+        patch_network: bool = False,
         # Product space parameters
         s: float = 0.01,               # Spillover strength
         c: float = 0.02,               # Competition strength for related products
         c_prime: float = 0.005,        # Competition strength for unrelated products
-        gamma: float = 0.05,           # Capability accumulation parameter
+        gamma: float = 1.0,            # Capability accumulation parameter
         kappa: float = 0.05,           # Proximity competition parameter
         sigma: float = 1.0,            # Diminishing returns to effort
         phi_space: np.ndarray = None,  # (SP × SP) proximity matrix; generated if None
@@ -65,6 +66,7 @@ class ProductSpaceModel(BaseModel):
             beta_trade_off=beta_trade_off,
             feasible=feasible,
             feasible_iters=feasible_iters,
+            patch_network=patch_network,
         )
 
 
@@ -102,16 +104,19 @@ class ProductSpaceModel(BaseModel):
         self.theta = self.phi_space * self.c + (1.0 - self.phi_space) * self.c_prime
         np.fill_diagonal(self.theta, 0.0)  # No self-competition via theta
 
-        # Row sums of phi for density calculation
-        self.phi_row_sum = self.phi_space.sum(axis=1) 
+        # Row means of phi for density calculation (mean proximity per product).
+        # Using the mean rather than the sum (like in Hidalgo) ensures density_ij is normalised by the
+        # average connectivity of product i, not its total, so Cap_j stays in [0, ~1]
+        # regardless of SP. This is a fixed, intrinsic scale from phi_space alone.
+        self.phi_row_sum = self.phi_space.mean(axis=1)
 
 
 
     # Solver override
 
     def solve(self, *args, **kwargs):
-        kwargs.setdefault("rtol", 1e-6)
-        kwargs.setdefault("atol", 1e-9)
+        kwargs.setdefault("rtol", 1e-4)
+        kwargs.setdefault("atol", 1e-7)
         return super().solve(*args, **kwargs)
     
     def _set_sol(self, sol):
@@ -250,7 +255,8 @@ def _odes_inner(
 
     dP = P * (r_P - competition_P + mut_P) + mu
 
-    # Capability accumulation
+    # Capability accumulation — absolute position in product space
+    # Cap_j = Σ_i α_ij · density_ij: how well-positioned country j is given its current specialisation
     density = _density_numba(alpha, phi_space, phi_row_sum)
     Cap = np.zeros(SC)
     for j in range(SC):
@@ -258,8 +264,9 @@ def _odes_inner(
             Cap[j] += alpha[j, i] * density[j, i]
 
     # Country dynamics
-    # Mutualism term for countries
-    rho_C_total = rho_C + gamma * Cap
+    # Mutualism term for countries — capability position amplifies mutualistic returns
+    # gamma=0: no amplification; gamma*Cap_j: proportional boost from product-space density
+    rho_C_total = rho_C * (1.0 + gamma * Cap)
     mut_C = rho_C_total / (1.0 + h_C * rho_C_total)
 
     dC = C * (r_C - d_C - C_CC @ C + mut_C) + mu

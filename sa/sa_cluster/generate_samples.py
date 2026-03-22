@@ -5,7 +5,7 @@ Generates the Sobol sampling matrices for both models and saves them to disk.
 import os
 import sys
 import numpy as np
-from SALib.sample import saltelli
+from SALib.sample import sobol as saltelli
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 

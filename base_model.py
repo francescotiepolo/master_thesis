@@ -32,6 +32,7 @@ class BaseModel:
         beta_trade_off: float = 0.5,    # Eta variable in paper (0 = no trade-off, 1 = strong trade-off)
         feasible: bool = True,          # Whether to enforce feasibility (all species alive at d_C=0) during initialization
         feasible_iters: int = 100,      # Number of iterations to attempt to generate a feasible network
+        patch_network: bool = False,    # Skip network generation entirely — for calibration where _patch_model overwrites everything
     ):
         self.SP = N_products
         self.SC = n_countries
@@ -52,6 +53,7 @@ class BaseModel:
 
         self.feasible = feasible
         self.feasible_iters = feasible_iters
+        self.patch_network = patch_network
         self.is_feasible = None
 
         # Solution storage
@@ -114,51 +116,51 @@ class BaseModel:
             frontier = nxt
         return len(seen) == N_c + N_p # True if all nodes are visited (connected)
 
-    def generate_network(self, max_iter: int = int(1e5)):
+    def generate_network(self, max_iter: int = int(1e5), max_retries: int = 20):
         """
         Generate a nested bipartite network (SC × SP).
         """
         N_c, N_p = self.SC, self.SP
-        net, forb = self.random_network()
 
-        converged = False
-        for _ in range(max_iter):
-            if _nestedness_fast(net) >= self.nestedness: # Check nestedness
-                converged = True
-                break
+        for _ in range(max_retries):
+            net, forb = self.random_network()
 
-            # If nestedness not reached, perform a random swap of the links
-            rows, cols = np.nonzero(net)
-            if len(rows) == 0:
-                break
-            idx = self.rng.choice(len(rows)) # Randomly select a link to swap
-            a, b = int(rows[idx]), int(cols[idx])
+            converged = False
+            for _ in range(max_iter):
+                if _nestedness_fast(net) >= self.nestedness: # Check nestedness
+                    converged = True
+                    break
 
-            if self.rng.choice([0, 1]) == 0: # Randomly decide to swap a country or a product
-                c = int(self.rng.integers(0, N_c)) # Randomly select a country
-                # Rewiring rule
-                if (
-                    net[c, b] == 0 and c != a and forb[c, b] == 0
-                    and net[a].sum() > 1 and net[c].sum() > net[a].sum()
-                ):
-                    # Swap the link from (a, b) to (c, b)
-                    net[c, b] = 1
-                    net[a, b] = 0
-            else: # Same for product
-                c = int(self.rng.integers(0, N_p))
-                if (
-                    net[a, c] == 0 and c != b and forb[a, c] == 0
-                    and net[:, b].sum() > 1 and net[:, c].sum() > net[:, b].sum()
-                ):
-                    net[a, c] = 1
-                    net[a, b] = 0
+                # If nestedness not reached, perform a random swap of the links
+                rows, cols = np.nonzero(net)
+                if len(rows) == 0:
+                    break
+                idx = self.rng.choice(len(rows)) # Randomly select a link to swap
+                a, b = int(rows[idx]), int(cols[idx])
 
-        if not converged:
-            print("Nestedness not reached, retrying network...")
-            return self.generate_network(max_iter)
-        if not self._is_connected(net):
-            print("Network not connected, retrying network...")
-            return self.generate_network(max_iter)
+                if self.rng.choice([0, 1]) == 0: # Randomly decide to swap a country or a product
+                    c = int(self.rng.integers(0, N_c)) # Randomly select a country
+                    # Rewiring rule
+                    if (
+                        net[c, b] == 0 and c != a and forb[c, b] == 0
+                        and net[a].sum() > 1 and net[c].sum() > net[a].sum()
+                    ):
+                        # Swap the link from (a, b) to (c, b)
+                        net[c, b] = 1
+                        net[a, b] = 0
+                else: # Same for product
+                    c = int(self.rng.integers(0, N_p))
+                    if (
+                        net[a, c] == 0 and c != b and forb[a, c] == 0
+                        and net[:, b].sum() > 1 and net[:, c].sum() > net[:, b].sum()
+                    ):
+                        net[a, c] = 1
+                        net[a, b] = 0
+
+            if converged and self._is_connected(net):
+                break  # Accept this network
+
+        # Accept whatever we have after max_retries (calibration code will overwrite anyway)
 
         self.adj_matrix = net 
         self.forbidden_network = forb
@@ -222,31 +224,36 @@ class BaseModel:
         Generate a nested network and sample parameters until all
         species survive at equilibrium (d_C = 0).
         """
+        if self.patch_network:
+            # Skip network generation entirely — _patch_model will overwrite everything
+            return True
+        if not self.feasible:
+            # Generate network once but skip ODE feasibility check
+            self.generate_network()
+            self.initialize_parameters()
+            return True
+
         for nt in range(max_network_tries):
             self.generate_network()
 
-            if self.feasible:
-                for _ in range(self.feasible_iters):
-                    self._reset_sol()
-                    self.initialize_parameters()
-                    # Quick feasibility solve
-                    sol = self.solve(
-                        1000, n_steps=1000, d_C=0,
-                        stop_on_equilibrium=True,
-                        stop_on_collapse=True
-                    )
-                    self._set_sol(sol)
-                    if self._is_all_alive()[-1].all(): # If all species are alive at equilibrium, we have a feasible network
-                        self.is_feasible = True
-                        print(f"Feasible network found")
-                        return True
-                print(
-                    f"Network {nt+1}/{max_network_tries}: "
-                    f"no feasible params after {self.feasible_iters} tries."
-                )
-            else:
+            for _ in range(self.feasible_iters):
+                self._reset_sol()
                 self.initialize_parameters()
-                return True
+                # Quick feasibility solve
+                sol = self.solve(
+                    1000, n_steps=1000, d_C=0,
+                    stop_on_equilibrium=True,
+                    stop_on_collapse=True
+                )
+                self._set_sol(sol)
+                if self._is_all_alive()[-1].all(): # If all species are alive at equilibrium, we have a feasible network
+                    self.is_feasible = True
+                    print(f"Feasible network found")
+                    return True
+            print(
+                f"Network {nt+1}/{max_network_tries}: "
+                f"no feasible params after {self.feasible_iters} tries."
+            )
 
         print("WARNING: could not find a feasible network.")
         self.is_feasible = False
@@ -353,7 +360,7 @@ class BaseModel:
         equi_tol: float = 1e-7,
         extinct_threshold: float = 0.01,
         rtol=1e-4,
-        atol=1e-7
+        atol=1e-7,
     ):
         """
         Solve the ODE system using the same solver settings as Terpstra 2022.
