@@ -6,3 +6,7 @@ sa/sa_results_second_order_cluster/BaseModel/
 sa/sa_results_second_order_cluster/ProductSpaceModel/
 __pycache__/
 calibration/raw_data/
+calibration/extracted_data/
+sa/sa_for_calibration/__pycache__/
+sa/sa_for_calibration/logs/
+.DS_Store

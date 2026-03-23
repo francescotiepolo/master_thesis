@@ -1,0 +1,11 @@
+numpy
+scipy
+numba
+pandas
+botorch
+gpytorch
+emcee
+SALib
+joblib
+matplotlib
+ecomplexity

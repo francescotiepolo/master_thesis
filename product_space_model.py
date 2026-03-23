@@ -43,6 +43,9 @@ class ProductSpaceModel(BaseModel):
         kappa: float = 0.05,           # Proximity competition parameter
         sigma: float = 1.0,            # Diminishing returns to effort
         phi_space: np.ndarray = None,  # (SP × SP) proximity matrix; generated if None
+        # Product entry parameters
+        enable_entry: bool = False,    # Main switch for new-product entry
+        entry_threshold: float = 0.1,  # Activation threshold for entry signal
     ):
         self.s = s
         self.c = c
@@ -51,6 +54,8 @@ class ProductSpaceModel(BaseModel):
         self.kappa = kappa
         self.sigma = sigma
         self._phi_space_init = phi_space  # Will be set properly after network exists
+        self.enable_entry = enable_entry
+        self.entry_threshold = entry_threshold
 
         super().__init__(
             N_products=N_products,
@@ -112,6 +117,63 @@ class ProductSpaceModel(BaseModel):
 
 
 
+    # Product entry mechanism
+
+    def activate_new_links(self, P, C, alpha):
+        """
+        Check for and activate new (country, product) links based on
+        proximity-weighted production in the product space.
+
+        Called between yearly simulation steps when enable_entry=True.
+        Modifies beta_C, beta_P, alpha, adj_matrix, KC, KP in-place.
+
+        Returns the number of newly activated links.
+        """
+        if not self.enable_entry:
+            return 0
+
+        # signal_ji = sum_{i'} phi_ii' * alpha_ji' * beta_C[j,i'] * P_i'
+        weighted_phi = self.phi_space * P[np.newaxis, :] # (SP, SP)
+        signal = (alpha * self.beta_C) @ weighted_phi # (SC, SP)
+
+        # Only consider currently-inactive pairs
+        inactive = self.beta_C == 0.0
+        candidates = inactive & (signal > self.entry_threshold)
+
+        n_new = candidates.sum()
+        if n_new == 0:
+            return 0
+
+        # Set beta values from proximity-weighted averages of active neighbors
+        for j in range(self.SC):
+            new_products = np.where(candidates[j])[0]
+            if len(new_products) == 0:
+                continue
+
+            active_j = self.beta_C[j] > 0.0  # (SP,) mask of active products for country j
+
+            for i in new_products:
+                phi_i = self.phi_space[i] # Proximity of product i to all products
+                weights = phi_i * active_j # Zero out inactive
+                w_sum = weights.sum()
+                self.beta_C[j, i] = (weights @ self.beta_C[j]) / w_sum
+                self.beta_P[j, i] = (weights @ self.beta_P[j]) / w_sum
+
+        # Update network
+        self.adj_matrix = (self.beta_C > 0).astype(float)
+        self.KC = self.adj_matrix.sum(axis=1).astype(float)
+        self.KP = self.adj_matrix.sum(axis=0).astype(float)
+
+        return int(n_new)
+
+    def _after_step(self, P, C, alpha):
+        """
+        Activate new product links after each hysteresis step.
+        """
+        self.activate_new_links(P, C, alpha)
+
+
+
     # Solver override
 
     def solve(self, *args, **kwargs):
@@ -149,8 +211,8 @@ class ProductSpaceModel(BaseModel):
 
         State vector  z = [P (SP) | C (SC) | alpha (SC×SP, flattened)]
         """
-        P     = z[:self.SP]
-        C     = z[self.SP:self.N]
+        P = z[:self.SP]
+        C = z[self.SP:self.N]
         alpha = z[self.N:].reshape((self.SC, self.SP))
 
         dP, dC, dalpha = _odes_inner(
@@ -255,7 +317,7 @@ def _odes_inner(
 
     dP = P * (r_P - competition_P + mut_P) + mu
 
-    # Capability accumulation — absolute position in product space
+    # Capability accumulation
     # Cap_j = Σ_i α_ij · density_ij: how well-positioned country j is given its current specialisation
     density = _density_numba(alpha, phi_space, phi_row_sum)
     Cap = np.zeros(SC)

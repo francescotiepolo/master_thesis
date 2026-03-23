@@ -46,7 +46,7 @@ BASE_SEED = 133 # Each sample gets BASE_SEED + sample_index
 # Hysteresis settings
 D_C_MIN = 0.0
 D_C_MAX = 5.0
-D_C_STEP = 0.05
+D_C_STEP = 0.02
 STEPS_AFTER_COLLAPSE = 3 
 T_INIT = 2_000 # Integration time for initial equilibrium
 T_STEP = 2_000 # Integration time per d_C step
@@ -95,7 +95,7 @@ SHARED_PARAMS = (
 )
 
 PS_ONLY_PARAMS = {
-    "names":  ["s", "c", "c_prime", "gamma", "kappa", "sigma"],
+    "names":  ["s", "c", "c_prime", "gamma", "kappa", "sigma", "entry_threshold"],
     "bounds": [
         [0.0, 1.0],   # s
         [0.001, 2.0], # c
@@ -103,6 +103,7 @@ PS_ONLY_PARAMS = {
         [0.0, 5.0],   # gamma
         [0.0, 1.0],   # kappa
         [0.1, 2.0],   # sigma
+        [0.01, 10.0], # entry_threshold
     ],
 }
 
@@ -184,7 +185,10 @@ def _run_hysteresis(model):
         model.solve(T_STEP, d_C=d_C, y0=y0, stop_on_equilibrium=True, save_period=0)
         if model.y is None:
             break
+        P_now = model.y[:model.SP, -1]
         C_now = model.y[model.SP:model.N, -1]
+        alpha_now = model.y_partial[:, -1].reshape(model.SC, model.SP)
+        model._after_step(P_now, C_now, alpha_now)
         C_fwd.append(C_now.copy())
         dC_fwd.append(d_C)
         if (C_now < thresh).all(): # Collapse condition
@@ -213,7 +217,11 @@ def _run_hysteresis(model):
         model.solve(T_STEP, d_C=d_C, y0=y0, stop_on_equilibrium=True, save_period=0)
         if model.y is None:
             break
-        C_bwd.append(model.y[model.SP:model.N, -1].copy())
+        P_now = model.y[:model.SP, -1]
+        C_now = model.y[model.SP:model.N, -1]
+        alpha_now = model.y_partial[:, -1].reshape(model.SC, model.SP)
+        model._after_step(P_now, C_now, alpha_now)
+        C_bwd.append(C_now.copy())
         dC_bwd.append(d_C)
 
     if not C_bwd:
@@ -270,7 +278,7 @@ def _evaluate_ps(params_row, seed): # For product space model (same as for base 
     ps_row = params_row[n_shared:]
 
     nu, G, q, mu, beta_trade_off, h_mean, r_mean, C_diag_mean, C_offdiag_mean = _unpack_shared(shared_row)
-    s, c, c_prime, gamma, kappa, sigma = ps_row
+    s, c, c_prime, gamma, kappa, sigma, entry_threshold = ps_row
 
     nan_out = np.full(len(OUTPUT_NAMES), np.nan)
     try:
@@ -283,6 +291,7 @@ def _evaluate_ps(params_row, seed): # For product space model (same as for base 
                 feasible=False, seed=int(seed),
                 s=float(s), c=float(c), c_prime=float(c_prime),
                 gamma=float(gamma), kappa=float(kappa), sigma=float(sigma),
+                enable_entry=True, entry_threshold=float(entry_threshold),
             )
         _apply_shared_overrides(m, float(h_mean), float(r_mean), float(C_diag_mean), float(C_offdiag_mean))
         r = _run_hysteresis(m)
@@ -348,6 +357,7 @@ def run_sobol(model_name, problem, eval_fn, n=N_SOBOL):
 def _bar_pair(ax, names, S1, S1c, ST, STc, title, c1, c2):
     x = np.arange(len(names))
     w = 0.35
+    ST = np.clip(ST, None, 1.0)
     ax.bar(x - w/2, S1, w, yerr=S1c, label="S1 (first-order)", color=c1, capsize=4, alpha=0.9)
     ax.bar(x + w/2, ST, w, yerr=STc, label="ST (total-order)", color=c2, capsize=4, alpha=0.9)
     ax.axhline(0, color="black", linewidth=0.7, linestyle="--")
@@ -439,7 +449,8 @@ def plot_comparison(result_base, result_ps):
         sp = si_ps[out_name]
         for col, (idx_label, base_vals, ps_vals) in enumerate([
             ("S1", sb["S1"][:n_shared], sp["S1"][:n_shared]),
-            ("ST", sb["ST"][:n_shared], sp["ST"][:n_shared]),
+            ("ST", np.clip(sb["ST"][:n_shared], None, 1.0),
+                   np.clip(sp["ST"][:n_shared], None, 1.0)),
         ]):
             base_conf = sb[f"{idx_label}_conf"][:n_shared]
             ps_conf = sp[f"{idx_label}_conf"][:n_shared]
@@ -514,7 +525,7 @@ def save_indices_csv(result, model_name):
             for j, pname in enumerate(result["problem"]["names"]):
                 writer.writerow([out_name, pname,
                                   round(Si["S1"][j], 5), round(Si["S1_conf"][j], 5),
-                                  round(Si["ST"][j], 5), round(Si["ST_conf"][j], 5)])
+                                  round(min(Si["ST"][j], 1.0), 5), round(Si["ST_conf"][j], 5)])
         if SECOND_ORDER:
             writer.writerow([])
             writer.writerow(["output", "param_i", "param_j", "S2", "S2_conf"])

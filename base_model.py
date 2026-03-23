@@ -225,7 +225,7 @@ class BaseModel:
         species survive at equilibrium (d_C = 0).
         """
         if self.patch_network:
-            # Skip network generation entirely — _patch_model will overwrite everything
+            # Skip network generation — _patch_model will overwrite everything
             return True
         if not self.feasible:
             # Generate network once but skip ODE feasibility check
@@ -330,7 +330,7 @@ class BaseModel:
         alpha = z[self.N:].reshape((self.SC, self.SP))
 
         dP, dC, dalpha = _odes_inner_base(
-            np.ascontiguousarray(P),
+            np.ascontiguousarray(P), # Ensure contiguous arrays for numba
             np.ascontiguousarray(C),
             np.ascontiguousarray(alpha),
             self.r_P, self.r_C,
@@ -397,6 +397,13 @@ class BaseModel:
     
 
 
+    def _after_step(self, P, C, alpha):
+        """
+        Runs after each simulation step in find_critical_points.
+        Does nothing here; used to override to update state in the ProductSpaceModel.
+        """
+        pass
+
     # Hysteresis study
 
     def find_critical_points(
@@ -443,11 +450,14 @@ class BaseModel:
             self.solve(t_step, d_C=d_C, y0=y0, save_period=0,
                        stop_on_equilibrium=True)
 
-            P_forward_list.append(self.y[:self.SP, -1].copy())
-            C_forward_list.append(self.y[self.SP:self.N, -1].copy())
-            alpha_forward_list.append(
-                self.y_partial[:, -1].reshape(self.SC, self.SP).copy()
-            )
+            P_t = self.y[:self.SP, -1]
+            C_t = self.y[self.SP:self.N, -1]
+            alpha_t = self.y_partial[:, -1].reshape(self.SC, self.SP)
+            self._after_step(P_t, C_t, alpha_t)
+
+            P_forward_list.append(P_t.copy())
+            C_forward_list.append(C_t.copy())
+            alpha_forward_list.append(alpha_t.copy())
             dCs_forward_list.append(d_C)
 
             # Check whether all countries have collapsed
@@ -482,9 +492,14 @@ class BaseModel:
             y0 = np.concatenate((self.y[:, -1], self.y_partial[:, -1]))
             self.solve(t_step, d_C=d_C, y0=y0, save_period=0,
                        stop_on_equilibrium=True)
-            P_backward[i] = self.y[:self.SP, -1]
-            C_backward[i] = self.y[self.SP:self.N, -1]
-            alpha_backward[i] = self.y_partial[:, -1].reshape(self.SC, self.SP)
+            P_t = self.y[:self.SP, -1]
+            C_t = self.y[self.SP:self.N, -1]
+            alpha_t = self.y_partial[:, -1].reshape(self.SC, self.SP)
+            self._after_step(P_t, C_t, alpha_t)
+
+            P_backward[i] = P_t
+            C_backward[i] = C_t
+            alpha_backward[i] = alpha_t
 
         # Collapse / recovery threshold
         thresh = self.extinct_threshold

@@ -3,6 +3,9 @@ import numpy as np
 import os
 
 model = "product_space" # "product_space" or "base"
+ENABLE_ENTRY = False    # Entry mechanism (ProductSpaceModel only)
+ENTRY_THRESHOLD = 0.1   # Activation threshold (only used when ENABLE_ENTRY=True)
+
 if model == "base":
     from base_model import BaseModel
     use_model = BaseModel
@@ -159,7 +162,8 @@ def verify_base_model():
     # Without adaptive foraging 
     nu = 1.0
     print(f"Testing WITHOUT adaptive foraging (nu={nu})...")
-    model_no_adapt = use_model(nu=nu, seed=133)
+    entry_kwargs = {"enable_entry": ENABLE_ENTRY, "entry_threshold": ENTRY_THRESHOLD} if model == "product_space" else {}
+    model_no_adapt = use_model(nu=nu, seed=133, **entry_kwargs)
     fig_net_no_adapt = plot_network_structure(model_no_adapt)
     critical_data_no_adapt = model_no_adapt.find_critical_points(d_C_max=7.0 if model == "product_space" else 3.0, d_C_step=0.1 if model == "product_space" else 0.02)
     fig1 = plot_C_P_alpha_dynamics(
@@ -169,9 +173,9 @@ def verify_base_model():
     )
 
     # With adaptive foraging
-    nu = 0.6
+    nu = 0.8
     print(f"Testing WITH adaptive foraging (nu={nu})...")
-    model_adapt = use_model(nu=nu, seed=133)
+    model_adapt = use_model(nu=nu, seed=133, **entry_kwargs)
     critical_data_adapt = model_adapt.find_critical_points(d_C_max=7.0 if model == "product_space" else 3.0, d_C_step=0.1 if model == "product_space" else 0.02)
     fig2 = plot_C_P_alpha_dynamics(
         model_adapt, 
@@ -207,8 +211,9 @@ if __name__ == "__main__":
     os.makedirs('Figures', exist_ok=True)
     
     # Save figures
-    results['figures']['network_no_adapt'].savefig(f'Figures/network_structure_no_adapt_{model}.png', dpi=300, bbox_inches='tight')
-    results['figures']['no_adapt'].savefig(f'Figures/dynamics_no_adapt_{model}.png', dpi=300, bbox_inches='tight')
-    results['figures']['adapt'].savefig(f'Figures/dynamics_adapt_{model}.png', dpi=300, bbox_inches='tight')
+    entry_tag = "_entry" if ENABLE_ENTRY else ""
+    results['figures']['network_no_adapt'].savefig(f'Figures/network_structure_no_adapt_{model}{entry_tag}.png', dpi=300, bbox_inches='tight')
+    results['figures']['no_adapt'].savefig(f'Figures/dynamics_no_adapt_{model}{entry_tag}.png', dpi=300, bbox_inches='tight')
+    results['figures']['adapt'].savefig(f'Figures/dynamics_adapt_{model}{entry_tag}.png', dpi=300, bbox_inches='tight')
     
     print("Figures saved")
