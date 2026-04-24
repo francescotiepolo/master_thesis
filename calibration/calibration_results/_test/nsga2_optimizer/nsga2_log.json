@@ -1,0 +1,30 @@
+{
+  "n_evals": 2,
+  "n_generations": 2,
+  "elapsed_s": 0.6197640895843506,
+  "n_pareto": 2,
+  "best_per_objective": {
+    "nrmse_C": 0.3307196693016655,
+    "traj_corr_C": 0.7509446943384801,
+    "rank_products": 1.0,
+    "nrmse_P": 0.3674365747018566
+  },
+  "compromise_idx": 0,
+  "compromise_objectives": {
+    "nrmse_C": 0.3764539723061487,
+    "traj_corr_C": 0.7509446943384801,
+    "rank_products": 1.0,
+    "nrmse_P": 0.5289349424509182
+  },
+  "compromise_theta": {
+    "C_offdiag_mean": 0.876514072307976,
+    "c_prime": 0.7982418032320441,
+    "beta_trade_off": 0.4920756821171665,
+    "sigma": 1.0278873403574735,
+    "entry_threshold": 3.463515394517633,
+    "h_mean": 0.8650887818240102,
+    "C_diag_mean": 1.5733558748754881,
+    "s": 0.0002932919277958106,
+    "kappa": 0.000180247767957189
+  }
+}

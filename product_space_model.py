@@ -4,7 +4,6 @@ ProductSpaceModel: extends BaseModel with product space integration.
 Implements the full final model:
   - Product dynamics with proximity-dependent competition and knowledge spillovers
   - Country dynamics with capability accumulation via density in product space
-  - Adaptive specialization (unchanged from base)
   - Proximity-dependent resource competition
 
 All unchanged logic (network generation, feasibility, solver, hysteresis, etc.)
@@ -53,7 +52,7 @@ class ProductSpaceModel(BaseModel):
         self.gamma = gamma
         self.kappa = kappa
         self.sigma = sigma
-        self._phi_space_init = phi_space  # Will be set properly after network exists
+        self._phi_space_init = phi_space
         self.enable_entry = enable_entry
         self.entry_threshold = entry_threshold
 
@@ -111,8 +110,7 @@ class ProductSpaceModel(BaseModel):
 
         # Row means of phi for density calculation (mean proximity per product).
         # Using the mean rather than the sum (like in Hidalgo) ensures density_ij is normalised by the
-        # average connectivity of product i, not its total, so Cap_j stays in [0, ~1]
-        # regardless of SP. This is a fixed, intrinsic scale from phi_space alone.
+        # average connectivity of product i, not its total, so Cap_j stays in [0, 1] regardless of SP.
         self.phi_row_sum = self.phi_space.mean(axis=1)
 
 
@@ -168,9 +166,10 @@ class ProductSpaceModel(BaseModel):
 
     def _after_step(self, P, C, alpha):
         """
-        Activate new product links after each hysteresis step.
+        Product entry is handled once per year in simulate(),
+        not at every solver output step.
         """
-        self.activate_new_links(P, C, alpha)
+        pass
 
 
 
@@ -183,7 +182,7 @@ class ProductSpaceModel(BaseModel):
     
     def _set_sol(self, sol):
         """
-        Adapts _set_sol for product space model
+        Adapts _set_sol for product space model.
         """
         # Ensure sol.y is a 2-D numpy array of shape (N, n_timepoints)
         if not isinstance(sol.y, np.ndarray) or sol.y.ndim < 2:

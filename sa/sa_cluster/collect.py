@@ -1,6 +1,6 @@
 """
 Assembles individual .npy result files, runs Sobol analysis,
-saves CSVs and generates all plots — same outputs as the original sensitivity_analysis.py.
+saves CSVs and generates all plots — same outputs as sensitivity_analysis.py.
 """
 
 import os
@@ -51,6 +51,9 @@ def collect_Y(model_name, n_runs):
 
 
 def run_analysis(model_name, problem):
+    """
+     Load Y, run Sobol analysis, print results, and return all data for plotting.
+     """
     param_path = os.path.join(RESULTS_DIR, f"{model_name}_param_values.npy")
     if not os.path.exists(param_path):
         print(f"ERROR: {param_path} not found. Did you run generate_samples.py?")

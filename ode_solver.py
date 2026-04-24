@@ -37,7 +37,8 @@ class OdeResult(OptimizeResult):
 def solve_ode(
     fun, t_span, y0, n_steps=1000, vectorized=False, args=None, save_partial=None,
     rtol=1e-3, atol=1e-6, method="RK45", stop_on_collapse=False, N_p=None, N_a=None,
-    extinct_threshold=None, stop_on_equilibrium=False, equi_tol=1e-7, **options
+    extinct_threshold=None, stop_on_equilibrium=False, equi_tol=1e-7,
+    max_solver_steps=None, save_trajectory=True, **options
 ):
     """Adapted from solve_ivp() of scipy package. Source:
     https://github.com/scipy/scipy/blob/v1.8.0/scipy/integrate/_ivp/ivp.py
@@ -203,8 +204,12 @@ def solve_ode(
         raise ValueError("tf should be larger than t0")
     if not isinstance(n_steps, int) or n_steps < 2:
         raise ValueError("n_steps should be an integer and have a value larger than 1")
-    t_eval = np.linspace(t0, tf, n_steps)
-    t_eval_i = 0
+    if save_trajectory:
+        t_eval = np.linspace(t0, tf, n_steps)
+        t_eval_i = 0
+    else:
+        t_eval = None
+        t_eval_i = None
 
     # Wrap the user's fun in lambdas to hide the
     # additional parameters.  Pass in the original fun as a keyword
@@ -221,10 +226,23 @@ def solve_ode(
     ts_partial = []
     ys_partial = []
     collapse_time = None
+    last_t = float(t0)
+    last_visible = None
+    last_partial = None
+
+    if save_partial is not None:
+        last_visible = np.concatenate((y0[:save_inds[0]], y0[save_inds[1]+1:])).astype(float, copy=True)
+        last_partial = y0[save_inds[0]:save_inds[1]+1].astype(float, copy=True)
+    else:
+        last_visible = np.asarray(y0, dtype=float).copy()
 
     status = None
+    solver_step_count = 0
+    _prev_y_eq = np.asarray(y0, dtype=float).copy()
+    _prev_t_eq = float(t0)
     while status is None:
         message = solver.step()
+        solver_step_count += 1
 
         if solver.status == 'finished':
             status = 0
@@ -232,9 +250,35 @@ def solve_ode(
             status = -1
             break
 
-        t_old = solver.t_old
+        if max_solver_steps is not None and solver_step_count >= max_solver_steps:
+            status = -1
+            break
+
         t = solver.t
         y = solver.y
+        last_t = float(t)
+
+        if not save_trajectory:
+            if save_partial is not None:
+                last_visible = np.concatenate((y[:save_inds[0]], y[save_inds[1]+1:])).copy()
+                last_partial = y[save_inds[0]:save_inds[1]+1].copy()
+            else:
+                last_visible = np.asarray(y, dtype=float).copy()
+
+            if stop_on_collapse:
+                if (last_visible[N_p:N_p+N_a] < extinct_threshold).all():
+                    status = 1
+                    collapse_time = t
+
+            if stop_on_equilibrium and t > _prev_t_eq:
+                dy_dt_max = np.max(np.abs(y - _prev_y_eq)) / (t - _prev_t_eq)
+                if t_iter > 1 and dy_dt_max < equi_tol:
+                    status = 2
+                _prev_y_eq = y.copy()
+                _prev_t_eq = float(t)
+
+            t_iter += 1
+            continue
 
         sol = None
 
@@ -245,14 +289,16 @@ def solve_ode(
         if t_eval_step.size > 0:
             if sol is None:
                 sol = solver.dense_output()
-            ts.append(t_eval_step)
 
             ys_sol = sol(t_eval_step)
+            last_t = float(t_eval_step[-1])
             if save_partial is not None:
+                visible_sol = np.concatenate((ys_sol[:save_inds[0]], ys_sol[save_inds[1]+1:]))
+                last_visible = visible_sol[:, -1].copy()
+                last_partial = ys_sol[save_inds[0]:save_inds[1]+1, -1].copy()
 
-                ys.append(
-                    np.concatenate((ys_sol[:save_inds[0]], ys_sol[save_inds[1]+1:]))
-                )
+                ts.append(t_eval_step)
+                ys.append(visible_sol)
                 # save to partial only each period as specified in save_partial_period
                 if (
                     save_partial_period is not None and save_partial_period > 0 and
@@ -261,13 +307,15 @@ def solve_ode(
                     ts_partial.append(t_eval_step)
                     ys_partial.append(ys_sol[save_inds[0]:save_inds[1]+1])
             else:
+                last_visible = ys_sol[:, -1].copy()
+                ts.append(t_eval_step)
                 ys.append(ys_sol)
             t_eval_i = t_eval_i_new
 
             # check if abundances pollinators below extinct_threshold:
             # set solver.status to finished
             if stop_on_collapse:
-                if (ys[-1][N_p:N_p+N_a] < extinct_threshold).all():
+                if (last_visible[N_p:N_p+N_a] < extinct_threshold).all():
                     status = 1
                     collapse_time = t
                     # print(ys[-1][N_p:N_p+N_a])
@@ -305,9 +353,15 @@ def solve_ode(
     if ts:
         ts = np.hstack(ts)
         ys = np.hstack(ys)
+    elif not save_trajectory:
+        ts = np.array([last_t], dtype=float)
+        ys = last_visible[:, np.newaxis]
     if ts_partial:
         ts_partial = np.hstack(ts_partial)
         ys_partial = np.hstack(ys_partial)
+    elif not save_trajectory and last_partial is not None:
+        ts_partial = np.array([last_t], dtype=float)
+        ys_partial = last_partial[:, np.newaxis]
 
     return OdeResult(
         t=ts, y=ys, t_partial=ts_partial, y_partial=ys_partial, status=status,

@@ -10,3 +10,7 @@ calibration/extracted_data/
 sa/sa_for_calibration/__pycache__/
 sa/sa_for_calibration/logs/
 .DS_Store
+calibration/__pycache__/
+calibration/logs/
+theory/
+docs/

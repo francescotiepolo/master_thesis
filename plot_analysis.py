@@ -13,15 +13,15 @@ elif model == "product_space":
     from product_space_model import ProductSpaceModel
     use_model = ProductSpaceModel
 
-COL_FORWARD  = "#1f77b4"   # blue – forward trajectory
-COL_BACKWARD = "#ff7f0e"   # orange – backward trajectory
+COL_FORWARD  = "#1f77b4"
+COL_BACKWARD = "#ff7f0e"
 
 def plot_network_structure(model: use_model):
     """
     Display the adjacency matrix (nested network) and the forbidden-links matrix
     for the given model's generated network.
     Species are sorted by degree (descending) so the characteristic nested
-    triangular pattern is visible, matching Fig A of the supporting information.
+    triangular pattern is visible, matching Fig A of the supporting information of the original paper.
     """
     fig, axes = plt.subplots(1, 2, figsize=(9, 4))
 

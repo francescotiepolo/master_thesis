@@ -1,8 +1,8 @@
 """
-Give a consistent annual time series for all available years (1988–2024), required for calibration.
+Phase 0: extract annual C, P, and alpha matrices from data (1988–2024).
 
-The product/country network is fixed at YEAR_REF (2000) and all annual matrices are index-aligned.
-The intrinsic growth rates are estimated via OLS on log-exports across the full time series.
+Phi_space are fixed at YEAR_REF (2000); beta_C uses the full series.
+Intrinsic growth rates r_C and r_P are estimated by OLS on log-exports over the full series.
 
 Outputs (extracted_data/):
   annual/alpha_{year}.npy  (SC × SP)  row-normalised RCA per year
@@ -26,14 +26,20 @@ import pandas as pd
 from scipy import stats
 from ecomplexity import proximity
 
+try:
+    from calibration_config import YEAR_START, YEAR_END, YEAR_REF, RAW_DATA_DIR, EXTRACTED_DIR
+except ModuleNotFoundError as exc:
+    if exc.name != "calibration_config":
+        raise
+    from .calibration_config import YEAR_START, YEAR_END, YEAR_REF, RAW_DATA_DIR, EXTRACTED_DIR
+
 # Settings
-YEAR_START = 1988
-YEAR_END = 2024
-YEAR_REF = 2000  # Same as Hidalgo et al. (2007) for defining the product space and initial conditions
+# YEAR_REF follows Hidalgo et al. (2007) for defining the product space and network alignment.
 IN_RANKINGS_ONLY = True # Whether to include only countries in the annual rankings (G20) or all available countries in trade data.
 TOP_N_PRODUCTS = 100
 
-OUT_DIR = "extracted_data"
+RAW_DIR = RAW_DATA_DIR
+OUT_DIR = EXTRACTED_DIR
 ANN_DIR = os.path.join(OUT_DIR, "annual")
 os.makedirs(ANN_DIR, exist_ok=True)
 
@@ -46,13 +52,12 @@ trade_cols = {
 
 # Load files
 print("Loading files...")
-trade = pd.read_csv("raw_data/hs92_country_product_year_4.csv", low_memory=False)
-products_lookup = pd.read_csv("raw_data/product_hs92.csv", low_memory=False)
-countries_lookup = pd.read_csv("raw_data/location_country.csv", low_memory=False)
+trade = pd.read_csv(os.path.join(RAW_DIR, "hs92_country_product_year_4.csv"), low_memory=False)
+products_lookup = pd.read_csv(os.path.join(RAW_DIR, "product_hs92.csv"), low_memory=False)
+countries_lookup = pd.read_csv(os.path.join(RAW_DIR, "location_country.csv"), low_memory=False)
 
 
-
-# Filter lookup files
+# Filter files
 
 products_lookup = products_lookup[products_lookup["product_level"] == 4].copy()
 
@@ -235,7 +240,6 @@ np.save(os.path.join(OUT_DIR, "P_init.npy"), np.load(os.path.join(ANN_DIR, f"P_{
 np.save(os.path.join(OUT_DIR, "C_init.npy"), np.load(os.path.join(ANN_DIR, f"C_{YEAR_START}.npy")))
 
 
-
 # OLS trend growth rates
 print("\nEstimating OLS trend growth rates...")
 years_arr = np.array(sorted(P_series.keys()), dtype=float)
@@ -243,7 +247,10 @@ t_arr = years_arr - years_arr[0] # t=0 at YEAR_START
 P_matrix = np.stack([P_series[int(y)] for y in years_arr], axis=0) # (n_years, SP)
 C_matrix = np.stack([C_series[int(y)] for y in years_arr], axis=0) # (n_years, SC)
 
-def ols_growth_rate(matrix, t): # Returns annualised log growth rate
+def ols_growth_rate(matrix, t):
+    """
+    Estimate OLS slope of log-values over time for each column in the matrix.
+    """
     n_series = matrix.shape[1]
     slopes = np.full(n_series, np.nan)
     for i in range(n_series):

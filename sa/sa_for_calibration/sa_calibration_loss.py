@@ -2,7 +2,7 @@
 Sobol global sensitivity analysis of the calibration loss function.
 
 Evaluates how all 6 PS-only parameters (s, c, c_prime, gamma, kappa, sigma)
-affect the calibration loss and its two components (rank_C, alpha),
+affect the calibration loss and its two components (rank_C, rank_products),
 using empirical UN Comtrade data (1988-2010) as fixed input.
 
 This complements the hysteresis SA in ../sensitivity_analysis.py providing a
@@ -11,16 +11,17 @@ basis for the free/fixed parameter selection used in calibration.
 Outputs (per parameter):
   loss_total — weighted aggregate calibration loss
   rank_C — 1 - Spearman(C_sim, C_obs), country activity rank
-  alpha — 1 - Spearman(entropy_sim, entropy_obs), diversification ordering
+  rank_products — 1 - mean per-country Spearman(alpha_sim[j,:], alpha_obs[j,:])
 """
 
 import os
 import sys
 import csv
+import time
 import warnings
+import multiprocessing as _mp
 import numpy as np
 import matplotlib.pyplot as plt
-from joblib import Parallel, delayed
 
 from SALib.sample import sobol as saltelli
 from SALib.analyze import sobol
@@ -34,54 +35,48 @@ sys.path.insert(0, _calib_dir)
 
 from calibration_config import (
     FIXED, CALIB_YEARS, LOSS_WEIGHTS, TIME_WEIGHT_SLOPE,
-    YEAR_START, SIM_STEPS_PER_YEAR,
+    YEAR_START, PARAM_NAMES, PARAM_BOUNDS, COUNTRY_GROUPS,
 )
-from calibration_utils import load_data, compute_stats, _patch_model
+from calibration_utils import load_data, aggregate_loss_components, _patch_model, _build_r_C_from_groups
 from product_space_model import ProductSpaceModel
 
 # Configuration
-N_SOBOL = 1024
-N_JOBS = -1 # -1 = all cores
+N_SOBOL = int(os.environ.get("N_SOBOL_OVERRIDE", "1024"))
+N_JOBS = int(os.environ.get("N_JOBS_OVERRIDE", "32"))
+CALC_SECOND_ORDER = False  # Skip second-order to halve run count
+EVAL_TIMEOUT_S = float(os.environ.get("SA_EVAL_TIMEOUT_S", "180"))
+WORKER_MEM_MB = int(os.environ.get("SA_WORKER_MEM_MB", "3000"))
 
 RESULTS_DIR = os.path.join(_this_dir, "results")
 
-# Parameters bounds
-SA_PARAM_NAMES = ["s", "c", "c_prime", "gamma", "kappa", "sigma", "nu", "beta_trade_off", "h_mean", "C_diag_mean", "C_offdiag_mean", "entry_threshold"]
-SA_PARAM_BOUNDS = [
-    (0.0, 1.0),    # s
-    (0.001, 2.0),  # c
-    (0.0, 2.0),    # c_prime
-    (0.0, 5.0),    # gamma
-    (0.0, 1.0),    # kappa
-    (0.1, 2.0),    # sigma
-    (0.0, 1.0),    # nu
-    (0.0, 1.0),    # beta_trade_off
-    (0.05, 1.0),   # h_mean
-    (0.1, 3.0),    # C_diag_mean
-    (0.001, 0.5),  # C_offdiag_mean
-    (0.01, 10.0),  # entry_threshold
-]
+# Fix r_C groups to 0
+_SA_FIXED = {"r_C_declining": 0.0, "r_C_rising": 0.0, "r_C_stable": 0.0}
+SA_PARAM_NAMES = [p for p in PARAM_NAMES if p not in _SA_FIXED]
+SA_PARAM_BOUNDS = [b for p, b in zip(PARAM_NAMES, PARAM_BOUNDS) if p not in _SA_FIXED]
 
 PROBLEM = {
     "num_vars": len(SA_PARAM_NAMES),
     "names": SA_PARAM_NAMES,
-    "bounds": SA_PARAM_BOUNDS,
+    "bounds": [list(b) for b in SA_PARAM_BOUNDS],
 }
 
-OUTPUT_NAMES = ["loss_total", "rank_C", "alpha"]
+OUTPUT_NAMES = ["loss_total", "nrmse_C", "traj_corr_C", "rank_products", "nrmse_P"]
 
 COLORS = {
     "loss_total": ("#333333", "#999999"),
-    "rank_C": ("#E64B35", "#F4A582"),
-    "alpha": ("#4DBBD5", "#92C5DE"),
+    "nrmse_C": ("#E64B35", "#F4A582"),
+    "traj_corr_C": ("#4DBBD5", "#92C5DE"),
+    "rank_products": ("#00A087", "#91D1C2"),
+    "nrmse_P": ("#8491B4", "#B09C85"),
 }
 
 
 # Model construction
 
-def _build_model_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean, C_diag_mean, C_offdiag_mean, entry_threshold, data):
+def _build_model_sa(params_dict, data):
     """
-    Build ProductSpaceModel with all 12 SA parameters and empirical data.
+    Build ProductSpaceModel matching the calibration free parameters exactly.
+    Fixed parameters are read from FIXED; r_C is built from group parameters.
     """
     fp = FIXED
     model = ProductSpaceModel(
@@ -90,33 +85,35 @@ def _build_model_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_me
         patch_network = True,
         seed = 133,
         phi_space = data["phi_space"],
-        s = float(s),
-        c = float(c),
-        c_prime = float(c_prime),
-        gamma = float(gamma),
-        kappa = float(kappa),
-        sigma = float(sigma),
-        nu = float(nu),
-        G = float(fp["G"]),
+        s = float(fp["s"]),
+        c = float(fp["c"]),
+        c_prime = float(fp["c_prime"]),
+        gamma = float(fp["gamma"]),
+        kappa = float(params_dict["kappa"]),
+        sigma = float(params_dict["sigma"]),
+        nu = float(params_dict["nu"]),
+        G = float(params_dict["G"]),
         q = float(fp["q"]),
         mu = float(fp["mu"]),
-        beta_trade_off = float(beta_trade_off),
-        enable_entry = True,
-        entry_threshold = float(entry_threshold),
+        beta_trade_off = float(params_dict["beta_trade_off"]),
+        enable_entry = bool(fp.get("enable_entry", True)),
+        entry_threshold = float(params_dict["entry_threshold"]),
     )
-    _patch_model(model, data, h_mean=float(h_mean),
-                 C_diag_mean=float(C_diag_mean), C_offdiag_mean=float(C_offdiag_mean))
+    _patch_model(model, data, params=params_dict,
+                 h_mean=float(params_dict["h_mean"]),
+                 C_diag_mean=float(params_dict["C_diag_mean"]),
+                 C_offdiag_mean=float(params_dict["C_offdiag_mean"]))
     return model
 
 
 # Simulation
 
-def _simulate_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean, C_diag_mean, C_offdiag_mean, entry_threshold, data, years):
+def _simulate_sa(params_dict, data, years):
     """
-    Year-by-year simulation from YEAR_START with the 12-param model.
+    Year-by-year simulation from YEAR_START with the calibration parameter set.
     Returns dict {year: (alpha, C, P)} or None if failure.
     """
-    model = _build_model_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean, C_diag_mean, C_offdiag_mean, entry_threshold, data)
+    model = _build_model_sa(params_dict, data)
     y0 = np.concatenate([data["P_init"], data["C_init"], model.alpha.flatten()])
 
     results = {}
@@ -133,8 +130,11 @@ def _simulate_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean,
                 model.solve(
                     t_end = float(n_yr),
                     d_C = float(FIXED["d_C"]),
-                    n_steps = 10 * n_yr, # SA only needs final state
-                    y0 = y0
+                    n_steps = 10 * n_yr,
+                    y0 = y0,
+                    rtol = 1e-3,
+                    atol = 1e-6,
+                    max_solver_steps = 5000,
                 )
         except Exception:
             return None
@@ -154,7 +154,7 @@ def _simulate_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean,
         if np.max(P_t) > 1e6 or np.max(C_t) > 1e6:
             return None
 
-        # Activate new product links between yearly steps
+        # Allow product entry between yearly steps.
         model.activate_new_links(P_t, C_t, alpha_t)
 
         results[year] = (alpha_t, C_t, P_t)
@@ -169,43 +169,187 @@ def _simulate_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean,
 def _evaluate(params_row, data):
     """
     Evaluate calibration loss components for one parameter vector.
-    Returns array [loss_total, rank_C_loss, alpha_loss].
+    Returns array [loss_total, nrmse_C, traj_corr_C, rank_products, nrmse_P].
     Returns NaN array on failure.
     """
     nan_out = np.full(len(OUTPUT_NAMES), np.nan)
-    s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean, C_diag_mean, C_offdiag_mean, entry_threshold = params_row
+    params_dict = dict(zip(SA_PARAM_NAMES, params_row))
+    params_dict.update(_SA_FIXED)  # fix r_C groups to 0, entry_threshold to neutral value
 
     try:
-        traj = _simulate_sa(s, c, c_prime, gamma, kappa, sigma, nu, beta_trade_off, h_mean, C_diag_mean, C_offdiag_mean, entry_threshold, data, CALIB_YEARS)
+        traj = _simulate_sa(params_dict, data, CALIB_YEARS)
         if traj is None:
             return nan_out
 
-        w = LOSS_WEIGHTS
-        totals = {"rank_C": 0.0, "alpha": 0.0}
-        total_w = 0.0
-
-        for yr in CALIB_YEARS:
-            if yr not in traj or yr not in data["alpha_obs"]:
-                continue
-            alpha_sim, C_sim, _ = traj[yr]
-            stats = compute_stats(alpha_sim, C_sim, data["alpha_obs"][yr], data["C_obs"][yr])
-            wt = 1.0 + TIME_WEIGHT_SLOPE * (yr - YEAR_START) # Make later years more important
-            for k in totals:
-                totals[k] += wt * stats[k]
-            total_w += wt
-
-        if total_w == 0:
+        agg = aggregate_loss_components(
+            traj, data, years=CALIB_YEARS, loss_weights=LOSS_WEIGHTS,
+            time_weight_slope=TIME_WEIGHT_SLOPE, year_start=YEAR_START
+        )
+        if agg is None:
             return nan_out
 
-        # Compute weighted mean loss and total loss
-        rc = totals["rank_C"] / total_w
-        al = totals["alpha"] / total_w
-        lt = w["rank_C"] * rc + w["alpha"] * al
-
-        return np.array([lt, rc, al])
+        return np.array([
+            agg["loss_total"],
+            agg["nrmse_C"],
+            agg["traj_corr_C"],
+            agg["rank_products"],
+            agg["nrmse_P"],
+        ])
 
     except Exception:
         return nan_out
+
+
+def _slurm_mem_limit_mb():
+    """
+    Returns the job memory limit in MB, read from SLURM environment variables. Returns None if unavailable.
+    """
+    per_node = os.environ.get("SLURM_MEM_PER_NODE")
+    if per_node and per_node.isdigit():
+        return int(per_node)
+    per_cpu = os.environ.get("SLURM_MEM_PER_CPU")
+    cpus = os.environ.get("SLURM_CPUS_PER_TASK")
+    if per_cpu and per_cpu.isdigit() and cpus and cpus.isdigit():
+        return int(per_cpu) * int(cpus)
+    return None
+
+
+def _resolve_n_workers():
+    """
+    Cap concurrency by CPUs and, when available, node memory.
+    """
+    n_cpus = _mp.cpu_count()
+    requested = n_cpus if N_JOBS <= 0 else min(N_JOBS, n_cpus)
+    mem_limit_mb = _slurm_mem_limit_mb()
+    if mem_limit_mb is None:
+        return max(1, requested), requested, None
+    mem_cap = max(1, mem_limit_mb // max(1, WORKER_MEM_MB))
+    return max(1, min(requested, mem_cap)), requested, mem_limit_mb
+
+
+def _eval_worker_process(params_row, data, conn):
+    """
+    Evaluate one Sobol sample in a killable subprocess.
+    """
+    os.environ["_CALIB_SUBPROCESS"] = "1"
+    try:
+        values = np.asarray(_evaluate(params_row, data), dtype=np.float64)
+        conn.send(("ok", values))
+    except Exception as exc:
+        conn.send(("err", repr(exc)))
+    finally:
+        conn.close()
+
+
+class _TimedVectorEvaluator:
+    """
+    Evaluate Sobol samples in isolated subprocesses with timeouts.
+    """
+
+    def __init__(self, max_workers, timeout_s):
+        self.ctx = _mp.get_context("spawn")
+        self.max_workers = max(1, int(max_workers))
+        self.timeout_s = float(timeout_s)
+        self.nan_vec = np.full(len(OUTPUT_NAMES), np.nan, dtype=np.float64)
+
+    def evaluate(self, candidates, data, progress_label=None):
+        rows = [np.asarray(row, dtype=np.float64).copy() for row in candidates]
+        if not rows:
+            return np.empty((0, len(self.nan_vec)), dtype=np.float64)
+
+        results = np.tile(self.nan_vec, (len(rows), 1))
+        active = {}
+        next_idx = 0
+        completed = 0
+        last_report = time.time()
+
+        while completed < len(rows):
+            while next_idx < len(rows) and len(active) < self.max_workers:
+                parent_conn, child_conn = self.ctx.Pipe(duplex=False)
+                proc = self.ctx.Process(
+                    target=_eval_worker_process,
+                    args=(rows[next_idx], data, child_conn),
+                )
+                proc.start()
+                child_conn.close()
+                active[next_idx] = {
+                    "proc": proc,
+                    "conn": parent_conn,
+                    "start": time.time(),
+                }
+                next_idx += 1
+
+            progress = False
+            now = time.time()
+
+            for idx, state in list(active.items()):
+                proc = state["proc"]
+                conn = state["conn"]
+
+                if conn.poll():
+                    try:
+                        status, payload = conn.recv()
+                    except EOFError:
+                        status, payload = ("err", "worker closed pipe before sending a result")
+                    conn.close()
+                    proc.join(timeout=0.1)
+                    active.pop(idx)
+                    completed += 1
+                    progress = True
+
+                    if status == "ok":
+                        values = np.asarray(payload, dtype=np.float64)
+                        if values.shape == self.nan_vec.shape:
+                            results[idx] = values
+                        else:
+                            print(
+                                f"    [eval-error] sample={idx} unexpected output shape={values.shape}",
+                                flush=True,
+                            )
+                    else:
+                        print(f"    [eval-error] sample={idx} err={payload}", flush=True)
+                    continue
+
+                if now - state["start"] > self.timeout_s:
+                    print(
+                        f"    [eval-timeout] sample={idx} limit={self.timeout_s:.0f}s",
+                        flush=True,
+                    )
+                    if hasattr(proc, "kill"):
+                        proc.kill()
+                    else:
+                        proc.terminate()
+                    proc.join(timeout=1.0)
+                    conn.close()
+                    active.pop(idx)
+                    completed += 1
+                    progress = True
+                    continue
+
+                if not proc.is_alive():
+                    proc.join(timeout=0.1)
+                    conn.close()
+                    active.pop(idx)
+                    completed += 1
+                    progress = True
+                    print(
+                        f"    [eval-error] sample={idx} worker exited without result",
+                        flush=True,
+                    )
+
+            if progress_label is not None and (completed == len(rows) or now - last_report >= 30.0):
+                pct = 100 * completed / len(rows)
+                print(
+                    f"    [{progress_label}] progress: {completed}/{len(rows)} done ({pct:.0f}%) "
+                    f"| {len(active)} still running",
+                    flush=True,
+                )
+                last_report = now
+
+            if not progress:
+                time.sleep(0.05)
+
+        return results
 
 
 # Sobol run
@@ -213,7 +357,7 @@ def _evaluate(params_row, data):
 def run_sobol(data, n=N_SOBOL):
     os.makedirs(RESULTS_DIR, exist_ok=True)
 
-    param_values = saltelli.sample(PROBLEM, n, calc_second_order=False)
+    param_values = saltelli.sample(PROBLEM, n, calc_second_order=CALC_SECOND_ORDER)
     n_runs = len(param_values)
 
     print("=" * 60)
@@ -222,31 +366,36 @@ def run_sobol(data, n=N_SOBOL):
     print(f"Calib years: {CALIB_YEARS}")
     print("=" * 60)
 
-    # Warm up numba JIT cache 
-    print("Warming up numba cache...", flush=True)
+    # Pre-compile numba JIT functions in the main process.
+    print("Pre-compiling numba cache...", flush=True)
     _evaluate(param_values[0], data)
     print("Numba cache ready.", flush=True)
 
-    # Run in chunks with explicit worker restarts between chunks.
-    from joblib import cpu_count
-    from joblib.externals.loky import get_reusable_executor
-    n_jobs_eff = cpu_count() if N_JOBS == -1 else N_JOBS
-    CHUNK = n_jobs_eff * 8 # Each worker handles ~8 tasks per chunk
-    results = []
-    for chunk_start in range(0, n_runs, CHUNK):
-        chunk_end = min(chunk_start + CHUNK, n_runs)
-        print(f"  chunk {chunk_start}–{chunk_end} / {n_runs}", flush=True)
-        batch = Parallel(n_jobs=N_JOBS, backend="loky", verbose=0,
-                         prefer="processes")(
-            delayed(_evaluate)(param_values[i], data)
-            for i in range(chunk_start, chunk_end)
+    n_workers, requested_workers, mem_limit_mb = _resolve_n_workers()
+    if mem_limit_mb is None:
+        print(f"Workers: {n_workers} (requested={requested_workers})", flush=True)
+    else:
+        print(
+            f"Workers: {n_workers} (requested={requested_workers}, "
+            f"node_mem={mem_limit_mb}MB, worker_budget={WORKER_MEM_MB}MB)",
+            flush=True,
         )
-        results.extend(batch)
-        # Kill worker pool so next chunk starts with fresh processes (no memory carryover)
-        get_reusable_executor(max_workers=n_jobs_eff).shutdown(wait=True, kill_workers=True)
+
+    evaluator = _TimedVectorEvaluator(max_workers=n_workers, timeout_s=EVAL_TIMEOUT_S)
+    batches = []
+    chunk = max(n_workers * 8, 1)
+    for chunk_start in range(0, n_runs, chunk):
+        chunk_end = min(chunk_start + chunk, n_runs)
+        print(f"  chunk {chunk_start}–{chunk_end} / {n_runs}", flush=True)
+        batch = evaluator.evaluate(
+            param_values[chunk_start:chunk_end],
+            data,
+            progress_label=f"chunk {chunk_start}-{chunk_end}",
+        )
+        batches.append(batch)
     sys.stdout.flush()
 
-    Y = np.array(results)
+    Y = np.vstack(batches)
 
     n_failed = np.isnan(Y).any(axis=1).sum()
     if n_failed:
@@ -262,10 +411,13 @@ def run_sobol(data, n=N_SOBOL):
 
     si_dict = {}
     for k, out_name in enumerate(OUTPUT_NAMES):
-        Si = sobol.analyze(PROBLEM, Y[:, k].astype(float), calc_second_order=False,
+        Si = sobol.analyze(PROBLEM, Y[:, k].astype(float), calc_second_order=CALC_SECOND_ORDER,
                            print_to_console=False)
         for key in ("S1", "S1_conf", "ST", "ST_conf"):
             Si[key] = np.array([float(np.squeeze(v)) for v in Si[key]])
+        if CALC_SECOND_ORDER and "S2" in Si and "S2_conf" in Si:
+            Si["S2"] = np.array(Si["S2"], dtype=float)
+            Si["S2_conf"] = np.array(Si["S2_conf"], dtype=float)
         si_dict[out_name] = Si
         print(f"\n  [{out_name}]")
         print(f"    {'Param':<12}  S1 +/- conf      ST +/- conf")
@@ -273,6 +425,15 @@ def run_sobol(data, n=N_SOBOL):
             print(f"    {pname:<12}"
                   f"  {float(Si['S1'][j]):+.3f} +/- {float(Si['S1_conf'][j]):.3f}"
                   f"  {float(Si['ST'][j]):+.3f} +/- {float(Si['ST_conf'][j]):.3f}")
+        if CALC_SECOND_ORDER and "S2" in Si:
+            pairs = []
+            for i in range(len(PROBLEM["names"])):
+                for j in range(i + 1, len(PROBLEM["names"])):
+                    pairs.append((Si["S2"][i, j], Si["S2_conf"][i, j], PROBLEM["names"][i], PROBLEM["names"][j]))
+            pairs = sorted(pairs, key=lambda x: abs(x[0]), reverse=True)
+            print("    Top |S2| pairs:")
+            for s2, s2c, pi, pj in pairs[:5]:
+                print(f"      {pi} x {pj}: {s2:+.3f} +/- {s2c:.3f}")
 
     return {"Y": Y, "param_values": param_values, "Si": si_dict}
 
@@ -361,7 +522,30 @@ def save_indices_csv(result):
     print(f"Saved: {path}")
 
 
-# Main
+def save_second_order_csv(result):
+    """
+    Save second-order Sobol interaction indices (S2) for each output.
+    """
+    if not CALC_SECOND_ORDER:
+        return
+    path = os.path.join(RESULTS_DIR, "sobol_indices_s2.csv")
+    names = PROBLEM["names"]
+    with open(path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["output", "param_i", "param_j", "S2", "S2_conf"])
+        for out_name in OUTPUT_NAMES:
+            Si = result["Si"][out_name]
+            if "S2" not in Si or "S2_conf" not in Si:
+                continue
+            for i in range(len(names)):
+                for j in range(i + 1, len(names)):
+                    writer.writerow([
+                        out_name, names[i], names[j],
+                        round(float(Si["S2"][i, j]), 5),
+                        round(float(Si["S2_conf"][i, j]), 5),
+                    ])
+    print(f"Saved: {path}")
+
 
 if __name__ == "__main__":
     extracted_dir = os.path.join(_calib_dir, "extracted_data")
@@ -371,6 +555,7 @@ if __name__ == "__main__":
     plot_results(result)
     plot_output_distributions(result)
     save_indices_csv(result)
+    save_second_order_csv(result)
 
     print(f"\nAll results saved to: {RESULTS_DIR}/")
     print("Done.")

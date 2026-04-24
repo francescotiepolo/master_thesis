@@ -309,9 +309,7 @@ class BaseModel:
 
     def _mutualism(self, rho, h):
         """
-        Holling type-II function: rho / (1 + h*rho).
-
-        Different from the one in paper (which does not work)!
+        Holling type-II function: rho / (1 + rho/h).
         """
         return rho / (1.0 + rho/h)
 
@@ -361,6 +359,8 @@ class BaseModel:
         extinct_threshold: float = 0.01,
         rtol=1e-4,
         atol=1e-7,
+        max_solver_steps=None,
+        save_trajectory: bool = True,
     ):
         """
         Solve the ODE system using the same solver settings as Terpstra 2022.
@@ -389,6 +389,8 @@ class BaseModel:
             extinct_threshold=extinct_threshold,
             stop_on_equilibrium=stop_on_equilibrium,
             equi_tol=equi_tol,
+            max_solver_steps=max_solver_steps,
+            save_trajectory=save_trajectory,
         )
 
         self._reset_sol()

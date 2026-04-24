@@ -1,0 +1,39 @@
+{
+  "criterion": {
+    "target_free_params": 7,
+    "selection_output_weights": {
+      "loss_total": 0.5,
+      "rank_C": 0.25,
+      "rank_products": 0.25
+    },
+    "definition": "rank by weighted max(ST-ST_conf,0); tie-break by weighted ST; then S2 rescue",
+    "s2_robust_min": 0.03,
+    "s2_max_rescued": null
+  },
+  "recommended_free_base": [
+    "C_offdiag_mean",
+    "c_prime",
+    "beta_trade_off",
+    "sigma",
+    "entry_threshold",
+    "h_mean",
+    "C_diag_mean"
+  ],
+  "recommended_free_rescued_by_s2": [],
+  "recommended_free": [
+    "C_offdiag_mean",
+    "c_prime",
+    "beta_trade_off",
+    "sigma",
+    "entry_threshold",
+    "h_mean",
+    "C_diag_mean"
+  ],
+  "recommended_fixed": [
+    "c",
+    "gamma",
+    "nu",
+    "s",
+    "kappa"
+  ]
+}

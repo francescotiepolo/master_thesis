@@ -1,394 +1,429 @@
 """
-Phase 4: Validation and diagnostics.
+Phase 3: Validation and diagnostics.
 
-  1. Posterior predictive check -- does the model under the posterior
-                                    reproduce 1988-2010 calibration targets?
-  2. Out-of-sample validation   -- simulate 2010-2024 with no re-fitting
-  3. Structural stability       -- MAP estimates across three sub-windows
-  4. Sobol on GP emulator       -- sensitivity analysis on BoTorch GP
-  5. Posterior corner plot      -- marginal and pairwise joint distributions
+  1. Best-point evaluation -- NSGA-II result point on calibration + validation periods
+  2. Trajectory comparison -- observed vs simulated country trajectories across both periods
+  3. Fit metrics -- period_metrics.json, yearly_metrics.csv, trajectory_fit.png, trajectory_summary.png
 """
 
 import os
 import copy
 import json
-import torch
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-from joblib import Parallel, delayed
-from SALib.sample import sobol as saltelli
-from SALib.analyze import sobol
 
 
-from calibration_config import (
-    PARAM_NAMES, PARAM_BOUNDS, N_PARAMS,
-    YEAR_START, CALIB_END, CALIB_YEARS, VALID_YEARS,
-    STABILITY_WINDOWS, MCMC_DIR, BO_DIR, VAL_DIR, SEED, FIXED,
-    GP_SOBOL_SAMPLES, N_PPC_DRAWS, N_OOS_DRAWS,
-)
-from calibration_utils import (
-    load_data, simulate, compute_stats, trajectory_loss,
-    load_bo_gp, gp_predict, PENALTY,
-)
-
-torch.set_default_dtype(torch.float64)
-N_JOBS = -1
+try:
+    from calibration_config import (
+        PARAM_NAMES, N_PARAMS,
+        YEAR_START, CALIB_END, CALIB_YEARS, VALID_YEARS,
+        NSGA2_DIR, VAL_DIR,
+    )
+    from calibration_utils import (
+        load_data, simulate, _windowed_simulate, compute_stats, aggregate_loss_components,
+        trajectory_correlation,
+    )
+except ModuleNotFoundError as exc:
+    if exc.name not in {"calibration_config", "calibration_utils"}:
+        raise
+    from .calibration_config import (
+        PARAM_NAMES, N_PARAMS,
+        YEAR_START, CALIB_END, CALIB_YEARS, VALID_YEARS,
+        NSGA2_DIR, VAL_DIR,
+    )
+    from .calibration_utils import (
+        load_data, simulate, _windowed_simulate, compute_stats, aggregate_loss_components,
+        trajectory_correlation,
+    )
 
 
 # Shared simulation helper
 
-def _simulate_draws(draws, sim_data, obs_data, years):
+def _make_window_data(data, start_year):
     """
-    Run the model for each posterior draw and collect per-year statistics.
-    sim_data: data dict passed to simulate() (sets initial conditions)
-    obs_data: data dict used for computing stats against observed values
-    Returns (n_draws, n_years, 2) array or None if all fail.
+    Return a data dict initialised at start_year when those observations exist.
     """
-    def _sim_one(theta):
-        traj = simulate(theta, sim_data, years)
-        if traj is None:
-            return None
-        row = []
-        for yr in years:
-            if yr not in traj or yr not in obs_data["alpha_obs"]:
-                row.append([np.nan, np.nan])
-                continue
-            alpha_s, C_s, _ = traj[yr]
-            s = compute_stats(alpha_s, C_s, obs_data["alpha_obs"][yr], obs_data["C_obs"][yr])
-            row.append([s["rank_C"], s["alpha"]])
-        return np.array(row)
+    if start_year == YEAR_START:
+        return data, YEAR_START
 
-    results = [r for r in Parallel(n_jobs=N_JOBS)(delayed(_sim_one)(d) for d in draws) if r is not None]
-    if len(results) == 0:
-        return None
-    return np.stack(results)
+    required = ("alpha_obs", "C_obs", "P_obs")
+    missing = [name for name in required if start_year not in data[name]]
+    if missing:
+        print(f"  WARNING: Missing observed initial state for year {start_year}; using {YEAR_START}.")
+        return data, YEAR_START
+
+    window_data = copy.deepcopy(data)
+    window_data["alpha_init"] = data["alpha_obs"][start_year].copy()
+    window_data["C_init"] = data["C_obs"][start_year].copy()
+    window_data["P_init"] = data["P_obs"][start_year].copy()
+    return window_data, start_year
 
 
-# Posterior predictive check (1988-2010)
-
-def posterior_predictive_check(data, n_draws=None):
+def _vector_error_metrics(sim_vec, obs_vec):
     """
-    Posterior predictive check: run the model forward over the calibration
-    period (1988-2010) for n_draws parameter vectors sampled from the MCMC
-    posterior, then compare the resulting trajectories against observed data.
-    Saves ppc_trajectories.npy and ppc_calibration.pdf
+    Compute RMSE, MAE, and R² between two vectors.
     """
-    if n_draws is None:
-        n_draws = N_PPC_DRAWS
-
-    samples = np.load(os.path.join(MCMC_DIR, "samples.npy"))
-    rng = np.random.default_rng(SEED)
-    draws = samples[rng.choice(len(samples), size=min(n_draws, len(samples)), replace=False)]
-    years = CALIB_YEARS
-    print(f"PPC: {len(draws)} draws x {len(years)} years")
-
-    ppc = _simulate_draws(draws, data, data, years)
-    if ppc is None:
-        print("  WARNING: All PPC simulations failed")
-        return None
-    np.save(os.path.join(VAL_DIR, "ppc_trajectories.npy"), ppc)
-    print(f"  {len(ppc)}/{len(draws)} simulations succeeded.")
-
-    stat_names = ["1 - Spearman(C rank)", "1 - Spearman(alpha)"]
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    fig.suptitle("Posterior Predictive Check (1988-2010)", fontsize=12, fontweight="bold")
-    for k, (ax, sname) in enumerate(zip(axes, stat_names)):
-        median = np.nanmedian(ppc[:, :, k], axis=0)
-        lo5 = np.nanpercentile(ppc[:, :, k], 5, axis=0)
-        hi95 = np.nanpercentile(ppc[:, :, k], 95, axis=0)
-        ax.fill_between(years, lo5, hi95, alpha=0.3, color="#4C72B0", label="90% CI")
-        ax.plot(years, median, color="#4C72B0", lw=2, label="Posterior median")
-        ax.set_title(sname, fontsize=10, fontweight="bold")
-        ax.set_xlabel("Year")
-        ax.legend(fontsize=8)
-        ax.spines[["top", "right"]].set_visible(False)
-    plt.tight_layout()
-    plt.savefig(os.path.join(VAL_DIR, "ppc_calibration.pdf"), dpi=150, bbox_inches="tight")
-    plt.close()
-    print(f"  Saved: ppc_calibration.pdf")
-    return ppc
-
-
-# Out-of-sample validation (2010-2024)
-
-def out_of_sample_validation(data, n_draws=None):
-    """
-    Simulate 2010-2024 under posterior draws. No re-fitting.
-    The OOS simulation needs different initial conditions (2010 observed
-    state instead of 1988), thus override alpha_init, C_init, P_init.
-    """
-    if n_draws is None:
-        n_draws = N_OOS_DRAWS
-
-    samples = np.load(os.path.join(MCMC_DIR, "samples.npy"))
-    rng = np.random.default_rng(SEED + 1)
-    draws = samples[rng.choice(len(samples), size=min(n_draws, len(samples)), replace=False)]
-    years = VALID_YEARS
-    print(f"Out-of-sample: {len(draws)} draws x {len(years)} years")
-
-    # Deep copy to avoid changing the original data
-    data_2010 = copy.deepcopy(data)
-    if CALIB_END in data["alpha_obs"]:
-        data_2010["alpha_init"] = data["alpha_obs"][CALIB_END].copy()
-        data_2010["C_init"] = data["C_obs"][CALIB_END].copy()
-        data_2010["P_init"] = data["P_obs"][CALIB_END].copy()
-    else:
-        print(f"  WARNING: No observed data for year {CALIB_END}, using original")
-
-    val_ppc = _simulate_draws(draws, data_2010, data, years)
-    if val_ppc is None:
-        print("  WARNING: All OOS simulations failed.")
-        return None
-    np.save(os.path.join(VAL_DIR, "oos_trajectories.npy"), val_ppc)
-    print(f"  {len(val_ppc)}/{len(draws)} simulations succeeded.")
-
-    stat_names = ["1 - Spearman(C rank)", "1 - Spearman(alpha)"]
-    fig, axes  = plt.subplots(1, 2, figsize=(10, 4))
-    fig.suptitle("Out-of-Sample Validation (2010-2024)", fontsize=12, fontweight="bold")
-    for k, (ax, sname) in enumerate(zip(axes, stat_names)):
-        median = np.nanmedian(val_ppc[:, :, k], axis=0)
-        lo5 = np.nanpercentile(val_ppc[:, :, k], 5, axis=0)
-        hi95 = np.nanpercentile(val_ppc[:, :, k], 95, axis=0)
-        ax.fill_between(years, lo5, hi95, alpha=0.3, color="#DD8452", label="90% posterior CI")
-        ax.plot(years, median, color="#DD8452", lw=2, label="Posterior median")
-        ax.axvline(CALIB_END, color="gray", linestyle=":", lw=1.5, label="Calibration end")
-        ax.set_title(sname, fontsize=10, fontweight="bold")
-        ax.set_xlabel("Year")
-        ax.legend(fontsize=8)
-        ax.spines[["top", "right"]].set_visible(False)
-    plt.tight_layout()
-    plt.savefig(os.path.join(VAL_DIR, "oos_validation.pdf"), dpi=150, bbox_inches="tight")
-    plt.close()
-    print(f"  Saved: oos_validation.pdf")
-    return val_ppc
-
-
-# Structural stability check
-
-def structural_stability_check(data, n_candidates=20):
-    """
-    Test whether the best-fit parameters change when calibrated on
-    different time sub-windows (e.g. 1988-2000, 2000-2012, 2012-2024).
-    Large shifts would indicate the model is overfitting to a specific
-    period rather than capturing stable dynamics.
-
-    The GP emulator pre-screens the BO archive to find the top candidates,
-    then only those are evaluated with the full simulator on each window.
-    """
-    theta_all = np.load(os.path.join(BO_DIR, "theta_all.npy"))
-    loss_all = np.load(os.path.join(BO_DIR, "loss_all.npy"))
-    finite = loss_all < PENALTY * 0.1
-    theta_fin = theta_all[finite]
-    print(f"Stability check: {len(theta_fin)} archive points x {len(STABILITY_WINDOWS)} windows")
-
-    # Use GP emulator to quickly pre-screen candidates
-    gp, lo, hi, bt = load_bo_gp()
-    mu_gp, _ = gp_predict(gp, theta_fin, bt)
-    # mu_gp is -loss; sort by predicted loss (best first)
-    top_idx = np.argsort(-mu_gp)[:n_candidates]
-    theta_top = theta_fin[top_idx]
-    print(f"  Pre-screened to top {len(theta_top)} candidates via GP emulator.")
-
-    window_maps = {}
-    for (wstart, wend) in STABILITY_WINDOWS:
-        years_w = [y for y in range(wstart, wend + 1, 2) if y in data["alpha_obs"]]
-        if len(years_w) < 2:
-            continue
-        losses_w = np.array([
-            trajectory_loss(theta_top[i], data, years=years_w)
-            for i in range(len(theta_top))
-        ])
-        fin_w = losses_w < PENALTY * 0.1
-        if not fin_w.any():
-            print(f"  {wstart}-{wend}: no finite evaluations -- skipping.")
-            continue
-        best_theta_w = theta_top[fin_w][losses_w[fin_w].argmin()]
-        window_maps[(wstart, wend)] = {
-            "best_theta": best_theta_w.tolist(),
-            "best_loss" : float(losses_w[fin_w].min()),
-        }
-        print(f"  {wstart}-{wend}:")
-        for name, val in zip(PARAM_NAMES, best_theta_w):
-            print(f"    {name:8s} = {val:.5f}")
-
-    # Stability plot
-    if len(window_maps) >= 2:
-        colors = ["#4C72B0", "#DD8452", "#55A868"]
-        fig, axes = plt.subplots(1, N_PARAMS, figsize=(3 * N_PARAMS, 3.5))
-        for k, (name, ax) in enumerate(zip(PARAM_NAMES, axes)):
-            for j, ((ws, we), info) in enumerate(window_maps.items()):
-                ax.axvline(info["best_theta"][k], color=colors[j % 3], lw=2,
-                           label=f"{ws}-{we}")
-            ax.set_title(name, fontsize=9, fontweight="bold")
-            ax.set_yticks([])
-            if k == 0:
-                ax.legend(fontsize=7)
-            ax.spines[["top", "right", "left"]].set_visible(False)
-        plt.suptitle("Parameter MAP Estimates Across Sub-Windows",
-                     fontsize=11, fontweight="bold")
-        plt.tight_layout()
-        plt.savefig(os.path.join(VAL_DIR, "stability_map.pdf"), dpi=150, bbox_inches="tight")
-        plt.close()
-        print(f"  Saved: stability_map.pdf")
-
-    with open(os.path.join(VAL_DIR, "stability_maps.json"), "w") as f:
-        json.dump({str(k): v for k, v in window_maps.items()}, f, indent=2)
-    return window_maps
-
-
-# Sobol on GP emulator
-
-def sobol_on_gp(n_samples=None):
-    """
-    Run SALib Sobol analysis on the GP emulator trained in the BO phase,
-    to identify which parameters drive the calibration loss.
-    """
-    if n_samples is None:
-        n_samples = GP_SOBOL_SAMPLES
-
-    gp, lo, hi, bt = load_bo_gp()
-
-    problem = {
-        "num_vars": N_PARAMS,
-        "names": PARAM_NAMES,
-        "bounds": [[lo[i], hi[i]] for i in range(N_PARAMS)],
+    diff = sim_vec - obs_vec
+    rmse = float(np.sqrt(np.mean(diff ** 2)))
+    mae = float(np.mean(np.abs(diff)))
+    ss_res = float(np.sum(diff ** 2))
+    ss_tot = float(np.sum((obs_vec - obs_vec.mean()) ** 2))
+    r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0
+    return {
+        "rmse": rmse,
+        "mae": mae,
+        "r2": r2,
     }
-    param_values = saltelli.sample(problem, n_samples, calc_second_order=True)
 
-    # Evaluate the GP emulator (cheap) instead of the full simulator at each Sobol sample point
-    mu, _ = gp_predict(gp, param_values, bt)
-    # GP predicts -loss; Sobol needs loss (positive)
-    Y_gp = -mu
 
-    Si = sobol.analyze(problem, Y_gp, calc_second_order=True, print_to_console=False)
+def _collect_period_metrics(label, years, traj, data, year_start):
+    """
+    Compute all fit metrics for a period, including per-year stats.
+    """
+    period_metrics = aggregate_loss_components(
+        traj, data, years=years, year_start=year_start
+    )
+    if period_metrics is None:
+        return None, []
 
-    # First-order and total-effect indices
-    sa_df = pd.DataFrame({
-        "parameter": PARAM_NAMES,
-        "S1": Si["S1"],
-        "S1_conf": Si["S1_conf"],
-        "ST": Si["ST"],
-        "ST_conf": Si["ST_conf"],
-    })
-    sa_df.to_csv(os.path.join(VAL_DIR, "sobol_on_gp.csv"), index=False)
+    sim_c_all, obs_c_all = [], []
+    sim_p_all, obs_p_all = [], []
+    yearly_rows = []
 
-    # Second-order interaction indices
-    s2_rows = []
-    for i in range(N_PARAMS):
-        for j in range(i + 1, N_PARAMS):
-            s2_rows.append({
-                "param_i": PARAM_NAMES[i],
-                "param_j": PARAM_NAMES[j],
-                "S2": Si["S2"][i, j],
-                "S2_conf": Si["S2_conf"][i, j],
-            })
-    s2_df = pd.DataFrame(s2_rows)
-    s2_df.to_csv(os.path.join(VAL_DIR, "sobol_on_gp_s2.csv"), index=False)
+    for yr in years:
+        if yr not in traj or yr not in data["alpha_obs"]:
+            continue
+        alpha_s, C_s, P_s = traj[yr]
+        alpha_o = data["alpha_obs"][yr]
+        C_o = data["C_obs"][yr]
+        P_o = data["P_obs"][yr]
+        stats = compute_stats(alpha_s, C_s, alpha_o, C_o, P_sim=P_s, P_obs=P_o)
+        share_sim = stats["share_sim"]
+        share_obs = stats["share_obs"]
+        sum_P_s = P_s.sum()
+        sum_P_o = P_o.sum()
+        share_P_sim = P_s / sum_P_s if sum_P_s > 0 else P_s
+        share_P_obs = P_o / sum_P_o if sum_P_o > 0 else P_o
+        c_err = _vector_error_metrics(share_sim, share_obs)
+        p_err = _vector_error_metrics(share_P_sim, share_P_obs)
 
-    # Bar plot S1 and ST
-    fig, ax = plt.subplots(figsize=(8, 4))
-    x = np.arange(N_PARAMS)
-    w = 0.35
-    ax.bar(x - w/2, Si["S1"], w, yerr=Si["S1_conf"], label="S1 (first-order)",
-           color="#4C72B0", capsize=4, alpha=0.9)
-    ax.bar(x + w/2, Si["ST"], w, yerr=Si["ST_conf"], label="ST (total-effect)",
-           color="#DD8452", capsize=4, alpha=0.9)
-    ax.axhline(0.05, color="red", linestyle="--", lw=1, label="0.05 threshold")
-    ax.set_xticks(x)
-    ax.set_xticklabels(PARAM_NAMES, rotation=30, ha="right")
-    ax.set_ylabel("Sobol index")
-    ax.set_title("Sobol Sensitivity on GP Emulator (calibration loss)",
-                 fontsize=10, fontweight="bold")
-    ax.legend(fontsize=8)
-    ax.set_ylim(-0.1, 1.1)
+        sim_c_all.append(share_sim.ravel())
+        obs_c_all.append(share_obs.ravel())
+        sim_p_all.append(share_P_sim.ravel())
+        obs_p_all.append(share_P_obs.ravel())
+
+        yearly_rows.append({
+            "period": label,
+            "year": int(yr),
+            "nrmse_C": float(stats["nrmse_C"]),
+            "nrmse_P": float(stats["nrmse_P"]),
+            "rank_products": float(stats["rank_products"]),
+            "rho_products": float(stats["rho_products"]),
+            "rmse_C": c_err["rmse"],
+            "mae_C": c_err["mae"],
+            "r2_C": c_err["r2"],
+            "rmse_P": p_err["rmse"],
+            "mae_P": p_err["mae"],
+            "r2_P": p_err["r2"],
+        })
+
+    if not yearly_rows:
+        return period_metrics, []
+
+    c_metrics = _vector_error_metrics(
+        np.concatenate(sim_c_all), np.concatenate(obs_c_all)
+    )
+    p_metrics = _vector_error_metrics(
+        np.concatenate(sim_p_all), np.concatenate(obs_p_all)
+    )
+    period_metrics = {
+        **period_metrics,
+        "rmse_C": c_metrics["rmse"],
+        "mae_C": c_metrics["mae"],
+        "r2_C": c_metrics["r2"],
+        "rmse_P": p_metrics["rmse"],
+        "mae_P": p_metrics["mae"],
+        "r2_P": p_metrics["r2"],
+    }
+    return period_metrics, yearly_rows
+
+
+def _write_yearly_metrics_csv(rows, path):
+    """
+    Write per-year fit metrics (from _collect_period_metrics) to a CSV file.
+    """
+    headers = [
+        "period", "year",
+        "nrmse_C", "nrmse_P", "rank_products", "rho_products",
+        "rmse_C", "mae_C", "r2_C",
+        "rmse_P", "mae_P", "r2_P",
+    ]
+    with open(path, "w", encoding="ascii") as f:
+        f.write(",".join(headers) + "\n")
+        for row in rows:
+            values = []
+            for key in headers:
+                val = row[key]
+                if isinstance(val, str):
+                    values.append(val)
+                elif key == "year":
+                    values.append(str(int(val)))
+                else:
+                    values.append(f"{float(val):.8f}")
+            f.write(",".join(values) + "\n")
+
+
+def _stack_series(traj, data, years, which):
+    """
+    Stack observed and simulated shares for a given period and output type (C or P).
+    """
+    obs_rows, sim_rows, valid_years = [], [], []
+    for yr in years:
+        if yr not in traj or yr not in data["alpha_obs"]:
+            continue
+        alpha_s, C_s, P_s = traj[yr]
+        if which == "C":
+            s = C_s.sum(); o = data["C_obs"][yr].sum()
+            sim_rows.append(C_s / s if s > 0 else C_s)
+            obs_rows.append(data["C_obs"][yr] / o if o > 0 else data["C_obs"][yr])
+        else:
+            s = P_s.sum(); o = data["P_obs"][yr].sum()
+            sim_rows.append(P_s / s if s > 0 else P_s)
+            obs_rows.append(data["P_obs"][yr] / o if o > 0 else data["P_obs"][yr])
+        valid_years.append(yr)
+    return np.array(valid_years), np.vstack(obs_rows), np.vstack(sim_rows)
+
+
+def _load_country_labels():
+    """
+    Load country short names from extracted_data/countries_index.csv.
+    """
+    csv_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "extracted_data", "countries_index.csv"
+    )
+    if not os.path.exists(csv_path):
+        return None
+    import csv
+    with open(csv_path, "r") as f:
+        reader = csv.DictReader(f)
+        labels = {int(row["position"]): row["country_name_short"] for row in reader}
+    return labels
+
+
+def plot_observed_vs_simulated(traj_calib, traj_valid, data):
+    """
+    Generate trajectory_fit.png: observed vs simulated market share time series for each country,
+    with Spearman correlation annotations for calibration and validation periods.
+    Also generates trajectory_summary.png: median trajectory across all countries.
+    """
+    country_labels = _load_country_labels()
+    SC = data["SC"]
+
+    # Collect per-country share time series across both periods
+    all_years_calib = sorted(yr for yr in CALIB_YEARS if yr in traj_calib)
+    all_years_valid = sorted(yr for yr in VALID_YEARS if yr in traj_valid)
+
+    obs_calib, sim_calib = {}, {}
+    for yr in all_years_calib:
+        _, C_sim, _ = traj_calib[yr]
+        C_obs = data["C_obs"][yr]
+        s_sim = C_sim / C_sim.sum() if C_sim.sum() > 0 else C_sim
+        s_obs = C_obs / C_obs.sum() if C_obs.sum() > 0 else C_obs
+        for j in range(SC):
+            obs_calib.setdefault(j, []).append(s_obs[j])
+            sim_calib.setdefault(j, []).append(s_sim[j])
+
+    obs_valid, sim_valid = {}, {}
+    for yr in all_years_valid:
+        _, C_sim, _ = traj_valid[yr]
+        C_obs = data["C_obs"][yr]
+        s_sim = C_sim / C_sim.sum() if C_sim.sum() > 0 else C_sim
+        s_obs = C_obs / C_obs.sum() if C_obs.sum() > 0 else C_obs
+        for j in range(SC):
+            obs_valid.setdefault(j, []).append(s_obs[j])
+            sim_valid.setdefault(j, []).append(s_sim[j])
+
+    # Per-country Spearman for annotation
+    from calibration_utils import spearman
+    rho_calib = {}
+    rho_valid = {}
+    for j in range(SC):
+        rho_calib[j] = spearman(np.array(sim_calib[j]), np.array(obs_calib[j]))
+        rho_valid[j] = spearman(np.array(sim_valid[j]), np.array(obs_valid[j]))
+
+    n_cols = 5
+    n_rows = 4
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(18, 12), sharex=True)
+
+    for j in range(SC):
+        row, col = divmod(j, n_cols)
+        ax = axes[row, col]
+        label = country_labels[j] if country_labels and j in country_labels else f"Country {j}"
+
+        # Calibration period
+        ax.plot(all_years_calib, obs_calib[j], color="#1F4E79", lw=1.5, label="Observed")
+        ax.plot(all_years_calib, sim_calib[j], color="#B5541E", lw=1.5, label="Simulated")
+
+        # Validation period
+        ax.plot(all_years_valid, obs_valid[j], color="#1F4E79", lw=1.5, ls="--")
+        ax.plot(all_years_valid, sim_valid[j], color="#B5541E", lw=1.5, ls="--")
+
+        # Calibration/validation boundary
+        ax.axvline(CALIB_END, color="grey", ls=":", lw=0.8, alpha=0.7)
+
+        ax.set_title(f"{label}", fontsize=9, fontweight="bold")
+        ax.annotate(
+            f"cal={rho_calib[j]:.2f}  val={rho_valid[j]:.2f}",
+            xy=(0.03, 0.95), xycoords="axes fraction", fontsize=7,
+            va="top", color="grey",
+        )
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.tick_params(labelsize=7)
+
+    # Hide unused subplot
+    for idx in range(SC, n_rows * n_cols):
+        row, col = divmod(idx, n_cols)
+        axes[row, col].set_visible(False)
+
+    # Shared legend and labels
+    axes[0, 0].legend(fontsize=7, frameon=False)
+    fig.supxlabel("Year", fontsize=11)
+    fig.supylabel("Market share", fontsize=11)
+    fig.suptitle("Country trajectories: observed vs simulated", fontsize=13, fontweight="bold")
+    plt.tight_layout()
+    out_path = os.path.join(VAL_DIR, "trajectory_fit.png")
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close()
+    print(f"  Saved: trajectory_fit.png")
+
+    # Summary plot: mean and median across all countries
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    obs_all = np.array([obs_calib[j] + obs_valid[j] for j in range(SC)])  # (SC, T)
+    sim_all = np.array([sim_calib[j] + sim_valid[j] for j in range(SC)])  # (SC, T)
+    all_years = all_years_calib + all_years_valid
+
+    # Individual country traces
+    for j in range(SC):
+        ax.plot(all_years, obs_all[j], color="#4C72B0", alpha=0.08, lw=0.7)
+        ax.plot(all_years, sim_all[j], color="#DD8452", alpha=0.08, lw=0.7)
+
+    ax.plot(all_years, np.median(obs_all, axis=0), color="#1F4E79", lw=2.5, label="Observed median")
+    ax.plot(all_years, np.median(sim_all, axis=0), color="#B5541E", lw=2.5, label="Simulated median")
+    ax.axvline(CALIB_END, color="grey", ls=":", lw=1, alpha=0.7, label="Calibration boundary")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Market share")
+    ax.set_title("Country market shares: all trajectories", fontsize=12, fontweight="bold")
     ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(fontsize=9, frameon=False)
     plt.tight_layout()
-    plt.savefig(os.path.join(VAL_DIR, "sobol_on_gp.pdf"), dpi=150, bbox_inches="tight")
+    out_path = os.path.join(VAL_DIR, "trajectory_summary.png")
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
     plt.close()
-
-    # Heatmap: S2 interactions
-    s2_matrix = np.full((N_PARAMS, N_PARAMS), np.nan)
-    for i in range(N_PARAMS):
-        for j in range(i + 1, N_PARAMS):
-            s2_matrix[i, j] = Si["S2"][i, j]
-            s2_matrix[j, i] = Si["S2"][i, j]
-    fig, ax = plt.subplots(figsize=(8, 7))
-    im = ax.imshow(s2_matrix, cmap="YlOrRd", vmin=0)
-    ax.set_xticks(range(N_PARAMS))
-    ax.set_yticks(range(N_PARAMS))
-    ax.set_xticklabels(PARAM_NAMES, rotation=45, ha="right", fontsize=8)
-    ax.set_yticklabels(PARAM_NAMES, fontsize=8)
-    ax.set_title("Second-Order Sobol Interactions (S2)",
-                 fontsize=10, fontweight="bold")
-    plt.colorbar(im, ax=ax, shrink=0.8, label="S2 index")
-    plt.tight_layout()
-    plt.savefig(os.path.join(VAL_DIR, "sobol_on_gp_s2.pdf"), dpi=150, bbox_inches="tight")
-    plt.close()
-
-    print(f"\nSobol on GP emulator:")
-    print(sa_df.to_string(index=False, float_format="{:.4f}".format))
-    print(f"\n  Top S2 interactions:")
-    print(s2_df.nlargest(10, "S2").to_string(index=False, float_format="{:.4f}".format))
-    print(f"  Saved: sobol_on_gp.pdf, sobol_on_gp_s2.pdf")
-    return Si
+    print(f"  Saved: trajectory_summary.png")
 
 
-# Posterior corner plot
+# Best-point evaluation
 
-def plot_posterior_corner():
+def evaluate_best_point(data):
     """
-    Triangle plot of the joint posterior: marginal histograms on the diagonal,
-    pairwise scatter plots below.
+    Evaluate the NSGA-II compromise point on calibration and validation periods,
+    printing per-component loss breakdowns.
     """
-    samples = np.load(os.path.join(MCMC_DIR, "samples.npy"))
-    fig, axes = plt.subplots(N_PARAMS, N_PARAMS, figsize=(2.5 * N_PARAMS, 2.5 * N_PARAMS))
-    for i in range(N_PARAMS):
-        for j in range(N_PARAMS):
-            ax = axes[i, j]
-            if i == j:
-                ax.hist(samples[:, i], bins=40, color="#4C72B0", alpha=0.8,
-                        edgecolor="white", linewidth=0.5)
-                ax.axvline(np.median(samples[:, i]), color="k", lw=1.5, linestyle="--")
-            elif i > j:
-                ax.scatter(samples[::10, j], samples[::10, i],
-                           alpha=0.15, s=3, color="#4C72B0")
-            else:
-                ax.set_visible(False)
-            if j == 0:
-                ax.set_ylabel(PARAM_NAMES[i], fontsize=8)
-            if i == N_PARAMS - 1:
-                ax.set_xlabel(PARAM_NAMES[j], fontsize=8)
-            ax.tick_params(labelsize=6)
-            ax.spines[["top", "right"]].set_visible(False)
-    plt.suptitle("Posterior P(θ | data)", fontsize=12, fontweight="bold", y=1.01)
-    plt.tight_layout()
-    plt.savefig(os.path.join(VAL_DIR, "posterior_corner.pdf"), dpi=150, bbox_inches="tight")
-    plt.close()
-    print(f"  Saved: posterior_corner.pdf")
+    nsga2_path = os.path.join(NSGA2_DIR, "best_theta.npy")
+    if not os.path.exists(nsga2_path):
+        print("  No NSGA-II best_theta.npy found -- run `python calibration/run_pipeline.py nsga2` first.")
+        return None
+    best_path = nsga2_path
+    print("  Using NSGA-II compromise point.")
+    theta = np.load(best_path)
+    if len(theta) != N_PARAMS:
+        print(f"  ERROR: best_theta.npy has {len(theta)} parameters but N_PARAMS={N_PARAMS}. "
+              f"Stale artifact -- re-run the optimizer to generate a compatible best_theta.npy.")
+        return None
+
+    print(f"Best-point evaluation (NSGA-II compromise point):")
+    for name, val in zip(PARAM_NAMES, theta):
+        print(f"  {name:20s} = {val:.5f}")
+
+    results = {}
+    yearly_rows = []
+
+    # Calibration period (1988-2010)
+    print(f"\n  Calibration period ({CALIB_YEARS[0]}-{CALIB_YEARS[-1]}):")
+    traj_calib = _windowed_simulate(theta, data, CALIB_YEARS)
+    if traj_calib is None:
+        print("    FAILED: simulation returned None")
+    else:
+        agg, rows = _collect_period_metrics(
+            "calibration", CALIB_YEARS, traj_calib, data, YEAR_START
+        )
+        if agg is not None:
+            results["calibration"] = agg
+            yearly_rows.extend(rows)
+            print(f"    Total loss   : {agg['loss_total']:.5f}")
+            for k, v in agg.items():
+                if k != "loss_total":
+                    print(f"    {k:15s}: {v:.5f}")
+
+            print(f"\n    Per-year stats:")
+            print(f"    {'Year':>6s}  {'nrmse_C':>8s}  {'nrmse_P':>8s}  {'rank_prod':>10s}")
+            for yr in CALIB_YEARS:
+                if yr not in traj_calib or yr not in data["alpha_obs"]:
+                    continue
+                alpha_s, C_s, P_s = traj_calib[yr]
+                P_o = data["P_obs"].get(yr)
+                s = compute_stats(alpha_s, C_s, data["alpha_obs"][yr], data["C_obs"][yr],
+                                  P_sim=P_s, P_obs=P_o)
+                print(f"    {yr:6d}  {s['nrmse_C']:8.4f}  {s['nrmse_P']:8.4f}  {s['rank_products']:10.4f}")
+
+    # Validation period (2010-2024)
+    print(f"\n  Validation period ({VALID_YEARS[0]}-{VALID_YEARS[-1]}):")
+    data_oos, start_year = _make_window_data(data, CALIB_END)
+    traj_valid = simulate(theta, data_oos, VALID_YEARS, start_year=start_year)
+    if traj_valid is None:
+        print("    FAILED: simulation returned None")
+    else:
+        agg_v, rows = _collect_period_metrics(
+            "validation", VALID_YEARS, traj_valid, data, start_year
+        )
+        if agg_v is not None:
+            results["validation"] = agg_v
+            yearly_rows.extend(rows)
+            print(f"    Total loss   : {agg_v['loss_total']:.5f}")
+            for k, v in agg_v.items():
+                if k != "loss_total":
+                    print(f"    {k:15s}: {v:.5f}")
+
+            print(f"\n    Per-year stats:")
+            print(f"    {'Year':>6s}  {'nrmse_C':>8s}  {'nrmse_P':>8s}  {'rank_prod':>10s}")
+            for yr in VALID_YEARS:
+                if yr not in traj_valid or yr not in data["alpha_obs"]:
+                    continue
+                alpha_s, C_s, P_s = traj_valid[yr]
+                P_o = data["P_obs"].get(yr)
+                s = compute_stats(alpha_s, C_s, data["alpha_obs"][yr], data["C_obs"][yr],
+                                  P_sim=P_s, P_obs=P_o)
+                print(f"    {yr:6d}  {s['nrmse_C']:8.4f}  {s['nrmse_P']:8.4f}  {s['rank_products']:10.4f}")
+
+    if traj_calib is not None and traj_valid is not None:
+        plot_observed_vs_simulated(traj_calib, traj_valid, data)
+
+    with open(os.path.join(VAL_DIR, "period_metrics.json"), "w") as f:
+        json.dump(results, f, indent=2)
+    _write_yearly_metrics_csv(yearly_rows, os.path.join(VAL_DIR, "yearly_metrics.csv"))
+
+    print(f"\n  Saved: period_metrics.json")
+    print(f"  Saved: yearly_metrics.csv")
+    return results
 
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) > 1:
-        N_JOBS = int(sys.argv[1])
     os.makedirs(VAL_DIR, exist_ok=True)
     print("Loading empirical data...")
     data = load_data()
 
-    print("\n1. Posterior predictive check...")
-    posterior_predictive_check(data)
-
-    print("\n2. Out-of-sample validation (2010-2024)...")
-    out_of_sample_validation(data)
-
-    print("\n3. Structural stability check...")
-    structural_stability_check(data)
-
-    print("\n4. Sobol on GP emulator...")
-    sobol_on_gp()
-
-    print("\n5. Posterior corner plot...")
-    plot_posterior_corner()
+    print("\n1. Best-point evaluation...")
+    evaluate_best_point(data)
 
     print(f"\nAll outputs saved to: {VAL_DIR}/")

@@ -1,37 +1,17 @@
 """
 Calibration configuration for ProductSpaceModel.
-
-Free parameters (from Sobol SA on calibration loss, SP=100, SC=19, N=1024;
-                   S1/ST reported as rank_C/alpha):
-  nu             — S1=≈0/0.25,  ST=0.16/0.48; dominant on alpha, moderate on rank_C via interactions
-  beta_trade_off — S1=0.04/0.33, ST=0.35/0.60; dominant on both outputs
-  sigma          — S1=≈0/0.02,  ST=0.25/0.11; moderate through interactions
-  h_mean         — S1=≈0/0.03,  ST=0.18/0.14; moderate through interactions
-  c_prime        — S1=0.05/≈0,  ST=0.25/0.05; meaningful on rank_C, weak on alpha; constrained c_prime <= c
-  gamma          — S1=0.02/≈0,  ST=0.10/0.01; weak, mostly rank_C interactions
-  s              — S1=0.02/0.01, ST=0.10/0.04; weak through interactions
-  c              — S1=≈0/0.01,  ST=0.07/0.04; weak, mostly interaction with c_prime
-  C_offdiag_mean — S1=0.19/≈0,  ST=0.68/0.13; dominant on rank_C, moderate on alpha via interactions
-  C_diag_mean    — S1=≈0/≈0,   ST=0.23/0.17; purely through interactions on both outputs
-
-Fixed (identifiable/numerically fixed):
-  kappa — irrelevant when q=0
-  G, q, mu, d_C
-  data parameters: phi_space, r_P, r_C, h_P, h_C, C_PP, C_CC
-
-To see the results of the SA on calibration loss, look in sa/sa_for_calibration/results/
 """
 
 import os
-import numpy as np
 
 # Directories
-RAW_DATA_DIR = "raw_data"
-EXTRACTED_DIR = "extracted_data"
-CALIB_DIR = "calibration_results"
-HM_DIR = os.path.join(CALIB_DIR, "history_matching")
-BO_DIR = os.path.join(CALIB_DIR, "bo_emulator")
-MCMC_DIR = os.path.join(CALIB_DIR, "mcmc")
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+RAW_DATA_DIR = os.path.join(_SCRIPT_DIR, "raw_data")
+EXTRACTED_DIR = os.path.join(_SCRIPT_DIR, "extracted_data")
+CALIB_DIR = os.path.join(_SCRIPT_DIR, "calibration_results")
+LHS_DIR = os.path.join(CALIB_DIR, "initial_design")
+DE_DIR = os.path.join(CALIB_DIR, "de_optimizer")
+NSGA2_DIR = os.path.join(CALIB_DIR, "nsga2_optimizer")
 VAL_DIR = os.path.join(CALIB_DIR, "validation")
 
 # Data years
@@ -40,82 +20,108 @@ YEAR_REF = 2000
 CALIB_END = 2010
 YEAR_END = 2024
 
-CALIB_YEARS = [yr for yr in range(YEAR_START, CALIB_END + 1, 2) if yr not in (1993, 1994)] # 1993/1994 have 0% data coverage
-VALID_YEARS = list(range(CALIB_END, YEAR_END + 1, 2))
+CALIB_YEARS = [yr for yr in range(YEAR_START, CALIB_END + 1) if yr not in (1993, 1994)] # 1993/1994 have 0% data coverage
+VALID_YEARS = list(range(CALIB_END, YEAR_END + 1))
 
-# Free parameters (10 selected by Sobol SA or mechanistic reasoning)
-PARAM_NAMES = ["sigma", "nu", "beta_trade_off", "h_mean", "s", "c", "c_prime", "gamma", "C_diag_mean", "C_offdiag_mean", "entry_threshold"]
-PARAM_BOUNDS = [
-    (0.1, 2.0),    # sigma:          exponent in xi_i; 0.1=almost flat returns, 2.0=strong diminishing
-    (0.0, 1.0),    # nu:             replicator (0) vs stabilisation (1); full interval
-    (0.0, 1.0),    # beta_trade_off: specialist premium in beta; full interval
-    (0.05, 1.0),   # h_mean:         Holling saturation; 0.05=near-linear mutualism, 1.0=strong saturation
-    (0.0, 0.5),    # s:              spillover weight; 0.5 keeps spillovers sub-dominant
-    (0.001, 2.0),  # c:              related-product competition multiplier on C_offdiag_mean
-    (0.0, 2.0),    # c_prime:        unrelated-product competition; constrained by c_prime <= c
-    (0.0, 5.0),    # gamma:          capability amplification; Cap_j median~0.73 so gamma=1 gives ~73% boost to rho_C
-    (0.3, 2.0),    # C_diag_mean:    self-competition; ST~0.23/0.17 through interactions
-    (0.001, 0.5),  # C_offdiag_mean: cross-competition baseline; dominant on rank_C (ST=0.68)
-    (0.01, 10.0),  # entry_threshold: activation threshold for new-product entry signal
+# Free parameters
+PARAM_NAMES = [
+    "C_offdiag_mean", "beta_trade_off",
+    "sigma", "h_mean", "C_diag_mean",
+    "kappa",
+    "nu", "G",
+    "r_C_declining", "r_C_rising", "r_C_stable",
+    "entry_threshold",
 ]
+PARAM_BOUNDS = [
+    (0.001, 1.0),  # C_offdiag_mean
+    (0.0, 1.0),    # beta_trade_off: specialist premium in beta
+    (0.01, 4.0),   # sigma
+    (0.05, 5.0),   # h_mean: Holling saturation
+    (0.3, 2.0),    # C_diag_mean: self-competition
+    (0.0, 0.05),   # kappa: proximity competition in xi
+    (0.0, 1.0),    # nu: replicator (0) vs stabilisation (1)
+    (0.01, 2.0),   # G: adaptation speed
+    (-1.0, 0.10),  # r_C_declining: net intrinsic growth for DEU, FRA, GBR, ITA, JPN, USA, CAN
+    (-1.0, 0.20),  # r_C_rising: net intrinsic growth for CHN, IND, KOR, MEX, RUS
+    (-1.0, 0.15),  # r_C_stable: net intrinsic growth for ARG, AUS, BRA, IDN, SAU, TUR, ZAF
+    (0.01, 50.0),  # entry_threshold: activation threshold for product entry
+]
+
+# Country groups for group-level intrinsic growth rates r_C
+# Indices refer to position in countries_index.csv
+COUNTRY_GROUPS = {
+    "declining": [3, 5, 6, 7, 10, 11, 17],  # CAN, DEU, FRA, GBR, ITA, JPN, USA
+    "rising":    [4, 9, 12, 13, 14],        # CHN, IND, KOR, MEX, RUS
+    "stable":    [0, 1, 2, 8, 15, 16, 18],  # ARG, AUS, BRA, IDN, SAU, TUR, ZAF
+}
 N_PARAMS = len(PARAM_NAMES)
 
 # Fixed parameters
 FIXED = {
-    "G": 1.0, # Adaptation speed; normalisation
-    "q": 0.0, # Congestion exponent; simplest assumption
-    "mu": 1e-4, # Immigration floor; purely numerical
-    "d_C": 0.0, # Country decay; absorbed into r_C
-    "kappa": 0.0, # Proximity competition in xi; not relevant when q=0
-    "enable_entry": True, # Product entry mechanism enabled during calibration
+    "q": 1.0,          # Congestion exponent; simplest assumption
+    "mu": 1e-4,        # Immigration; purely numerical
+    "d_C": 0.0,        # Not needed with free r_C groups: r_C - d_C absorbed into r_C
+    "enable_entry": True,
+    "c": 1.0,          # Related-product competition multiplier
+    "c_prime": 1.0,    # Fixed: optimizer converged to c_prime ≈ c; competition is uniform across products
+    "s": 0.0,          # Fixed: knowledge spillovers negligible (optimizer converged to ~0)
+    "gamma": 1.0,      # Capability amplification
 }
 
 # Loss function
 LOSS_WEIGHTS = {
-    "rank_C": 1.0,
-    "alpha": 1.0,
+    "nrmse_C": 0.25,        # normalised RMSE on log country market shares
+    "traj_corr_C": 0.30,    # per-country trajectory tracking (1 - mean Spearman over time)
+    "rank_products": 0.25,  # product allocation ranking within each country
+    "nrmse_P": 0.20,        # normalised RMSE on log product market shares
 }
 TIME_WEIGHT_SLOPE = 0.02
 
-# Observation and model uncertainty
+# Windowed simulation: re-initialise from observed data at these years to prevent error accumulation
+WINDOW_REINIT_YEARS = [1991, 1995, 1998, 2001, 2004, 2007]  # every ~3 years
 
-# Trade data has measurement error. sigma_obs represents irreducible noise in the calibration targets.
-# Set to 0.05; should ideally be estimated from the data.
-SIGMA_OBS = 0.05
-
-# The model cannot perfectly reproduce trade dynamics. Following Kennedy & O'Hagan
-# (2001), this term prevents over-fitting to simulator noise.
-SIGMA_MODEL = 0.02
-
-# History matching
-HM_N_WAVES = 3
-HM_SIMS_PER_WAVE = 200 # Number of simulations to run per wave
-HM_SCREEN_N = 100_000 # Number of Sobol samples to evaluate GP on for NROY screening
-HM_THRESHOLD = 3.0 # Pukelsheim 3-sigma rule
-
-# Bayesian optimisation
-BO_N_INIT = 10 * N_PARAMS
-BO_N_ROUNDS = 15
-BO_BATCH_SIZE = 16
-
-# MCMC (emcee)
-MCMC_N_WALKERS = max(2 * N_PARAMS + 2, 32)
-MCMC_N_STEPS = 15_000
-MCMC_BURNIN = 5000 # Number of initial steps to discard as burn-in
-MCMC_THIN = 5 # Thinning factor to reduce autocorrelation in samples; keep every 5th sample after burn-in
-
-# ODE solver
-SIM_STEPS_PER_YEAR = 2000
-
-# Validation
-STABILITY_WINDOWS = [
+# Growth rate periods 
+GROWTH_RATE_PERIODS = [
     (1988, 2000),
-    (2000, 2012),
-    (2012, 2024)
+    (2000, 2010),
+    (2010, 2024),
 ]
 
-N_PPC_DRAWS = 200 # Posterior predictive check draws
-N_OOS_DRAWS = 200 # Out-of-sample draws
-GP_SOBOL_SAMPLES = 8192 # Sobol samples on GP
+# Initial design
+LHS_N_SAMPLES = 15000
+LHS_NROY_ELITE_FRACTION = 0.40 
+LHS_NROY_PADDING = 0.15
+LHS_CHUNK_SIZE = int(os.environ.get("LHS_CHUNK_SIZE", "1000"))
+
+# Differential evolution
+DE_POPSIZE = 16 # population = DE_POPSIZE * N_PARAMS = 176
+DE_MAXITER = 100_000
+DE_TOL = 0.0 # disable scipy's convergence stop
+DE_STALL_LIMIT = 100 # stop after this many generations without improvement
+DE_LOCAL_SAMPLES = 600 # local evaluations around optimum
+DE_LOCAL_SCALE = 0.12 # neighbourhood radius for local refinement
+DE_MUTATION = (0.5, 1.8)
+DE_N_RESTARTS = 8
+DE_START_RESTART = 0 # run all restarts
+# ODE solver
+SIM_STEPS_PER_YEAR = 2    # minimum output grid; calibration only reads final state per year
+SOLVE_TIMEOUT_S = 120 # time limit per ODE solve
+TRAJECTORY_TIMEOUT_S = 180 # time limit per full trajectory evaluation
+MAX_SOLVER_STEPS = 10_000 # limit on LSODA internal steps per yearly solve
 
 SEED = 133
+MAX_PARALLEL_JOBS = int(
+    os.environ.get(
+        "CALIB_MAX_JOBS",
+        "128" if os.environ.get("ON_CLUSTER") else "128",
+    )
+)
+
+# NSGA-II multi-objective optimizer
+NSGA2_POP_SIZE = 200  # individuals per generation
+NSGA2_N_GEN    = 800  # max generations
+NSGA2_SEED     = SEED
+NSGA2_TIMEOUT_S = 60   # time limit per NSGA-II candidate
+
+# Objectives for multi-objective evaluation (all minimised)
+LOSS_OBJECTIVES = ["nrmse_C", "traj_corr_C", "rank_products", "nrmse_P"]

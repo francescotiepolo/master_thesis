@@ -2,10 +2,9 @@ numpy
 scipy
 numba
 pandas
-botorch
-gpytorch
-emcee
+scikit-learn
 SALib
 joblib
 matplotlib
 ecomplexity
+pymoo
