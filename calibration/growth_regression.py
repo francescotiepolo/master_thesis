@@ -13,13 +13,16 @@ import pandas as pd
 from sklearn.linear_model import RidgeCV
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+from joblib import Parallel, delayed
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from calibration_config import (
-    EXTRACTED_DIR, YEAR_START, YEAR_END,
+    EXTRACTED_DIR, YEAR_START, YEAR_END, MAX_PARALLEL_JOBS,
 )
+
+N_JOBS = int(os.environ.get("REGRESSION_N_JOBS", str(min(MAX_PARALLEL_JOBS, 19))))
 
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "calibration_results", "growth_regression")
@@ -76,26 +79,27 @@ def load_alpha_panel(years):
     return alpha
 
 
-def compute_mutualism_proxy(C, P, alpha_panel, beta_C_ref, eps=1e-12):
+def compute_mutualism_proxy(C, P, alpha_panel, beta_C_ref, eps=1e-12, bt_proxy=0.5):
     """
-    Data mutualism proxy for every country-year.
+    Alpha-free data proxy for rho_C_j = (1/KC_j^bt) * sum_k beta_C_ref[j,k] * xi_hat_k,
+    with xi_hat_k = P_obs_k / E_k and E_k = (1/KP_k^bt) * sum_j beta_C_ref[j,k] * C_obs_j.
+    bt_proxy=0.5 is the midpoint of the calibrated [0,1] range.
+    """
+    mask = (beta_C_ref > 0).astype(float)
+    KC = mask.sum(axis=1)
+    KP = mask.sum(axis=0)
+    KC_factor = 1.0 / np.maximum(KC, 1.0) ** bt_proxy  # shape (SC,)
+    KP_factor = 1.0 / np.maximum(KP, 1.0) ** bt_proxy  # shape (SP,)
 
-    For each year t:
-      E_k(t)      = sum_j alpha_obs[j,k,t] * beta_C_ref[j,k] * C_obs[j,t]
-      xi_hat_k(t) = P_obs[k,t] / max(E_k(t), eps)
-      mut_j(t)    = sum_k alpha_obs[j,k,t] * beta_C_ref[j,k] * xi_hat_k(t)
-    """
     mut = {}
-    for yr, alpha in alpha_panel.items():
+    for yr in alpha_panel:
         if yr not in C or yr not in P:
             continue
         C_yr = C[yr]
         P_yr = P[yr]
-        # E_k = sum over countries of alpha[j,k] * beta[j,k] * C[j]
-        E = ((alpha * beta_C_ref).T @ C_yr) # shape (SP,)
-        xi_hat = P_yr / np.maximum(E, eps) # shape (SP,)
-        # mut_j = sum over products of alpha[j,k] * beta[j,k] * xi_hat[k]
-        mut_j = (alpha * beta_C_ref) @ xi_hat # shape (SC,)
+        E = KP_factor * (beta_C_ref.T @ C_yr)   # shape (SP,)
+        xi_hat = P_yr / np.maximum(E, eps)      # shape (SP,)
+        mut_j = KC_factor * (beta_C_ref @ xi_hat)  # shape (SC,)
         mut[yr] = mut_j
     return mut
 
@@ -136,15 +140,17 @@ def build_country_data(C, P, i, mut_panel=None, dt=1):
 
 def _ridge_fit(X, y, alphas, n_folds):
     """
-    Standardize, fit RidgeCV, return coefficients and intercept.
+    Fit RidgeCV after standardization; return coefficients in raw-feature units
+    and the centered intercept (= mean(y), prediction at X=X_mean). The raw-X
+    intercept (prediction at X=0) is out-of-distribution and inflates r_C/r_P.
     """
     scaler = StandardScaler()
     Xs = scaler.fit_transform(X)
     folds = min(n_folds, len(y) - 1)
     model = RidgeCV(alphas=alphas, cv=folds).fit(Xs, y)
     coef = model.coef_ / scaler.scale_
-    intercept = model.intercept_
-    return coef, intercept, model, scaler
+    intercept_centered = float(model.intercept_)
+    return coef, intercept_centered, model, scaler
 
 
 def _bootstrap_se(X, y, base_pi, base_r, n_folds, n_boot, pi_slice=None):
@@ -164,7 +170,7 @@ def _bootstrap_se(X, y, base_pi, base_r, n_folds, n_boot, pi_slice=None):
             Xb = scaler_b.fit_transform(X[idx])
             rb = RidgeCV(alphas=RIDGE_ALPHAS, cv=folds).fit(Xb, y[idx])
             pi_boot[b] = rb.coef_ / scaler_b.scale_
-            r_boot[b] = rb.intercept_
+            r_boot[b] = float(rb.intercept_)
         except Exception:
             pi_boot[b] = base_pi if pi_slice is None else np.concatenate([[base_r], base_pi])[pi_slice]
             r_boot[b] = base_r
@@ -394,26 +400,32 @@ def main():
         )
     np.save(os.path.join(OUT_DIR, "mut_proxy_panel.npy"),
             np.row_stack([mut_panel[yr] for yr in sorted(mut_panel)]))
-    print()
 
     variants = ["raw", "free", "fixed"]
     results_by_variant = {v: {} for v in variants}
 
-    for i in range(SC):
-        y, xc, xp, mut_i, ts = build_country_data(C, P, i, mut_panel=mut_panel)
+    def _process_country(i, code):
+        y, xc, _, mut_i, _ = build_country_data(C, P, i, mut_panel=mut_panel)
         if len(y) < 10:
-            print(f"  {codes[i]}: only {len(y)} obs, skipping")
+            return code, i, len(y), None
+        per_variant = {v: estimate_country(y, xc, mut_i=mut_i, variant=v)
+                       for v in variants}
+        return code, i, len(y), per_variant
+
+    print(f"Fitting {SC} countries in parallel (n_jobs={N_JOBS}) ...", flush=True)
+    parallel_out = Parallel(n_jobs=N_JOBS, backend="loky", verbose=5)(
+        delayed(_process_country)(i, codes[i]) for i in range(SC)
+    )
+
+    for code, i, n_obs, per_variant in parallel_out:
+        if per_variant is None:
+            print(f"  {code}: only {n_obs} obs, skipping")
             continue
-
-        for variant in variants:
-            res = estimate_country(y, xc, mut_i=mut_i, variant=variant)
-            results_by_variant[variant][codes[i]] = res
-
-        rres = results_by_variant["raw"][codes[i]]
-        fres = results_by_variant["free"][codes[i]]
-        xres = results_by_variant["fixed"][codes[i]]
+        for variant, res in per_variant.items():
+            results_by_variant[variant][code] = res
+        rres, fres, xres = per_variant["raw"], per_variant["free"], per_variant["fixed"]
         print(
-            f"  {codes[i]:3s} "
+            f"  {code:3s} "
             f"raw: r={rres['r_i']:+.3f} pi_ii={rres['pi'][i]:+.3f} R²={rres['r2_g']:.2f} | "
             f"free: r={fres['r_i']:+.3f} eta={fres['eta_i']:+.3f} pi_ii={fres['pi'][i]:+.3f} R²={fres['r2_g']:.2f} | "
             f"fixed: r={xres['r_i']:+.3f} pi_ii={xres['pi'][i]:+.3f} R²={xres['r2_g']:.2f}"
