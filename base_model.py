@@ -305,25 +305,6 @@ class BaseModel:
 
 
 
-    # ODE building blocks
-
-    def _phi(self, P, alpha_beta_C_prod):
-        """
-        Supply/demand ratio for each product.
-        """
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return np.nan_to_num(
-                P / (alpha_beta_C_prod ** self.q), copy=False, nan=0.0
-            )
-
-    def _mutualism(self, rho, h):
-        """
-        Holling type-II function: rho / (1 + rho/h).
-        """
-        return rho / (1.0 + rho/h)
-
-
-
     # ODEs
 
     def ODEs(self, t: float, z: np.ndarray, d_C: float) -> np.ndarray:
