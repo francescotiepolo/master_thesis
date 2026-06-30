@@ -10,7 +10,6 @@ RAW_DATA_DIR = os.path.join(_SCRIPT_DIR, "raw_data")
 EXTRACTED_DIR = os.path.join(_SCRIPT_DIR, "extracted_data")
 CALIB_DIR = os.path.join(_SCRIPT_DIR, "calibration_results")
 LHS_DIR = os.path.join(CALIB_DIR, "initial_design")
-DE_DIR = os.path.join(CALIB_DIR, "de_optimizer")
 NSGA2_DIR = os.path.join(CALIB_DIR, "nsga2_optimizer")
 VAL_DIR = os.path.join(CALIB_DIR, "validation")
 
@@ -93,16 +92,6 @@ LHS_NROY_ELITE_FRACTION = 0.40
 LHS_NROY_PADDING = 0.15
 LHS_CHUNK_SIZE = int(os.environ.get("LHS_CHUNK_SIZE", "1000"))
 
-# Differential evolution
-DE_POPSIZE = 16 # population = DE_POPSIZE * N_PARAMS = 176
-DE_MAXITER = 100_000
-DE_TOL = 0.0 # disable scipy's convergence stop
-DE_STALL_LIMIT = 100 # stop after this many generations without improvement
-DE_LOCAL_SAMPLES = 600 # local evaluations around optimum
-DE_LOCAL_SCALE = 0.12 # neighbourhood radius for local refinement
-DE_MUTATION = (0.5, 1.8)
-DE_N_RESTARTS = 8
-DE_START_RESTART = 0 # run all restarts
 # ODE solver
 SIM_STEPS_PER_YEAR = 2    # minimum output grid; calibration only reads final state per year
 SOLVE_TIMEOUT_S = 120 # time limit per ODE solve
