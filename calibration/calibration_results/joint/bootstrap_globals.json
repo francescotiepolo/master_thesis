@@ -1,0 +1,20 @@
+{
+  "kappa": 0.024428601698053685,
+  "sigma": 2.603901588215731,
+  "h_P": 1.2105384251570122,
+  "s_pi": 0.05,
+  "s_pi_P": 1.0,
+  "a_C": 0.1353348022792038,
+  "b_C": 1.0,
+  "a_P": -0.22266268700819516,
+  "b_P": 1.0,
+  "_provenance": {
+    "source": "/gpfs/home1/ftiepolo/thesis/calibration/calibration_results/country_wise/summary.csv",
+    "compromise_objectives": {
+      "nrmse_C": 0.20474101191157218,
+      "traj_corr_C": 0.4467284024229299,
+      "rank_products": 0.43518669529553644,
+      "nrmse_P": 0.31386424485343956
+    }
+  }
+}

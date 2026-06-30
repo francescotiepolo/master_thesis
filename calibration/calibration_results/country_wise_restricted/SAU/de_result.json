@@ -1,0 +1,149 @@
+{
+  "country_idx": 15,
+  "best_loss": 4.067282514118661,
+  "message": "Optimization terminated successfully.",
+  "nfev": 880,
+  "nit": 21,
+  "params": {
+    "s_pi": 0.0001003107989430152,
+    "G": 1.245464634788355,
+    "nu": 0.8406114702125976,
+    "h_C": 0.09032030573190664,
+    "entry_threshold": 18.63808668160278
+  },
+  "loss_components": {
+    "nrmse_C": 14.291551114123502,
+    "nrmse_P": 0.3152939125007475,
+    "rank_products": 0.3028822738890059,
+    "traj_corr_C": 1.1853846153846155,
+    "loss_total": 4.067282514118661
+  },
+  "de_log": [
+    {
+      "generation": 1,
+      "best_loss": Infinity,
+      "convergence": 0.20759910219707123,
+      "time_s": 3.8677589893341064
+    },
+    {
+      "generation": 2,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.26148327991236925,
+      "time_s": 5.826711416244507
+    },
+    {
+      "generation": 3,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.27574594684155873,
+      "time_s": 7.788209915161133
+    },
+    {
+      "generation": 4,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.31683126683371043,
+      "time_s": 9.744012832641602
+    },
+    {
+      "generation": 5,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.3312726580451918,
+      "time_s": 11.69128131866455
+    },
+    {
+      "generation": 6,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.33150133419694156,
+      "time_s": 13.66281270980835
+    },
+    {
+      "generation": 7,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.32834511713986125,
+      "time_s": 15.594265460968018
+    },
+    {
+      "generation": 8,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.3282567687994416,
+      "time_s": 17.509456396102905
+    },
+    {
+      "generation": 9,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.30991305816540926,
+      "time_s": 19.428683042526245
+    },
+    {
+      "generation": 10,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.3282154106954937,
+      "time_s": 21.360156297683716
+    },
+    {
+      "generation": 11,
+      "best_loss": 4.06864647862536,
+      "convergence": 0.31573750452097676,
+      "time_s": 23.309799909591675
+    },
+    {
+      "generation": 12,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.3441315860385318,
+      "time_s": 25.220043182373047
+    },
+    {
+      "generation": 13,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.3598809923241373,
+      "time_s": 27.161474466323853
+    },
+    {
+      "generation": 14,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.3452885635835486,
+      "time_s": 29.10508894920349
+    },
+    {
+      "generation": 15,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.3581888370058119,
+      "time_s": 31.104368686676025
+    },
+    {
+      "generation": 16,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.3527742515440445,
+      "time_s": 33.10353684425354
+    },
+    {
+      "generation": 17,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.4095813536517051,
+      "time_s": 35.134379148483276
+    },
+    {
+      "generation": 18,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.4587014724098707,
+      "time_s": 37.031280755996704
+    },
+    {
+      "generation": 19,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.4530141926750478,
+      "time_s": 38.99503254890442
+    },
+    {
+      "generation": 20,
+      "best_loss": 4.067282514118661,
+      "convergence": 0.5879243682797541,
+      "time_s": 40.946287393569946
+    },
+    {
+      "generation": 21,
+      "best_loss": 4.067282514118661,
+      "convergence": 1.3150907544238823,
+      "time_s": 42.8877637386322
+    }
+  ]
+}

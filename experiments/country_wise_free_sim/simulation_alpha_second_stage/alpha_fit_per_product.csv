@@ -1,0 +1,1901 @@
+country_code,country_name,product_idx,product_name,mean_obs_mass,active,corr_calib,corr_valid
+ARG,Argentina,0,Wheat and meslin,1.242921e-01,1,0.2154,0.2364
+ARG,Argentina,1,Corn,2.608577e-01,1,0.4703,-0.6970
+ARG,Argentina,2,Wine,3.800885e-02,1,0.6479,-0.6364
+ARG,Argentina,3,Coal,7.427989e-05,1,,
+ARG,Argentina,4,"Petroleum oils, crude",8.915948e-03,1,0.4865,-0.5273
+ARG,Argentina,5,"Petroleum oils, refined",9.489384e-03,1,-0.2764,-0.5636
+ARG,Argentina,6,Petroleum gases,9.212458e-03,1,-0.0347,0.6364
+ARG,Argentina,7,Cyclic hydrocarbons,6.403058e-03,1,-0.5375,0.3697
+ARG,Argentina,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,1.087907e-03,1,,
+ARG,Argentina,9,"Medicaments, packaged",4.606568e-03,1,,
+ARG,Argentina,10,Industrial monocarboxylic fatty acids,2.685067e-02,1,,
+ARG,Argentina,11,Polymers of ethylene,1.137623e-02,1,,
+ARG,Argentina,12,Polyacetals,4.588548e-03,1,0.2263,-0.8788
+ARG,Argentina,13,"Other plates of plastics, noncellular and not reinforced",5.564806e-03,1,,
+ARG,Argentina,14,Packing lids,5.968110e-03,1,,
+ARG,Argentina,15,Other articles of plastic,1.144832e-03,1,,
+ARG,Argentina,16,New pneumatic tires of rubber,6.432961e-03,1,-0.1390,0.3818
+ARG,Argentina,17,Tanned hides of bovines or equines,1.163841e-01,1,-0.2147,-0.9152
+ARG,Argentina,18,Trunks or cases,5.746322e-04,1,,
+ARG,Argentina,19,Wood sawn lengthwise,3.101598e-03,1,,
+ARG,Argentina,20,"Chemical woodpulp, soda or sulfate",1.217787e-02,1,-0.3583,-0.6364
+ARG,Argentina,21,"Paper and paperboard, coated with kaolin",3.767959e-04,1,,
+ARG,Argentina,22,Woven fabrics of synthetic filament yarn,5.150207e-04,1,,
+ARG,Argentina,23,"T-shirts, knit",5.398174e-04,1,,
+ARG,Argentina,24,"Sweaters, pullovers, sweatshirts etc., knit",4.061840e-04,1,,
+ARG,Argentina,25,Men's suits and pants,2.182414e-04,1,,
+ARG,Argentina,26,Women's suits and pants,3.443140e-04,1,,
+ARG,Argentina,27,Leather footwear,7.657305e-04,1,,
+ARG,Argentina,28,Diamonds,2.107932e-05,1,,
+ARG,Argentina,29,Gold,9.177905e-03,1,,
+ARG,Argentina,30,Platinum,1.225702e-04,1,,
+ARG,Argentina,31,Jewelry of precious metal,1.330045e-04,1,,
+ARG,Argentina,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",3.387247e-03,1,,
+ARG,Argentina,33,"Flat rolled iron, width > 600mm, clad",5.942145e-03,1,-0.1174,-0.1758
+ARG,Argentina,34,Other articles of iron or steel,2.498689e-03,1,,
+ARG,Argentina,35,Unwrought aluminum,2.283091e-02,1,0.1853,-0.9030
+ARG,Argentina,36,Aluminum plates > 0.2 mm,5.306209e-04,1,,
+ARG,Argentina,37,Spark-ignition reciprocating internal combustion piston engines,2.721056e-03,1,,
+ARG,Argentina,38,Compression-ignition internal combustion piston engines,8.335390e-03,1,0.2695,0.8788
+ARG,Argentina,39,Parts suitable for use with spark-ignition engines,5.781122e-03,1,,
+ARG,Argentina,40,Gas turbines,6.610010e-04,1,,
+ARG,Argentina,41,Pumps for liquids,4.286538e-03,1,,
+ARG,Argentina,42,"Pumps, compressors, fans, etc.",1.934871e-03,1,,
+ARG,Argentina,43,Air conditioners,8.087328e-04,1,,
+ARG,Argentina,44,"Refrigerators, freezers",3.279815e-03,1,,
+ARG,Argentina,45,Equipment for temperature change of materials,3.978563e-03,1,,
+ARG,Argentina,46,Centrifuges,2.746946e-03,1,,
+ARG,Argentina,47,Dish washing machines,4.098018e-03,1,,
+ARG,Argentina,48,"Self-propelled bulldozers, excavators and road rollers",2.283192e-04,1,,
+ARG,Argentina,49,Parts for use with hoists and excavation machinery,1.202131e-03,1,,
+ARG,Argentina,50,Printers and copiers,5.189813e-04,1,,
+ARG,Argentina,51,Computers,1.636159e-04,1,,
+ARG,Argentina,52,Parts and accessories for office machines,1.474683e-04,1,,
+ARG,Argentina,53,Machinery for working rubber or plastics,9.058322e-04,1,,
+ARG,Argentina,54,Machines n.e.c.,1.288700e-03,1,,
+ARG,Argentina,55,Appliances for thermostatically controlled valves,3.376195e-03,1,,
+ARG,Argentina,56,Ball or roller bearings,3.270238e-03,1,,
+ARG,Argentina,57,Transmission shafts,2.639080e-03,1,,
+ARG,Argentina,58,Electric motors and generators,1.025801e-03,1,,
+ARG,Argentina,59,Electrical transformers,9.791831e-04,1,,
+ARG,Argentina,60,Batteries,5.362167e-04,1,,
+ARG,Argentina,61,Electric heaters,5.434900e-04,1,,
+ARG,Argentina,62,Telephones,3.260875e-04,1,,
+ARG,Argentina,63,Microphones,9.869626e-05,1,,
+ARG,Argentina,64,Video recording apparatus,6.270836e-05,1,,
+ARG,Argentina,65,"Tapes, cassettes, records and compact disks",1.620645e-03,1,,
+ARG,Argentina,66,"Transmission apparatus for radio, telephone and TV",1.427517e-04,1,,
+ARG,Argentina,67,Reception apparatus for radio broadcasting,3.097618e-03,1,,
+ARG,Argentina,68,Monitors and projectors,3.783503e-04,1,,
+ARG,Argentina,69,"Parts of radios, telephones, and T.V.s",1.614703e-04,1,,
+ARG,Argentina,70,Electrical capacitors,1.489133e-04,1,,
+ARG,Argentina,71,Electronic printed circuits,3.383448e-05,1,,
+ARG,Argentina,72,Electrical apparatus for < 1k volts,9.404832e-04,1,,
+ARG,Argentina,73,Parts for electrical apparatus,4.560760e-04,1,,
+ARG,Argentina,74,"Thermionic, cold cathode or photocathode tubes",5.206663e-05,1,,
+ARG,Argentina,75,Semiconductor devices,2.425656e-05,1,,
+ARG,Argentina,76,Electronic integrated circuits,1.233985e-05,1,,
+ARG,Argentina,77,Electrical machines with individual functions n.e.c.,4.917525e-04,1,,
+ARG,Argentina,78,Insulated electrical wire,1.516531e-03,1,,
+ARG,Argentina,79,Tractors,1.712195e-03,1,,
+ARG,Argentina,80,Cars,7.373614e-03,1,0.1645,-0.1636
+ARG,Argentina,81,Motor vehicles for transporting goods,4.287513e-02,1,-0.2919,-0.2000
+ARG,Argentina,82,Parts of motor vehicles,6.454393e-03,1,0.5538,0.7697
+ARG,Argentina,83,Motorcycles,3.336744e-04,1,,
+ARG,Argentina,84,Other aircraft and spacecraft,3.940095e-03,1,,
+ARG,Argentina,85,Parts of other aircraft,1.361632e-04,1,,
+ARG,Argentina,86,Cargo ships and similar vessels,9.354169e-04,1,,
+ARG,Argentina,87,Optical fibers,6.103184e-04,1,,
+ARG,Argentina,88,Electrostatic photo-copyers,9.852218e-05,1,,
+ARG,Argentina,89,Liquid crystal devices,2.777820e-05,1,,
+ARG,Argentina,90,Medical instruments,6.152073e-04,1,,
+ARG,Argentina,91,Instruments for physical or chemical analysis,6.458005e-04,1,,
+ARG,Argentina,92,Instruments for measuring electricity,3.311783e-04,1,,
+ARG,Argentina,93,Measuring instruments,8.639484e-04,1,,
+ARG,Argentina,94,Automatic regulating instruments,2.665302e-03,1,,
+ARG,Argentina,95,Seats,4.006411e-03,1,-0.1290,-0.8545
+ARG,Argentina,96,Other furniture and parts,9.061672e-04,1,,
+ARG,Argentina,97,Toys,4.311909e-04,1,,
+ARG,Argentina,98,Commodities not specified according to kind,1.148738e-02,1,0.0558,0.9030
+ARG,Argentina,99,Trade data discrepancies,7.481141e-04,1,,
+AUS,Australia,0,Wheat and meslin,6.860438e-02,1,-0.1019,-0.5152
+AUS,Australia,1,Corn,5.841950e-04,1,,
+AUS,Australia,2,Wine,5.411236e-02,1,0.4185,0.5152
+AUS,Australia,3,Coal,3.142352e-01,1,-0.7653,0.4909
+AUS,Australia,4,"Petroleum oils, crude",6.406898e-03,1,-0.2371,0.0545
+AUS,Australia,5,"Petroleum oils, refined",3.291434e-03,1,,
+AUS,Australia,6,Petroleum gases,4.336876e-02,1,0.1475,0.4909
+AUS,Australia,7,Cyclic hydrocarbons,1.436647e-04,1,,
+AUS,Australia,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,2.497017e-04,1,,
+AUS,Australia,9,"Medicaments, packaged",7.341450e-03,1,0.7189,0.1273
+AUS,Australia,10,Industrial monocarboxylic fatty acids,1.411337e-03,1,,
+AUS,Australia,11,Polymers of ethylene,8.716374e-04,1,,
+AUS,Australia,12,Polyacetals,1.359183e-03,1,,
+AUS,Australia,13,"Other plates of plastics, noncellular and not reinforced",2.380636e-03,1,,
+AUS,Australia,14,Packing lids,2.470909e-03,1,,
+AUS,Australia,15,Other articles of plastic,1.704145e-03,1,,
+AUS,Australia,16,New pneumatic tires of rubber,1.027709e-03,1,,
+AUS,Australia,17,Tanned hides of bovines or equines,1.225913e-02,1,0.1521,0.9273
+AUS,Australia,18,Trunks or cases,8.043176e-04,1,,
+AUS,Australia,19,Wood sawn lengthwise,1.835073e-03,1,,
+AUS,Australia,20,"Chemical woodpulp, soda or sulfate",8.274345e-05,1,,
+AUS,Australia,21,"Paper and paperboard, coated with kaolin",8.435792e-04,1,,
+AUS,Australia,22,Woven fabrics of synthetic filament yarn,8.764705e-04,1,,
+AUS,Australia,23,"T-shirts, knit",4.442888e-04,1,,
+AUS,Australia,24,"Sweaters, pullovers, sweatshirts etc., knit",5.518574e-04,1,,
+AUS,Australia,25,Men's suits and pants,4.097808e-04,1,,
+AUS,Australia,26,Women's suits and pants,6.219488e-04,1,,
+AUS,Australia,27,Leather footwear,6.351197e-04,1,,
+AUS,Australia,28,Diamonds,3.471858e-03,1,,
+AUS,Australia,29,Gold,8.261542e-02,1,0.0216,0.4788
+AUS,Australia,30,Platinum,7.204118e-04,1,,
+AUS,Australia,31,Jewelry of precious metal,2.712027e-03,1,,
+AUS,Australia,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",7.061019e-03,1,0.1969,-0.0182
+AUS,Australia,33,"Flat rolled iron, width > 600mm, clad",6.773113e-03,1,0.6100,-0.8182
+AUS,Australia,34,Other articles of iron or steel,4.238640e-03,1,,
+AUS,Australia,35,Unwrought aluminum,6.744277e-02,1,0.2270,0.7818
+AUS,Australia,36,Aluminum plates > 0.2 mm,9.231550e-03,1,0.6232,0.4788
+AUS,Australia,37,Spark-ignition reciprocating internal combustion piston engines,5.346111e-03,1,,
+AUS,Australia,38,Compression-ignition internal combustion piston engines,8.512535e-04,1,,
+AUS,Australia,39,Parts suitable for use with spark-ignition engines,2.781347e-03,1,,
+AUS,Australia,40,Gas turbines,1.709199e-03,1,,
+AUS,Australia,41,Pumps for liquids,4.020047e-03,1,,
+AUS,Australia,42,"Pumps, compressors, fans, etc.",1.274592e-03,1,,
+AUS,Australia,43,Air conditioners,2.012236e-03,1,,
+AUS,Australia,44,"Refrigerators, freezers",1.610032e-03,1,,
+AUS,Australia,45,Equipment for temperature change of materials,2.945835e-03,1,,
+AUS,Australia,46,Centrifuges,3.077925e-03,1,,
+AUS,Australia,47,Dish washing machines,2.484916e-03,1,,
+AUS,Australia,48,"Self-propelled bulldozers, excavators and road rollers",2.817422e-03,1,,
+AUS,Australia,49,Parts for use with hoists and excavation machinery,6.291234e-03,1,,
+AUS,Australia,50,Printers and copiers,3.203394e-03,1,,
+AUS,Australia,51,Computers,1.498438e-03,1,,
+AUS,Australia,52,Parts and accessories for office machines,3.443626e-03,1,,
+AUS,Australia,53,Machinery for working rubber or plastics,1.433445e-03,1,,
+AUS,Australia,54,Machines n.e.c.,3.512628e-03,1,,
+AUS,Australia,55,Appliances for thermostatically controlled valves,2.293081e-03,1,,
+AUS,Australia,56,Ball or roller bearings,1.109438e-03,1,,
+AUS,Australia,57,Transmission shafts,2.519322e-03,1,,
+AUS,Australia,58,Electric motors and generators,1.373381e-03,1,,
+AUS,Australia,59,Electrical transformers,1.555156e-03,1,,
+AUS,Australia,60,Batteries,6.761933e-04,1,,
+AUS,Australia,61,Electric heaters,1.464708e-03,1,,
+AUS,Australia,62,Telephones,2.434537e-03,1,,
+AUS,Australia,63,Microphones,2.458220e-03,1,,
+AUS,Australia,64,Video recording apparatus,1.281499e-03,1,,
+AUS,Australia,65,"Tapes, cassettes, records and compact disks",3.535794e-03,1,,
+AUS,Australia,66,"Transmission apparatus for radio, telephone and TV",1.665408e-03,1,,
+AUS,Australia,67,Reception apparatus for radio broadcasting,1.396635e-03,1,,
+AUS,Australia,68,Monitors and projectors,4.255873e-04,1,,
+AUS,Australia,69,"Parts of radios, telephones, and T.V.s",1.353521e-03,1,,
+AUS,Australia,70,Electrical capacitors,7.648310e-04,1,,
+AUS,Australia,71,Electronic printed circuits,5.111142e-04,1,,
+AUS,Australia,72,Electrical apparatus for < 1k volts,2.269366e-03,1,,
+AUS,Australia,73,Parts for electrical apparatus,1.536019e-03,1,,
+AUS,Australia,74,"Thermionic, cold cathode or photocathode tubes",1.634843e-03,1,,
+AUS,Australia,75,Semiconductor devices,1.071392e-03,1,,
+AUS,Australia,76,Electronic integrated circuits,2.793003e-04,1,,
+AUS,Australia,77,Electrical machines with individual functions n.e.c.,2.794028e-03,1,,
+AUS,Australia,78,Insulated electrical wire,1.710861e-03,1,,
+AUS,Australia,79,Tractors,8.431523e-04,1,,
+AUS,Australia,80,Cars,2.180103e-03,1,,
+AUS,Australia,81,Motor vehicles for transporting goods,1.203820e-03,1,,
+AUS,Australia,82,Parts of motor vehicles,1.997504e-03,1,,
+AUS,Australia,83,Motorcycles,8.345011e-04,1,,
+AUS,Australia,84,Other aircraft and spacecraft,1.671302e-03,1,,
+AUS,Australia,85,Parts of other aircraft,1.070518e-02,1,,
+AUS,Australia,86,Cargo ships and similar vessels,2.971755e-03,1,,
+AUS,Australia,87,Optical fibers,3.550451e-03,1,,
+AUS,Australia,88,Electrostatic photo-copyers,2.078996e-03,1,,
+AUS,Australia,89,Liquid crystal devices,9.865833e-04,1,,
+AUS,Australia,90,Medical instruments,4.331567e-03,1,,
+AUS,Australia,91,Instruments for physical or chemical analysis,6.126045e-03,1,0.6602,-0.1636
+AUS,Australia,92,Instruments for measuring electricity,2.691449e-03,1,,
+AUS,Australia,93,Measuring instruments,3.156964e-03,1,,
+AUS,Australia,94,Automatic regulating instruments,2.149853e-03,1,,
+AUS,Australia,95,Seats,5.991941e-04,1,,
+AUS,Australia,96,Other furniture and parts,8.827415e-04,1,,
+AUS,Australia,97,Toys,7.291943e-04,1,,
+AUS,Australia,98,Commodities not specified according to kind,4.023088e-03,1,,
+AUS,Australia,99,Trade data discrepancies,1.806753e-03,1,-0.4363,-0.6319
+BRA,Brazil,0,Wheat and meslin,4.035302e-03,1,,
+BRA,Brazil,1,Corn,7.860021e-02,1,,
+BRA,Brazil,2,Wine,3.403989e-04,1,,
+BRA,Brazil,3,Coal,8.019522e-05,1,,
+BRA,Brazil,4,"Petroleum oils, crude",1.347670e-02,1,,
+BRA,Brazil,5,"Petroleum oils, refined",6.604043e-03,1,,
+BRA,Brazil,6,Petroleum gases,1.844477e-04,1,,
+BRA,Brazil,7,Cyclic hydrocarbons,9.085776e-03,1,-0.2988,0.2727
+BRA,Brazil,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,2.404461e-03,1,,
+BRA,Brazil,9,"Medicaments, packaged",2.315023e-03,1,,
+BRA,Brazil,10,Industrial monocarboxylic fatty acids,3.269005e-03,1,,
+BRA,Brazil,11,Polymers of ethylene,1.455121e-02,1,0.3992,-0.8909
+BRA,Brazil,12,Polyacetals,4.254369e-03,1,,
+BRA,Brazil,13,"Other plates of plastics, noncellular and not reinforced",4.428052e-03,1,,
+BRA,Brazil,14,Packing lids,3.335114e-03,1,,
+BRA,Brazil,15,Other articles of plastic,1.727572e-03,1,,
+BRA,Brazil,16,New pneumatic tires of rubber,1.632438e-02,1,0.1459,-0.1515
+BRA,Brazil,17,Tanned hides of bovines or equines,8.894663e-02,1,-0.6432,0.3576
+BRA,Brazil,18,Trunks or cases,4.718600e-04,1,,
+BRA,Brazil,19,Wood sawn lengthwise,1.729147e-02,1,0.0347,0.0424
+BRA,Brazil,20,"Chemical woodpulp, soda or sulfate",1.307442e-01,1,-0.5321,0.4182
+BRA,Brazil,21,"Paper and paperboard, coated with kaolin",1.081559e-02,1,,
+BRA,Brazil,22,Woven fabrics of synthetic filament yarn,1.330447e-03,1,,
+BRA,Brazil,23,"T-shirts, knit",1.636286e-03,1,,
+BRA,Brazil,24,"Sweaters, pullovers, sweatshirts etc., knit",2.456248e-04,1,,
+BRA,Brazil,25,Men's suits and pants,4.490919e-04,1,,
+BRA,Brazil,26,Women's suits and pants,5.997977e-04,1,,
+BRA,Brazil,27,Leather footwear,2.698248e-02,1,0.0710,-0.4909
+BRA,Brazil,28,Diamonds,3.469940e-04,1,,
+BRA,Brazil,29,Gold,1.385149e-02,1,0.0680,-0.3818
+BRA,Brazil,30,Platinum,3.600797e-04,1,,
+BRA,Brazil,31,Jewelry of precious metal,9.777626e-04,1,,
+BRA,Brazil,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",1.740115e-02,1,0.1969,-0.6848
+BRA,Brazil,33,"Flat rolled iron, width > 600mm, clad",1.076539e-02,1,-0.4386,-0.5394
+BRA,Brazil,34,Other articles of iron or steel,4.693283e-03,1,,
+BRA,Brazil,35,Unwrought aluminum,3.148127e-02,1,0.1737,-0.0909
+BRA,Brazil,36,Aluminum plates > 0.2 mm,6.316388e-03,1,,
+BRA,Brazil,37,Spark-ignition reciprocating internal combustion piston engines,1.046207e-02,1,,
+BRA,Brazil,38,Compression-ignition internal combustion piston engines,9.770785e-03,1,0.0880,-0.6848
+BRA,Brazil,39,Parts suitable for use with spark-ignition engines,2.300878e-02,1,0.0757,-0.1636
+BRA,Brazil,40,Gas turbines,6.619935e-03,1,,
+BRA,Brazil,41,Pumps for liquids,9.190895e-03,1,0.1676,-0.8061
+BRA,Brazil,42,"Pumps, compressors, fans, etc.",1.363137e-02,1,0.1166,-0.7212
+BRA,Brazil,43,Air conditioners,3.082715e-03,1,,
+BRA,Brazil,44,"Refrigerators, freezers",6.915467e-03,1,-0.0278,-0.9273
+BRA,Brazil,45,Equipment for temperature change of materials,3.605414e-03,1,,
+BRA,Brazil,46,Centrifuges,4.061386e-03,1,,
+BRA,Brazil,47,Dish washing machines,3.205936e-03,1,,
+BRA,Brazil,48,"Self-propelled bulldozers, excavators and road rollers",3.116407e-02,1,0.6471,-0.3091
+BRA,Brazil,49,Parts for use with hoists and excavation machinery,2.536707e-03,1,,
+BRA,Brazil,50,Printers and copiers,1.686107e-03,1,,
+BRA,Brazil,51,Computers,7.873076e-04,1,,
+BRA,Brazil,52,Parts and accessories for office machines,4.339469e-04,1,,
+BRA,Brazil,53,Machinery for working rubber or plastics,2.583992e-03,1,,
+BRA,Brazil,54,Machines n.e.c.,2.565756e-03,1,,
+BRA,Brazil,55,Appliances for thermostatically controlled valves,3.411691e-03,1,,
+BRA,Brazil,56,Ball or roller bearings,5.273514e-03,1,,
+BRA,Brazil,57,Transmission shafts,1.096882e-02,1,0.0502,-0.7697
+BRA,Brazil,58,Electric motors and generators,1.212667e-02,1,0.8772,0.2364
+BRA,Brazil,59,Electrical transformers,4.291908e-03,1,,
+BRA,Brazil,60,Batteries,3.542712e-03,1,,
+BRA,Brazil,61,Electric heaters,1.167155e-03,1,,
+BRA,Brazil,62,Telephones,1.639656e-03,1,,
+BRA,Brazil,63,Microphones,9.128460e-04,1,,
+BRA,Brazil,64,Video recording apparatus,2.095873e-04,1,,
+BRA,Brazil,65,"Tapes, cassettes, records and compact disks",6.043599e-04,1,,
+BRA,Brazil,66,"Transmission apparatus for radio, telephone and TV",4.579172e-03,1,0.4201,0.7818
+BRA,Brazil,67,Reception apparatus for radio broadcasting,6.704397e-03,1,0.1421,-0.6727
+BRA,Brazil,68,Monitors and projectors,1.218673e-03,1,,
+BRA,Brazil,69,"Parts of radios, telephones, and T.V.s",1.364080e-03,1,,
+BRA,Brazil,70,Electrical capacitors,4.260593e-03,1,,
+BRA,Brazil,71,Electronic printed circuits,5.821736e-04,1,,
+BRA,Brazil,72,Electrical apparatus for < 1k volts,2.341801e-03,1,,
+BRA,Brazil,73,Parts for electrical apparatus,1.122856e-03,1,,
+BRA,Brazil,74,"Thermionic, cold cathode or photocathode tubes",3.306560e-03,1,0.8741,-0.6000
+BRA,Brazil,75,Semiconductor devices,3.275956e-04,1,,
+BRA,Brazil,76,Electronic integrated circuits,1.965077e-04,1,,
+BRA,Brazil,77,Electrical machines with individual functions n.e.c.,1.057517e-03,1,,
+BRA,Brazil,78,Insulated electrical wire,3.221451e-03,1,,
+BRA,Brazil,79,Tractors,1.976337e-02,1,,
+BRA,Brazil,80,Cars,5.639507e-03,1,,
+BRA,Brazil,81,Motor vehicles for transporting goods,1.376932e-02,1,0.4278,-0.5515
+BRA,Brazil,82,Parts of motor vehicles,8.067255e-03,1,,
+BRA,Brazil,83,Motorcycles,6.498577e-03,1,,
+BRA,Brazil,84,Other aircraft and spacecraft,2.541238e-02,1,0.4981,0.1515
+BRA,Brazil,85,Parts of other aircraft,4.307540e-03,1,,
+BRA,Brazil,86,Cargo ships and similar vessels,9.125378e-04,1,,
+BRA,Brazil,87,Optical fibers,1.989445e-03,1,,
+BRA,Brazil,88,Electrostatic photo-copyers,2.434769e-03,1,,
+BRA,Brazil,89,Liquid crystal devices,1.879042e-04,1,,
+BRA,Brazil,90,Medical instruments,1.406051e-03,1,,
+BRA,Brazil,91,Instruments for physical or chemical analysis,5.314660e-04,1,,
+BRA,Brazil,92,Instruments for measuring electricity,5.299239e-04,1,,
+BRA,Brazil,93,Measuring instruments,1.091149e-03,1,,
+BRA,Brazil,94,Automatic regulating instruments,5.178048e-03,1,,
+BRA,Brazil,95,Seats,2.633496e-03,1,,
+BRA,Brazil,96,Other furniture and parts,8.640007e-03,1,0.8023,0.3818
+BRA,Brazil,97,Toys,4.939760e-04,1,,
+BRA,Brazil,98,Commodities not specified according to kind,1.281443e-03,1,,
+BRA,Brazil,99,Trade data discrepancies,5.906244e-03,1,,
+CAN,Canada,0,Wheat and meslin,4.666654e-02,1,-0.6162,0.0061
+CAN,Canada,1,Corn,2.819725e-03,1,,
+CAN,Canada,2,Wine,4.549802e-04,1,,
+CAN,Canada,3,Coal,1.745384e-02,1,-0.2548,-0.2000
+CAN,Canada,4,"Petroleum oils, crude",2.150726e-02,1,0.9500,0.8303
+CAN,Canada,5,"Petroleum oils, refined",7.908353e-03,1,0.6774,-0.3818
+CAN,Canada,6,Petroleum gases,2.765517e-02,1,-0.0734,0.5636
+CAN,Canada,7,Cyclic hydrocarbons,8.621588e-03,1,0.0958,0.0909
+CAN,Canada,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,4.315162e-04,1,,
+CAN,Canada,9,"Medicaments, packaged",5.551249e-03,1,0.9053,0.1030
+CAN,Canada,10,Industrial monocarboxylic fatty acids,4.784521e-03,1,,
+CAN,Canada,11,Polymers of ethylene,2.282599e-02,1,-0.7336,0.7697
+CAN,Canada,12,Polyacetals,4.231304e-03,1,,
+CAN,Canada,13,"Other plates of plastics, noncellular and not reinforced",9.291781e-03,1,,
+CAN,Canada,14,Packing lids,1.348681e-02,1,-0.7228,-0.0182
+CAN,Canada,15,Other articles of plastic,6.563514e-03,1,,
+CAN,Canada,16,New pneumatic tires of rubber,9.985993e-03,1,-0.0988,0.9030
+CAN,Canada,17,Tanned hides of bovines or equines,1.055204e-03,1,,
+CAN,Canada,18,Trunks or cases,1.144077e-03,1,,
+CAN,Canada,19,Wood sawn lengthwise,7.393418e-02,1,-0.0934,-0.0182
+CAN,Canada,20,"Chemical woodpulp, soda or sulfate",6.017878e-02,1,-0.1004,0.9515
+CAN,Canada,21,"Paper and paperboard, coated with kaolin",1.014542e-02,1,0.1413,0.2000
+CAN,Canada,22,Woven fabrics of synthetic filament yarn,1.878428e-03,1,,
+CAN,Canada,23,"T-shirts, knit",1.036707e-03,1,,
+CAN,Canada,24,"Sweaters, pullovers, sweatshirts etc., knit",1.574913e-03,1,,
+CAN,Canada,25,Men's suits and pants,2.132911e-03,1,,
+CAN,Canada,26,Women's suits and pants,1.308828e-03,1,,
+CAN,Canada,27,Leather footwear,8.717175e-04,1,,
+CAN,Canada,28,Diamonds,6.160965e-03,1,,
+CAN,Canada,29,Gold,1.763852e-02,1,-0.5228,-0.6485
+CAN,Canada,30,Platinum,2.308341e-03,1,,
+CAN,Canada,31,Jewelry of precious metal,1.489949e-03,1,,
+CAN,Canada,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",6.248426e-03,1,,
+CAN,Canada,33,"Flat rolled iron, width > 600mm, clad",6.560623e-03,1,,
+CAN,Canada,34,Other articles of iron or steel,7.236000e-03,1,,
+CAN,Canada,35,Unwrought aluminum,4.373061e-02,1,-0.6934,0.2848
+CAN,Canada,36,Aluminum plates > 0.2 mm,1.051797e-02,1,-0.0749,0.6606
+CAN,Canada,37,Spark-ignition reciprocating internal combustion piston engines,2.118125e-02,1,-0.5228,0.4182
+CAN,Canada,38,Compression-ignition internal combustion piston engines,5.999433e-04,1,,
+CAN,Canada,39,Parts suitable for use with spark-ignition engines,7.341894e-03,1,-0.0440,0.8909
+CAN,Canada,40,Gas turbines,1.617877e-02,1,-0.7089,-0.2364
+CAN,Canada,41,Pumps for liquids,7.586030e-03,1,,
+CAN,Canada,42,"Pumps, compressors, fans, etc.",3.688238e-03,1,,
+CAN,Canada,43,Air conditioners,4.239881e-03,1,,
+CAN,Canada,44,"Refrigerators, freezers",3.082225e-03,1,,
+CAN,Canada,45,Equipment for temperature change of materials,7.264470e-03,1,,
+CAN,Canada,46,Centrifuges,8.329732e-03,1,,
+CAN,Canada,47,Dish washing machines,6.045741e-03,1,,
+CAN,Canada,48,"Self-propelled bulldozers, excavators and road rollers",2.351898e-03,1,,
+CAN,Canada,49,Parts for use with hoists and excavation machinery,1.041072e-02,1,,
+CAN,Canada,50,Printers and copiers,2.492582e-03,1,,
+CAN,Canada,51,Computers,2.263396e-03,1,0.3615,-0.5879
+CAN,Canada,52,Parts and accessories for office machines,3.421473e-03,1,0.1081,-0.6727
+CAN,Canada,53,Machinery for working rubber or plastics,1.362958e-02,1,-0.6340,0.9636
+CAN,Canada,54,Machines n.e.c.,5.255469e-03,1,,
+CAN,Canada,55,Appliances for thermostatically controlled valves,5.547600e-03,1,,
+CAN,Canada,56,Ball or roller bearings,4.443542e-03,1,,
+CAN,Canada,57,Transmission shafts,8.900654e-03,1,-0.1838,0.7576
+CAN,Canada,58,Electric motors and generators,3.804730e-03,1,,
+CAN,Canada,59,Electrical transformers,4.912114e-03,1,,
+CAN,Canada,60,Batteries,1.611391e-03,1,,
+CAN,Canada,61,Electric heaters,2.724371e-03,1,,
+CAN,Canada,62,Telephones,7.785447e-03,1,0.0718,0.7455
+CAN,Canada,63,Microphones,2.670224e-03,1,,
+CAN,Canada,64,Video recording apparatus,2.764888e-03,1,,
+CAN,Canada,65,"Tapes, cassettes, records and compact disks",4.068586e-03,1,,
+CAN,Canada,66,"Transmission apparatus for radio, telephone and TV",3.723974e-03,1,-0.0016,-0.7697
+CAN,Canada,67,Reception apparatus for radio broadcasting,1.338343e-03,1,,
+CAN,Canada,68,Monitors and projectors,1.105609e-03,1,,
+CAN,Canada,69,"Parts of radios, telephones, and T.V.s",3.137288e-03,1,0.2359,-0.8182
+CAN,Canada,70,Electrical capacitors,5.587298e-04,1,,
+CAN,Canada,71,Electronic printed circuits,3.627380e-03,1,,
+CAN,Canada,72,Electrical apparatus for < 1k volts,1.961958e-03,1,,
+CAN,Canada,73,Parts for electrical apparatus,2.592566e-03,1,,
+CAN,Canada,74,"Thermionic, cold cathode or photocathode tubes",1.286223e-03,1,,
+CAN,Canada,75,Semiconductor devices,9.498379e-04,1,,
+CAN,Canada,76,Electronic integrated circuits,2.205753e-03,1,0.1375,-0.9273
+CAN,Canada,77,Electrical machines with individual functions n.e.c.,5.380028e-03,1,,
+CAN,Canada,78,Insulated electrical wire,3.292249e-03,1,,
+CAN,Canada,79,Tractors,9.681958e-03,1,0.1668,0.6364
+CAN,Canada,80,Cars,2.182091e-02,1,-0.3591,0.9394
+CAN,Canada,81,Motor vehicles for transporting goods,1.839402e-02,1,0.1398,-0.5394
+CAN,Canada,82,Parts of motor vehicles,1.335332e-02,1,0.1089,-0.4061
+CAN,Canada,83,Motorcycles,1.859061e-03,1,,
+CAN,Canada,84,Other aircraft and spacecraft,1.895743e-02,1,-0.6317,-0.8303
+CAN,Canada,85,Parts of other aircraft,1.310321e-02,1,-0.6849,-0.6606
+CAN,Canada,86,Cargo ships and similar vessels,1.365788e-04,1,,
+CAN,Canada,87,Optical fibers,2.407741e-03,1,0.1035,0.3939
+CAN,Canada,88,Electrostatic photo-copyers,1.536579e-03,1,,
+CAN,Canada,89,Liquid crystal devices,5.583817e-03,1,-0.0170,-0.9394
+CAN,Canada,90,Medical instruments,2.494729e-03,1,,
+CAN,Canada,91,Instruments for physical or chemical analysis,6.728448e-03,1,,
+CAN,Canada,92,Instruments for measuring electricity,5.649584e-03,1,,
+CAN,Canada,93,Measuring instruments,7.320109e-03,1,,
+CAN,Canada,94,Automatic regulating instruments,6.928461e-03,1,,
+CAN,Canada,95,Seats,1.152070e-02,1,0.1622,0.8909
+CAN,Canada,96,Other furniture and parts,1.468218e-02,1,0.0448,0.3455
+CAN,Canada,97,Toys,3.731988e-03,1,,
+CAN,Canada,98,Commodities not specified according to kind,1.630267e-02,1,0.1143,0.5273
+CAN,Canada,99,Trade data discrepancies,1.799894e-03,1,0.1990,0.7781
+CHN,China,0,Wheat and meslin,2.018982e-04,1,,
+CHN,China,1,Corn,3.874921e-03,1,-0.1992,-0.7333
+CHN,China,2,Wine,1.512544e-04,1,,
+CHN,China,3,Coal,5.478015e-03,1,-0.4440,-0.6000
+CHN,China,4,"Petroleum oils, crude",5.609212e-04,1,,
+CHN,China,5,"Petroleum oils, refined",2.067013e-03,1,,
+CHN,China,6,Petroleum gases,4.157080e-04,1,,
+CHN,China,7,Cyclic hydrocarbons,1.104266e-03,1,,
+CHN,China,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,4.288100e-03,1,,
+CHN,China,9,"Medicaments, packaged",5.070759e-04,1,,
+CHN,China,10,Industrial monocarboxylic fatty acids,3.516205e-03,1,,
+CHN,China,11,Polymers of ethylene,5.697050e-04,1,,
+CHN,China,12,Polyacetals,4.311001e-03,1,,
+CHN,China,13,"Other plates of plastics, noncellular and not reinforced",4.134838e-03,1,,
+CHN,China,14,Packing lids,9.241386e-03,1,0.1815,0.8424
+CHN,China,15,Other articles of plastic,1.645671e-02,1,0.2263,0.8182
+CHN,China,16,New pneumatic tires of rubber,7.950927e-03,1,,
+CHN,China,17,Tanned hides of bovines or equines,3.776431e-03,1,0.8780,-0.9758
+CHN,China,18,Trunks or cases,3.308622e-02,1,0.1081,-0.6485
+CHN,China,19,Wood sawn lengthwise,7.747190e-04,1,,
+CHN,China,20,"Chemical woodpulp, soda or sulfate",8.128126e-05,1,,
+CHN,China,21,"Paper and paperboard, coated with kaolin",3.258302e-03,1,,
+CHN,China,22,Woven fabrics of synthetic filament yarn,2.078308e-02,1,0.6842,-0.1515
+CHN,China,23,"T-shirts, knit",1.679094e-02,1,0.6317,0.2242
+CHN,China,24,"Sweaters, pullovers, sweatshirts etc., knit",2.632464e-02,1,0.3761,-0.1636
+CHN,China,25,Men's suits and pants,1.874489e-02,1,0.6602,0.5636
+CHN,China,26,Women's suits and pants,2.226811e-02,1,0.6363,0.5515
+CHN,China,27,Leather footwear,1.668432e-02,1,0.0741,0.5879
+CHN,China,28,Diamonds,1.234131e-03,1,,
+CHN,China,29,Gold,4.509564e-04,1,,
+CHN,China,30,Platinum,3.915396e-04,1,,
+CHN,China,31,Jewelry of precious metal,8.842496e-03,1,0.7019,0.3818
+CHN,China,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",4.700877e-03,1,0.2687,0.6242
+CHN,China,33,"Flat rolled iron, width > 600mm, clad",7.463329e-03,1,,
+CHN,China,34,Other articles of iron or steel,9.383027e-03,1,0.3869,0.7697
+CHN,China,35,Unwrought aluminum,2.689756e-03,1,,
+CHN,China,36,Aluminum plates > 0.2 mm,5.414308e-03,1,,
+CHN,China,37,Spark-ignition reciprocating internal combustion piston engines,1.974339e-03,1,,
+CHN,China,38,Compression-ignition internal combustion piston engines,1.407327e-03,1,,
+CHN,China,39,Parts suitable for use with spark-ignition engines,2.816271e-03,1,,
+CHN,China,40,Gas turbines,1.086447e-03,1,,
+CHN,China,41,Pumps for liquids,4.363218e-03,1,,
+CHN,China,42,"Pumps, compressors, fans, etc.",9.086690e-03,1,,
+CHN,China,43,Air conditioners,1.464643e-02,1,0.8919,-0.2242
+CHN,China,44,"Refrigerators, freezers",8.000526e-03,1,,
+CHN,China,45,Equipment for temperature change of materials,3.858413e-03,1,,
+CHN,China,46,Centrifuges,3.485495e-03,1,,
+CHN,China,47,Dish washing machines,2.557129e-03,1,,
+CHN,China,48,"Self-propelled bulldozers, excavators and road rollers",3.645376e-03,1,,
+CHN,China,49,Parts for use with hoists and excavation machinery,4.875800e-03,1,,
+CHN,China,50,Printers and copiers,2.816930e-03,1,,
+CHN,China,51,Computers,1.929481e-02,1,-0.1251,0.0061
+CHN,China,52,Parts and accessories for office machines,1.368469e-02,1,0.2819,0.2970
+CHN,China,53,Machinery for working rubber or plastics,5.827677e-03,1,,
+CHN,China,54,Machines n.e.c.,2.573178e-03,1,,
+CHN,China,55,Appliances for thermostatically controlled valves,7.702668e-03,1,,
+CHN,China,56,Ball or roller bearings,7.329060e-03,1,0.2178,-0.7939
+CHN,China,57,Transmission shafts,4.963239e-03,1,,
+CHN,China,58,Electric motors and generators,1.201809e-02,1,0.2873,-0.4182
+CHN,China,59,Electrical transformers,1.668406e-02,1,0.2448,-0.5394
+CHN,China,60,Batteries,1.476162e-02,1,-0.4008,0.9273
+CHN,China,61,Electric heaters,2.281853e-02,1,0.8772,-0.7939
+CHN,China,62,Telephones,1.367222e-02,1,,
+CHN,China,63,Microphones,2.278162e-02,1,0.4757,-0.6606
+CHN,China,64,Video recording apparatus,2.226577e-02,1,-0.0008,0.7333
+CHN,China,65,"Tapes, cassettes, records and compact disks",3.178694e-03,1,,
+CHN,China,66,"Transmission apparatus for radio, telephone and TV",1.752840e-02,1,0.3830,-0.7455
+CHN,China,67,Reception apparatus for radio broadcasting,1.854984e-02,1,0.3977,0.4182
+CHN,China,68,Monitors and projectors,1.276147e-02,1,0.8409,0.5394
+CHN,China,69,"Parts of radios, telephones, and T.V.s",1.806290e-02,1,0.8494,0.4424
+CHN,China,70,Electrical capacitors,9.488276e-03,1,,
+CHN,China,71,Electronic printed circuits,1.952891e-02,1,0.6795,0.0909
+CHN,China,72,Electrical apparatus for < 1k volts,7.129910e-03,1,,
+CHN,China,73,Parts for electrical apparatus,4.343581e-03,1,,
+CHN,China,74,"Thermionic, cold cathode or photocathode tubes",7.525887e-03,1,0.6131,-0.2727
+CHN,China,75,Semiconductor devices,1.266700e-02,1,0.9220,0.4788
+CHN,China,76,Electronic integrated circuits,6.581575e-03,1,,
+CHN,China,77,Electrical machines with individual functions n.e.c.,9.576237e-03,1,,
+CHN,China,78,Insulated electrical wire,8.142538e-03,1,0.2896,-0.8303
+CHN,China,79,Tractors,1.273180e-03,1,,
+CHN,China,80,Cars,5.945499e-04,1,,
+CHN,China,81,Motor vehicles for transporting goods,1.254821e-03,1,,
+CHN,China,82,Parts of motor vehicles,3.058020e-03,1,,
+CHN,China,83,Motorcycles,1.130580e-02,1,0.6456,-0.6364
+CHN,China,84,Other aircraft and spacecraft,4.557566e-04,1,,
+CHN,China,85,Parts of other aircraft,1.220125e-03,1,,
+CHN,China,86,Cargo ships and similar vessels,1.052537e-02,1,0.4270,-0.4424
+CHN,China,87,Optical fibers,5.989418e-03,1,,
+CHN,China,88,Electrostatic photo-copyers,1.434824e-02,1,-0.3467,0.7455
+CHN,China,89,Liquid crystal devices,1.995658e-02,1,0.7529,0.4424
+CHN,China,90,Medical instruments,2.169128e-03,1,,
+CHN,China,91,Instruments for physical or chemical analysis,1.760195e-03,1,,
+CHN,China,92,Instruments for measuring electricity,2.631875e-03,1,,
+CHN,China,93,Measuring instruments,2.920635e-03,1,,
+CHN,China,94,Automatic regulating instruments,3.789291e-03,1,,
+CHN,China,95,Seats,1.349198e-02,1,0.4564,0.5515
+CHN,China,96,Other furniture and parts,1.379293e-02,1,-0.3143,0.0061
+CHN,China,97,Toys,4.283791e-02,1,0.2070,0.4545
+CHN,China,98,Commodities not specified according to kind,1.103978e-03,1,,
+CHN,China,99,Trade data discrepancies,2.862694e-02,1,0.1737,-0.0545
+DEU,Germany,0,Wheat and meslin,4.352286e-03,1,,
+DEU,Germany,1,Corn,7.310657e-04,1,,
+DEU,Germany,2,Wine,2.999429e-03,1,,
+DEU,Germany,3,Coal,2.632152e-04,1,,
+DEU,Germany,4,"Petroleum oils, crude",3.021997e-05,1,0.7790,-0.2606
+DEU,Germany,5,"Petroleum oils, refined",2.449748e-03,1,-0.1011,0.2970
+DEU,Germany,6,Petroleum gases,1.386857e-03,1,,
+DEU,Germany,7,Cyclic hydrocarbons,3.961849e-03,1,,
+DEU,Germany,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,6.097646e-03,1,,
+DEU,Germany,9,"Medicaments, packaged",1.377088e-02,1,-0.6494,0.6485
+DEU,Germany,10,Industrial monocarboxylic fatty acids,1.471334e-02,1,0.1907,0.0182
+DEU,Germany,11,Polymers of ethylene,5.698786e-03,1,,
+DEU,Germany,12,Polyacetals,1.179887e-02,1,0.1861,-0.1758
+DEU,Germany,13,"Other plates of plastics, noncellular and not reinforced",1.209704e-02,1,0.1398,0.1273
+DEU,Germany,14,Packing lids,9.200297e-03,1,0.1915,0.0545
+DEU,Germany,15,Other articles of plastic,1.182441e-02,1,-0.5992,-0.4545
+DEU,Germany,16,New pneumatic tires of rubber,6.976110e-03,1,,
+DEU,Germany,17,Tanned hides of bovines or equines,4.236286e-03,1,,
+DEU,Germany,18,Trunks or cases,2.686513e-03,1,,
+DEU,Germany,19,Wood sawn lengthwise,4.842289e-03,1,,
+DEU,Germany,20,"Chemical woodpulp, soda or sulfate",1.466283e-03,1,,
+DEU,Germany,21,"Paper and paperboard, coated with kaolin",1.273133e-02,1,-0.3274,0.4061
+DEU,Germany,22,Woven fabrics of synthetic filament yarn,3.281211e-03,1,,
+DEU,Germany,23,"T-shirts, knit",4.232075e-03,1,,
+DEU,Germany,24,"Sweaters, pullovers, sweatshirts etc., knit",4.233757e-03,1,,
+DEU,Germany,25,Men's suits and pants,5.304346e-03,1,,
+DEU,Germany,26,Women's suits and pants,4.933283e-03,1,,
+DEU,Germany,27,Leather footwear,5.024587e-03,1,,
+DEU,Germany,28,Diamonds,1.215137e-04,1,,
+DEU,Germany,29,Gold,2.055186e-03,1,,
+DEU,Germany,30,Platinum,7.900256e-03,1,,
+DEU,Germany,31,Jewelry of precious metal,1.969503e-03,1,,
+DEU,Germany,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",5.480632e-03,1,,
+DEU,Germany,33,"Flat rolled iron, width > 600mm, clad",7.514361e-03,1,0.1699,-0.0182
+DEU,Germany,34,Other articles of iron or steel,1.046077e-02,1,-0.0865,-0.5758
+DEU,Germany,35,Unwrought aluminum,2.178080e-03,1,,
+DEU,Germany,36,Aluminum plates > 0.2 mm,1.574776e-02,1,-0.2479,-0.8424
+DEU,Germany,37,Spark-ignition reciprocating internal combustion piston engines,8.424971e-03,1,,
+DEU,Germany,38,Compression-ignition internal combustion piston engines,1.383201e-02,1,0.0417,-0.1152
+DEU,Germany,39,Parts suitable for use with spark-ignition engines,1.811856e-02,1,-0.7127,-0.2970
+DEU,Germany,40,Gas turbines,8.199950e-03,1,-0.4595,0.0909
+DEU,Germany,41,Pumps for liquids,1.762241e-02,1,0.1807,-0.0667
+DEU,Germany,42,"Pumps, compressors, fans, etc.",1.210712e-02,1,-0.7228,-0.5273
+DEU,Germany,43,Air conditioners,3.881437e-03,1,,
+DEU,Germany,44,"Refrigerators, freezers",5.645799e-03,1,,
+DEU,Germany,45,Equipment for temperature change of materials,1.419810e-02,1,-0.2247,0.0788
+DEU,Germany,46,Centrifuges,1.746509e-02,1,-0.7120,-0.4424
+DEU,Germany,47,Dish washing machines,2.560630e-02,1,-0.0788,-0.7212
+DEU,Germany,48,"Self-propelled bulldozers, excavators and road rollers",7.301533e-03,1,-0.0386,-0.5394
+DEU,Germany,49,Parts for use with hoists and excavation machinery,8.220223e-03,1,0.1645,0.2727
+DEU,Germany,50,Printers and copiers,2.719451e-02,1,0.0927,-0.4545
+DEU,Germany,51,Computers,4.372455e-03,1,0.7183,0.5879
+DEU,Germany,52,Parts and accessories for office machines,4.280222e-03,1,0.7207,0.2364
+DEU,Germany,53,Machinery for working rubber or plastics,2.155518e-02,1,-0.6564,-0.4424
+DEU,Germany,54,Machines n.e.c.,1.480024e-02,1,-0.7382,-0.3697
+DEU,Germany,55,Appliances for thermostatically controlled valves,1.366221e-02,1,0.0154,0.6848
+DEU,Germany,56,Ball or roller bearings,1.456045e-02,1,-0.6008,0.5152
+DEU,Germany,57,Transmission shafts,2.073802e-02,1,-0.6456,0.3576
+DEU,Germany,58,Electric motors and generators,1.304469e-02,1,-0.6641,-0.1515
+DEU,Germany,59,Electrical transformers,9.290639e-03,1,,
+DEU,Germany,60,Batteries,5.897595e-03,1,,
+DEU,Germany,61,Electric heaters,8.639096e-03,1,0.0432,-0.3455
+DEU,Germany,62,Telephones,5.444264e-03,1,,
+DEU,Germany,63,Microphones,4.891950e-03,1,,
+DEU,Germany,64,Video recording apparatus,4.413043e-03,1,,
+DEU,Germany,65,"Tapes, cassettes, records and compact disks",1.163758e-02,1,,
+DEU,Germany,66,"Transmission apparatus for radio, telephone and TV",5.313326e-03,1,0.1236,-0.1636
+DEU,Germany,67,Reception apparatus for radio broadcasting,3.655999e-03,1,,
+DEU,Germany,68,Monitors and projectors,2.415674e-03,1,,
+DEU,Germany,69,"Parts of radios, telephones, and T.V.s",3.329860e-03,1,,
+DEU,Germany,70,Electrical capacitors,4.449937e-03,1,,
+DEU,Germany,71,Electronic printed circuits,3.164522e-03,1,,
+DEU,Germany,72,Electrical apparatus for < 1k volts,1.368084e-02,1,-0.1683,0.7576
+DEU,Germany,73,Parts for electrical apparatus,1.683594e-02,1,0.1900,0.3212
+DEU,Germany,74,"Thermionic, cold cathode or photocathode tubes",5.238441e-03,1,,
+DEU,Germany,75,Semiconductor devices,6.465807e-03,1,,
+DEU,Germany,76,Electronic integrated circuits,3.504444e-03,1,0.8544,-0.3091
+DEU,Germany,77,Electrical machines with individual functions n.e.c.,8.501927e-03,1,0.0734,-0.5758
+DEU,Germany,78,Insulated electrical wire,6.664821e-03,1,,
+DEU,Germany,79,Tractors,1.658796e-02,1,-0.1498,-0.0061
+DEU,Germany,80,Cars,1.886990e-02,1,-0.6571,-0.4545
+DEU,Germany,81,Motor vehicles for transporting goods,8.432019e-03,1,0.1004,-0.6364
+DEU,Germany,82,Parts of motor vehicles,1.280792e-02,1,-0.7946,0.8061
+DEU,Germany,83,Motorcycles,5.958970e-03,1,,
+DEU,Germany,84,Other aircraft and spacecraft,1.588929e-02,1,-0.7081,-0.0303
+DEU,Germany,85,Parts of other aircraft,9.437635e-03,1,,
+DEU,Germany,86,Cargo ships and similar vessels,4.794524e-03,1,,
+DEU,Germany,87,Optical fibers,6.486454e-03,1,,
+DEU,Germany,88,Electrostatic photo-copyers,7.413079e-03,1,,
+DEU,Germany,89,Liquid crystal devices,5.194303e-03,1,,
+DEU,Germany,90,Medical instruments,1.138868e-02,1,-0.6981,0.0909
+DEU,Germany,91,Instruments for physical or chemical analysis,1.695356e-02,1,-0.7189,-0.3212
+DEU,Germany,92,Instruments for measuring electricity,9.317426e-03,1,,
+DEU,Germany,93,Measuring instruments,1.854176e-02,1,-0.7375,-0.6606
+DEU,Germany,94,Automatic regulating instruments,1.427142e-02,1,-0.6857,-0.2121
+DEU,Germany,95,Seats,6.047800e-03,1,,
+DEU,Germany,96,Other furniture and parts,8.203113e-03,1,,
+DEU,Germany,97,Toys,5.497607e-03,1,,
+DEU,Germany,98,Commodities not specified according to kind,1.203019e-02,1,-0.0440,-0.5273
+DEU,Germany,99,Trade data discrepancies,0.000000e+00,0,,
+FRA,France,0,Wheat and meslin,2.375662e-02,1,-0.4394,0.2242
+FRA,France,1,Corn,1.591066e-02,1,0.1359,0.7818
+FRA,France,2,Wine,6.929254e-02,1,-0.5498,-0.8424
+FRA,France,3,Coal,1.072836e-04,1,,0.1643
+FRA,France,4,"Petroleum oils, crude",1.873924e-05,1,0.0950,-0.1758
+FRA,France,5,"Petroleum oils, refined",4.284533e-03,1,0.8936,0.7091
+FRA,France,6,Petroleum gases,2.416201e-03,1,,0.5882
+FRA,France,7,Cyclic hydrocarbons,4.273053e-03,1,,
+FRA,France,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,1.030115e-02,1,-0.0432,-0.4667
+FRA,France,9,"Medicaments, packaged",1.828403e-02,1,-0.6842,0.7576
+FRA,France,10,Industrial monocarboxylic fatty acids,9.936264e-03,1,-0.3243,0.5636
+FRA,France,11,Polymers of ethylene,8.395193e-03,1,0.0456,0.9030
+FRA,France,12,Polyacetals,4.440767e-03,1,,
+FRA,France,13,"Other plates of plastics, noncellular and not reinforced",6.215541e-03,1,,
+FRA,France,14,Packing lids,1.134029e-02,1,-0.3622,-0.6000
+FRA,France,15,Other articles of plastic,9.530133e-03,1,0.1236,0.6485
+FRA,France,16,New pneumatic tires of rubber,1.198689e-02,1,0.2124,0.9758
+FRA,France,17,Tanned hides of bovines or equines,3.506199e-03,1,,
+FRA,France,18,Trunks or cases,2.579082e-02,1,-0.7050,-0.8667
+FRA,France,19,Wood sawn lengthwise,2.403839e-03,1,,
+FRA,France,20,"Chemical woodpulp, soda or sulfate",1.793348e-03,1,,
+FRA,France,21,"Paper and paperboard, coated with kaolin",8.603869e-03,1,-0.3429,0.9515
+FRA,France,22,Woven fabrics of synthetic filament yarn,3.900984e-03,1,,
+FRA,France,23,"T-shirts, knit",4.928267e-03,1,,
+FRA,France,24,"Sweaters, pullovers, sweatshirts etc., knit",5.364422e-03,1,,
+FRA,France,25,Men's suits and pants,3.159114e-03,1,,
+FRA,France,26,Women's suits and pants,6.276111e-03,1,,
+FRA,France,27,Leather footwear,7.021355e-03,1,,
+FRA,France,28,Diamonds,5.675335e-04,1,,
+FRA,France,29,Gold,1.359316e-03,1,-0.1689,0.6000
+FRA,France,30,Platinum,1.649936e-03,1,,
+FRA,France,31,Jewelry of precious metal,9.686043e-03,1,,
+FRA,France,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",9.122021e-03,1,-0.1413,0.8909
+FRA,France,33,"Flat rolled iron, width > 600mm, clad",1.142487e-02,1,0.0973,0.6121
+FRA,France,34,Other articles of iron or steel,1.019177e-02,1,0.0486,0.6606
+FRA,France,35,Unwrought aluminum,2.659443e-03,1,,
+FRA,France,36,Aluminum plates > 0.2 mm,1.308039e-02,1,-0.1776,0.1030
+FRA,France,37,Spark-ignition reciprocating internal combustion piston engines,5.693172e-03,1,,
+FRA,France,38,Compression-ignition internal combustion piston engines,1.732843e-02,1,-0.5745,0.6242
+FRA,France,39,Parts suitable for use with spark-ignition engines,8.008793e-03,1,,
+FRA,France,40,Gas turbines,2.301751e-02,1,-0.7328,-0.7939
+FRA,France,41,Pumps for liquids,1.028674e-02,1,0.0826,0.7455
+FRA,France,42,"Pumps, compressors, fans, etc.",8.832125e-03,1,-0.2541,0.9273
+FRA,France,43,Air conditioners,4.749586e-03,1,,
+FRA,France,44,"Refrigerators, freezers",8.323972e-03,1,-0.1405,0.7939
+FRA,France,45,Equipment for temperature change of materials,9.003669e-03,1,0.0409,0.5394
+FRA,France,46,Centrifuges,1.066353e-02,1,-0.0625,0.8909
+FRA,France,47,Dish washing machines,6.216306e-03,1,,
+FRA,France,48,"Self-propelled bulldozers, excavators and road rollers",9.845260e-03,1,0.0981,0.7697
+FRA,France,49,Parts for use with hoists and excavation machinery,8.326194e-03,1,,
+FRA,France,50,Printers and copiers,7.090209e-03,1,,
+FRA,France,51,Computers,3.448574e-03,1,0.7554,0.9394
+FRA,France,52,Parts and accessories for office machines,2.913499e-03,1,0.5746,-0.1879
+FRA,France,53,Machinery for working rubber or plastics,9.589388e-03,1,-0.2348,0.2606
+FRA,France,54,Machines n.e.c.,4.055380e-03,1,0.1617,0.6485
+FRA,France,55,Appliances for thermostatically controlled valves,8.711735e-03,1,0.1792,0.8788
+FRA,France,56,Ball or roller bearings,1.370879e-02,1,-0.6178,0.8424
+FRA,France,57,Transmission shafts,8.371562e-03,1,,
+FRA,France,58,Electric motors and generators,8.814516e-03,1,,
+FRA,France,59,Electrical transformers,5.386093e-03,1,,
+FRA,France,60,Batteries,6.309573e-03,1,,
+FRA,France,61,Electric heaters,8.911880e-03,1,0.2100,0.8061
+FRA,France,62,Telephones,5.377659e-03,1,0.7422,0.8303
+FRA,France,63,Microphones,3.218619e-03,1,,
+FRA,France,64,Video recording apparatus,2.018783e-03,1,,
+FRA,France,65,"Tapes, cassettes, records and compact disks",7.164022e-03,1,,
+FRA,France,66,"Transmission apparatus for radio, telephone and TV",4.325372e-03,1,0.1135,0.9152
+FRA,France,67,Reception apparatus for radio broadcasting,3.330731e-03,1,,
+FRA,France,68,Monitors and projectors,3.755783e-03,1,0.1676,-0.3333
+FRA,France,69,"Parts of radios, telephones, and T.V.s",3.878646e-03,1,-0.2787,-0.1030
+FRA,France,70,Electrical capacitors,1.856363e-03,1,,
+FRA,France,71,Electronic printed circuits,2.024508e-03,1,,
+FRA,France,72,Electrical apparatus for < 1k volts,1.261609e-02,1,-0.5776,0.7939
+FRA,France,73,Parts for electrical apparatus,1.372603e-02,1,-0.1413,0.7091
+FRA,France,74,"Thermionic, cold cathode or photocathode tubes",1.972854e-02,1,,
+FRA,France,75,Semiconductor devices,3.821498e-03,1,,
+FRA,France,76,Electronic integrated circuits,4.575366e-03,1,0.5630,0.8545
+FRA,France,77,Electrical machines with individual functions n.e.c.,3.756995e-03,1,,
+FRA,France,78,Insulated electrical wire,5.400895e-03,1,,
+FRA,France,79,Tractors,1.568843e-02,1,-0.3784,-0.7697
+FRA,France,80,Cars,8.811412e-03,1,-0.0008,0.2485
+FRA,France,81,Motor vehicles for transporting goods,1.034582e-02,1,-0.3869,0.0424
+FRA,France,82,Parts of motor vehicles,1.149232e-02,1,0.1089,0.9273
+FRA,France,83,Motorcycles,4.837001e-03,1,,
+FRA,France,84,Other aircraft and spacecraft,5.291367e-02,1,-0.7506,-0.2485
+FRA,France,85,Parts of other aircraft,1.901350e-02,1,-0.7544,-0.8061
+FRA,France,86,Cargo ships and similar vessels,4.990460e-03,1,-0.1713,0.2000
+FRA,France,87,Optical fibers,4.441748e-03,1,,
+FRA,France,88,Electrostatic photo-copyers,4.818510e-03,1,,
+FRA,France,89,Liquid crystal devices,2.131590e-03,1,,
+FRA,France,90,Medical instruments,6.528744e-03,1,,
+FRA,France,91,Instruments for physical or chemical analysis,7.055100e-03,1,,
+FRA,France,92,Instruments for measuring electricity,5.645770e-03,1,,
+FRA,France,93,Measuring instruments,6.874128e-03,1,,
+FRA,France,94,Automatic regulating instruments,9.759764e-03,1,,
+FRA,France,95,Seats,5.249869e-03,1,,
+FRA,France,96,Other furniture and parts,5.066156e-03,1,,
+FRA,France,97,Toys,4.604824e-03,1,,
+FRA,France,98,Commodities not specified according to kind,4.777561e-03,1,0.3607,0.7576
+FRA,France,99,Trade data discrepancies,9.345773e-04,1,-0.0803,0.0552
+GBR,United Kingdom,0,Wheat and meslin,3.756517e-03,1,,
+GBR,United Kingdom,1,Corn,5.620979e-04,1,,
+GBR,United Kingdom,2,Wine,4.841813e-03,1,,
+GBR,United Kingdom,3,Coal,5.966526e-04,1,,
+GBR,United Kingdom,4,"Petroleum oils, crude",8.204156e-03,1,,
+GBR,United Kingdom,5,"Petroleum oils, refined",7.810270e-03,1,,
+GBR,United Kingdom,6,Petroleum gases,4.802645e-03,1,,
+GBR,United Kingdom,7,Cyclic hydrocarbons,5.148793e-03,1,,
+GBR,United Kingdom,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,1.374880e-02,1,,
+GBR,United Kingdom,9,"Medicaments, packaged",2.242136e-02,1,0.5212,0.1273
+GBR,United Kingdom,10,Industrial monocarboxylic fatty acids,9.992019e-03,1,0.1158,-0.3939
+GBR,United Kingdom,11,Polymers of ethylene,3.082690e-03,1,,
+GBR,United Kingdom,12,Polyacetals,5.091857e-03,1,,
+GBR,United Kingdom,13,"Other plates of plastics, noncellular and not reinforced",9.068106e-03,1,,
+GBR,United Kingdom,14,Packing lids,8.265997e-03,1,,
+GBR,United Kingdom,15,Other articles of plastic,7.224007e-03,1,,
+GBR,United Kingdom,16,New pneumatic tires of rubber,5.142063e-03,1,-0.0108,0.5515
+GBR,United Kingdom,17,Tanned hides of bovines or equines,4.475373e-03,1,,
+GBR,United Kingdom,18,Trunks or cases,4.383747e-03,1,,
+GBR,United Kingdom,19,Wood sawn lengthwise,6.617909e-04,1,,
+GBR,United Kingdom,20,"Chemical woodpulp, soda or sulfate",2.305660e-04,1,,
+GBR,United Kingdom,21,"Paper and paperboard, coated with kaolin",3.794298e-03,1,,
+GBR,United Kingdom,22,Woven fabrics of synthetic filament yarn,3.902207e-03,1,,
+GBR,United Kingdom,23,"T-shirts, knit",4.498602e-03,1,,
+GBR,United Kingdom,24,"Sweaters, pullovers, sweatshirts etc., knit",5.387458e-03,1,,
+GBR,United Kingdom,25,Men's suits and pants,3.318771e-03,1,,
+GBR,United Kingdom,26,Women's suits and pants,5.480713e-03,1,,
+GBR,United Kingdom,27,Leather footwear,5.332346e-03,1,,
+GBR,United Kingdom,28,Diamonds,1.687112e-02,1,-0.0803,0.6485
+GBR,United Kingdom,29,Gold,1.874641e-02,1,0.3042,-0.2606
+GBR,United Kingdom,30,Platinum,3.727856e-02,1,-0.7004,-0.7212
+GBR,United Kingdom,31,Jewelry of precious metal,1.546362e-02,1,,
+GBR,United Kingdom,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",3.311258e-03,1,,
+GBR,United Kingdom,33,"Flat rolled iron, width > 600mm, clad",5.458307e-03,1,0.0054,0.3212
+GBR,United Kingdom,34,Other articles of iron or steel,7.334031e-03,1,,
+GBR,United Kingdom,35,Unwrought aluminum,4.586300e-03,1,,
+GBR,United Kingdom,36,Aluminum plates > 0.2 mm,7.540617e-03,1,,
+GBR,United Kingdom,37,Spark-ignition reciprocating internal combustion piston engines,1.432820e-02,1,,
+GBR,United Kingdom,38,Compression-ignition internal combustion piston engines,2.065543e-02,1,0.6355,-0.5030
+GBR,United Kingdom,39,Parts suitable for use with spark-ignition engines,8.610317e-03,1,,
+GBR,United Kingdom,40,Gas turbines,5.546351e-02,1,0.9653,-0.6000
+GBR,United Kingdom,41,Pumps for liquids,1.061559e-02,1,0.6703,-0.0788
+GBR,United Kingdom,42,"Pumps, compressors, fans, etc.",8.337145e-03,1,0.0950,-0.4545
+GBR,United Kingdom,43,Air conditioners,4.485134e-03,1,,
+GBR,United Kingdom,44,"Refrigerators, freezers",2.908810e-03,1,,
+GBR,United Kingdom,45,Equipment for temperature change of materials,7.649810e-03,1,,
+GBR,United Kingdom,46,Centrifuges,1.283148e-02,1,0.2402,0.6727
+GBR,United Kingdom,47,Dish washing machines,4.571098e-03,1,,
+GBR,United Kingdom,48,"Self-propelled bulldozers, excavators and road rollers",1.721738e-02,1,0.8479,0.4182
+GBR,United Kingdom,49,Parts for use with hoists and excavation machinery,9.771155e-03,1,0.4293,-0.3455
+GBR,United Kingdom,50,Printers and copiers,1.124454e-02,1,0.5274,-0.1152
+GBR,United Kingdom,51,Computers,7.782076e-03,1,-0.0108,-0.1030
+GBR,United Kingdom,52,Parts and accessories for office machines,7.483853e-03,1,0.0703,0.5515
+GBR,United Kingdom,53,Machinery for working rubber or plastics,3.426623e-03,1,,
+GBR,United Kingdom,54,Machines n.e.c.,6.273224e-03,1,,
+GBR,United Kingdom,55,Appliances for thermostatically controlled valves,1.142795e-02,1,,
+GBR,United Kingdom,56,Ball or roller bearings,6.841334e-03,1,,
+GBR,United Kingdom,57,Transmission shafts,7.329231e-03,1,,
+GBR,United Kingdom,58,Electric motors and generators,5.469536e-03,1,,
+GBR,United Kingdom,59,Electrical transformers,5.508218e-03,1,,
+GBR,United Kingdom,60,Batteries,4.919422e-03,1,,
+GBR,United Kingdom,61,Electric heaters,5.656164e-03,1,,
+GBR,United Kingdom,62,Telephones,9.391213e-03,1,0.0525,-0.1758
+GBR,United Kingdom,63,Microphones,8.108762e-03,1,,
+GBR,United Kingdom,64,Video recording apparatus,5.292993e-03,1,,
+GBR,United Kingdom,65,"Tapes, cassettes, records and compact disks",1.566423e-02,1,0.4278,0.7091
+GBR,United Kingdom,66,"Transmission apparatus for radio, telephone and TV",9.481720e-03,1,0.4687,-0.1758
+GBR,United Kingdom,67,Reception apparatus for radio broadcasting,2.963970e-03,1,,
+GBR,United Kingdom,68,Monitors and projectors,5.384522e-03,1,0.0116,0.5394
+GBR,United Kingdom,69,"Parts of radios, telephones, and T.V.s",4.497805e-03,1,,
+GBR,United Kingdom,70,Electrical capacitors,4.228606e-03,1,,
+GBR,United Kingdom,71,Electronic printed circuits,4.829554e-03,1,,
+GBR,United Kingdom,72,Electrical apparatus for < 1k volts,7.608349e-03,1,,
+GBR,United Kingdom,73,Parts for electrical apparatus,5.208246e-03,1,,
+GBR,United Kingdom,74,"Thermionic, cold cathode or photocathode tubes",1.576988e-02,1,,
+GBR,United Kingdom,75,Semiconductor devices,4.569434e-03,1,,
+GBR,United Kingdom,76,Electronic integrated circuits,3.837442e-03,1,,
+GBR,United Kingdom,77,Electrical machines with individual functions n.e.c.,1.220055e-02,1,0.1143,0.1758
+GBR,United Kingdom,78,Insulated electrical wire,4.539752e-03,1,,
+GBR,United Kingdom,79,Tractors,1.112150e-02,1,0.1606,0.2606
+GBR,United Kingdom,80,Cars,1.303304e-02,1,,
+GBR,United Kingdom,81,Motor vehicles for transporting goods,5.850318e-03,1,,
+GBR,United Kingdom,82,Parts of motor vehicles,6.815388e-03,1,0.0039,0.8182
+GBR,United Kingdom,83,Motorcycles,3.320903e-03,1,,
+GBR,United Kingdom,84,Other aircraft and spacecraft,3.899014e-03,1,,
+GBR,United Kingdom,85,Parts of other aircraft,4.119628e-02,1,0.9544,-0.6606
+GBR,United Kingdom,86,Cargo ships and similar vessels,1.144735e-03,1,,
+GBR,United Kingdom,87,Optical fibers,1.120805e-02,1,,
+GBR,United Kingdom,88,Electrostatic photo-copyers,6.142409e-03,1,0.1985,0.3333
+GBR,United Kingdom,89,Liquid crystal devices,3.961222e-03,1,,
+GBR,United Kingdom,90,Medical instruments,7.641836e-03,1,,
+GBR,United Kingdom,91,Instruments for physical or chemical analysis,1.738800e-02,1,0.7761,-0.6848
+GBR,United Kingdom,92,Instruments for measuring electricity,1.243989e-02,1,0.2710,-0.8424
+GBR,United Kingdom,93,Measuring instruments,1.209256e-02,1,0.7699,-0.5515
+GBR,United Kingdom,94,Automatic regulating instruments,1.046149e-02,1,0.5050,0.3697
+GBR,United Kingdom,95,Seats,4.968478e-03,1,,
+GBR,United Kingdom,96,Other furniture and parts,4.590764e-03,1,,
+GBR,United Kingdom,97,Toys,5.623820e-03,1,,
+GBR,United Kingdom,98,Commodities not specified according to kind,1.194788e-02,1,0.7699,0.7333
+GBR,United Kingdom,99,Trade data discrepancies,9.508916e-05,1,,
+IDN,Indonesia,0,Wheat and meslin,1.174927e-04,1,,
+IDN,Indonesia,1,Corn,8.521331e-04,1,,
+IDN,Indonesia,2,Wine,7.101174e-05,1,,
+IDN,Indonesia,3,Coal,1.255623e-01,1,-0.1089,-0.4788
+IDN,Indonesia,4,"Petroleum oils, crude",1.148719e-02,1,-0.0726,0.8182
+IDN,Indonesia,5,"Petroleum oils, refined",5.600677e-03,1,-0.2324,-0.8424
+IDN,Indonesia,6,Petroleum gases,5.216574e-02,1,-0.7405,-0.9030
+IDN,Indonesia,7,Cyclic hydrocarbons,9.045388e-03,1,-0.1328,-0.3091
+IDN,Indonesia,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,1.440734e-03,1,,
+IDN,Indonesia,9,"Medicaments, packaged",7.922175e-04,1,,
+IDN,Indonesia,10,Industrial monocarboxylic fatty acids,7.697319e-03,1,,
+IDN,Indonesia,11,Polymers of ethylene,2.510238e-03,1,,
+IDN,Indonesia,12,Polyacetals,9.324201e-03,1,0.5413,0.9152
+IDN,Indonesia,13,"Other plates of plastics, noncellular and not reinforced",8.436474e-03,1,,
+IDN,Indonesia,14,Packing lids,7.004907e-03,1,,
+IDN,Indonesia,15,Other articles of plastic,2.113323e-03,1,,
+IDN,Indonesia,16,New pneumatic tires of rubber,1.575259e-02,1,-0.1135,0.6727
+IDN,Indonesia,17,Tanned hides of bovines or equines,5.306255e-03,1,,
+IDN,Indonesia,18,Trunks or cases,7.459399e-03,1,0.3668,-0.9879
+IDN,Indonesia,19,Wood sawn lengthwise,2.862055e-03,1,,
+IDN,Indonesia,20,"Chemical woodpulp, soda or sulfate",5.439487e-02,1,-0.0286,0.0909
+IDN,Indonesia,21,"Paper and paperboard, coated with kaolin",1.974754e-02,1,0.3266,0.6000
+IDN,Indonesia,22,Woven fabrics of synthetic filament yarn,3.128145e-02,1,0.3521,0.9273
+IDN,Indonesia,23,"T-shirts, knit",1.218009e-02,1,0.2239,0.7818
+IDN,Indonesia,24,"Sweaters, pullovers, sweatshirts etc., knit",1.646186e-02,1,0.0301,-0.1879
+IDN,Indonesia,25,Men's suits and pants,1.655510e-02,1,0.4278,-0.5758
+IDN,Indonesia,26,Women's suits and pants,1.772412e-02,1,0.3529,0.7212
+IDN,Indonesia,27,Leather footwear,4.247625e-02,1,-0.3297,-0.4909
+IDN,Indonesia,28,Diamonds,1.039609e-04,1,,
+IDN,Indonesia,29,Gold,8.370982e-03,1,0.1815,0.4667
+IDN,Indonesia,30,Platinum,3.027451e-05,1,,
+IDN,Indonesia,31,Jewelry of precious metal,1.649679e-02,1,,
+IDN,Indonesia,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",7.585708e-03,1,,
+IDN,Indonesia,33,"Flat rolled iron, width > 600mm, clad",1.443129e-03,1,,
+IDN,Indonesia,34,Other articles of iron or steel,2.468640e-03,1,,
+IDN,Indonesia,35,Unwrought aluminum,7.431116e-03,1,,
+IDN,Indonesia,36,Aluminum plates > 0.2 mm,3.979408e-03,1,,
+IDN,Indonesia,37,Spark-ignition reciprocating internal combustion piston engines,4.324200e-03,1,,
+IDN,Indonesia,38,Compression-ignition internal combustion piston engines,8.345325e-04,1,,
+IDN,Indonesia,39,Parts suitable for use with spark-ignition engines,3.677682e-03,1,,
+IDN,Indonesia,40,Gas turbines,6.627944e-04,1,,
+IDN,Indonesia,41,Pumps for liquids,1.172780e-03,1,,
+IDN,Indonesia,42,"Pumps, compressors, fans, etc.",3.524824e-03,1,,
+IDN,Indonesia,43,Air conditioners,1.618302e-03,1,,
+IDN,Indonesia,44,"Refrigerators, freezers",6.096949e-03,1,,
+IDN,Indonesia,45,Equipment for temperature change of materials,1.898271e-03,1,,
+IDN,Indonesia,46,Centrifuges,2.271156e-03,1,,
+IDN,Indonesia,47,Dish washing machines,5.065881e-04,1,,
+IDN,Indonesia,48,"Self-propelled bulldozers, excavators and road rollers",4.104845e-03,1,,
+IDN,Indonesia,49,Parts for use with hoists and excavation machinery,3.947224e-03,1,,
+IDN,Indonesia,50,Printers and copiers,5.993349e-03,1,,
+IDN,Indonesia,51,Computers,3.147671e-03,1,0.1961,-0.7697
+IDN,Indonesia,52,Parts and accessories for office machines,4.759175e-03,1,,
+IDN,Indonesia,53,Machinery for working rubber or plastics,6.165951e-04,1,,
+IDN,Indonesia,54,Machines n.e.c.,7.913808e-04,1,,
+IDN,Indonesia,55,Appliances for thermostatically controlled valves,1.052457e-03,1,,
+IDN,Indonesia,56,Ball or roller bearings,4.515806e-03,1,,
+IDN,Indonesia,57,Transmission shafts,2.181815e-03,1,,
+IDN,Indonesia,58,Electric motors and generators,8.032975e-03,1,0.5429,0.7333
+IDN,Indonesia,59,Electrical transformers,6.515996e-03,1,,
+IDN,Indonesia,60,Batteries,9.205386e-03,1,,
+IDN,Indonesia,61,Electric heaters,3.968020e-03,1,,
+IDN,Indonesia,62,Telephones,4.455759e-03,1,,
+IDN,Indonesia,63,Microphones,1.341399e-02,1,0.4371,0.9879
+IDN,Indonesia,64,Video recording apparatus,2.800036e-02,1,-0.1444,0.8788
+IDN,Indonesia,65,"Tapes, cassettes, records and compact disks",5.545922e-04,1,,
+IDN,Indonesia,66,"Transmission apparatus for radio, telephone and TV",2.051434e-03,1,,
+IDN,Indonesia,67,Reception apparatus for radio broadcasting,2.080150e-02,1,0.0124,0.6727
+IDN,Indonesia,68,Monitors and projectors,8.758568e-03,1,0.0749,-0.8545
+IDN,Indonesia,69,"Parts of radios, telephones, and T.V.s",5.088246e-03,1,0.3884,0.0788
+IDN,Indonesia,70,Electrical capacitors,1.441408e-02,1,,
+IDN,Indonesia,71,Electronic printed circuits,5.202734e-03,1,,
+IDN,Indonesia,72,Electrical apparatus for < 1k volts,5.395665e-03,1,,
+IDN,Indonesia,73,Parts for electrical apparatus,2.130019e-03,1,,
+IDN,Indonesia,74,"Thermionic, cold cathode or photocathode tubes",1.307460e-02,1,-0.0927,0.4303
+IDN,Indonesia,75,Semiconductor devices,3.087274e-03,1,,
+IDN,Indonesia,76,Electronic integrated circuits,1.321364e-03,1,,
+IDN,Indonesia,77,Electrical machines with individual functions n.e.c.,4.083556e-03,1,,
+IDN,Indonesia,78,Insulated electrical wire,9.325200e-03,1,,
+IDN,Indonesia,79,Tractors,5.063479e-04,1,,
+IDN,Indonesia,80,Cars,2.305718e-03,1,-0.1352,-0.8667
+IDN,Indonesia,81,Motor vehicles for transporting goods,1.039031e-03,1,,
+IDN,Indonesia,82,Parts of motor vehicles,3.195592e-03,1,,
+IDN,Indonesia,83,Motorcycles,1.468903e-02,1,,
+IDN,Indonesia,84,Other aircraft and spacecraft,3.987574e-04,1,,
+IDN,Indonesia,85,Parts of other aircraft,1.297644e-03,1,,
+IDN,Indonesia,86,Cargo ships and similar vessels,2.453241e-03,1,,
+IDN,Indonesia,87,Optical fibers,6.942534e-03,1,,
+IDN,Indonesia,88,Electrostatic photo-copyers,9.548416e-03,1,,
+IDN,Indonesia,89,Liquid crystal devices,6.299427e-04,1,,
+IDN,Indonesia,90,Medical instruments,1.277217e-03,1,,
+IDN,Indonesia,91,Instruments for physical or chemical analysis,7.883226e-04,1,,
+IDN,Indonesia,92,Instruments for measuring electricity,3.379956e-04,1,,
+IDN,Indonesia,93,Measuring instruments,1.126590e-03,1,,
+IDN,Indonesia,94,Automatic regulating instruments,6.852624e-04,1,,
+IDN,Indonesia,95,Seats,1.203634e-02,1,0.3946,-0.8061
+IDN,Indonesia,96,Other furniture and parts,1.746632e-02,1,0.3900,0.0545
+IDN,Indonesia,97,Toys,9.321014e-03,1,,
+IDN,Indonesia,98,Commodities not specified according to kind,5.165313e-03,1,,
+IDN,Indonesia,99,Trade data discrepancies,5.019604e-03,1,,
+IND,India,0,Wheat and meslin,7.962560e-03,1,,
+IND,India,1,Corn,7.127552e-03,1,,
+IND,India,2,Wine,8.589655e-05,1,,
+IND,India,3,Coal,1.361556e-03,1,,
+IND,India,4,"Petroleum oils, crude",4.017461e-05,1,-0.1241,-0.2121
+IND,India,5,"Petroleum oils, refined",2.723167e-02,1,0.6121,0.0061
+IND,India,6,Petroleum gases,4.476697e-04,1,,
+IND,India,7,Cyclic hydrocarbons,2.224175e-02,1,-0.2587,-0.6727
+IND,India,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,1.214128e-02,1,,
+IND,India,9,"Medicaments, packaged",1.543594e-02,1,-0.0680,-0.2970
+IND,India,10,Industrial monocarboxylic fatty acids,2.244070e-03,1,,
+IND,India,11,Polymers of ethylene,4.208081e-03,1,,
+IND,India,12,Polyacetals,7.350740e-03,1,,
+IND,India,13,"Other plates of plastics, noncellular and not reinforced",9.690671e-03,1,,
+IND,India,14,Packing lids,6.733820e-03,1,,
+IND,India,15,Other articles of plastic,4.534095e-03,1,,
+IND,India,16,New pneumatic tires of rubber,1.206862e-02,1,0.0216,-0.0545
+IND,India,17,Tanned hides of bovines or equines,1.942061e-02,1,0.0981,0.1636
+IND,India,18,Trunks or cases,2.288940e-02,1,0.4193,0.1515
+IND,India,19,Wood sawn lengthwise,3.133780e-04,1,,
+IND,India,20,"Chemical woodpulp, soda or sulfate",1.759535e-04,1,,
+IND,India,21,"Paper and paperboard, coated with kaolin",3.533164e-03,1,,
+IND,India,22,Woven fabrics of synthetic filament yarn,2.851600e-02,1,0.2958,0.0667
+IND,India,23,"T-shirts, knit",3.604178e-02,1,0.5120,0.1515
+IND,India,24,"Sweaters, pullovers, sweatshirts etc., knit",6.538292e-03,1,0.3915,0.0788
+IND,India,25,Men's suits and pants,1.372204e-02,1,0.5197,0.2000
+IND,India,26,Women's suits and pants,3.326445e-02,1,0.5197,0.4182
+IND,India,27,Leather footwear,1.985242e-02,1,-0.1452,0.2364
+IND,India,28,Diamonds,1.379754e-01,1,0.3166,0.8182
+IND,India,29,Gold,3.342042e-03,1,,
+IND,India,30,Platinum,2.458900e-03,1,,
+IND,India,31,Jewelry of precious metal,7.416124e-02,1,0.2958,0.2727
+IND,India,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",1.741624e-02,1,-0.0293,-0.5515
+IND,India,33,"Flat rolled iron, width > 600mm, clad",2.129698e-02,1,0.4695,0.4788
+IND,India,34,Other articles of iron or steel,1.015179e-02,1,,
+IND,India,35,Unwrought aluminum,1.822398e-02,1,-0.3815,-0.4909
+IND,India,36,Aluminum plates > 0.2 mm,4.058579e-03,1,,
+IND,India,37,Spark-ignition reciprocating internal combustion piston engines,3.412403e-03,1,,
+IND,India,38,Compression-ignition internal combustion piston engines,6.179221e-03,1,,
+IND,India,39,Parts suitable for use with spark-ignition engines,7.394797e-03,1,,
+IND,India,40,Gas turbines,5.294726e-03,1,,
+IND,India,41,Pumps for liquids,6.147583e-03,1,,
+IND,India,42,"Pumps, compressors, fans, etc.",4.906077e-03,1,,
+IND,India,43,Air conditioners,1.631405e-03,1,,
+IND,India,44,"Refrigerators, freezers",2.449726e-03,1,,
+IND,India,45,Equipment for temperature change of materials,6.952780e-03,1,,
+IND,India,46,Centrifuges,3.667345e-03,1,,
+IND,India,47,Dish washing machines,2.745957e-03,1,,
+IND,India,48,"Self-propelled bulldozers, excavators and road rollers",3.171527e-03,1,,
+IND,India,49,Parts for use with hoists and excavation machinery,3.751659e-03,1,,
+IND,India,50,Printers and copiers,3.434170e-03,1,,
+IND,India,51,Computers,7.059530e-04,1,,
+IND,India,52,Parts and accessories for office machines,1.358695e-03,1,,
+IND,India,53,Machinery for working rubber or plastics,5.708896e-03,1,,
+IND,India,54,Machines n.e.c.,3.620692e-03,1,,
+IND,India,55,Appliances for thermostatically controlled valves,6.351697e-03,1,,
+IND,India,56,Ball or roller bearings,7.302349e-03,1,,
+IND,India,57,Transmission shafts,6.357863e-03,1,,
+IND,India,58,Electric motors and generators,4.324168e-03,1,,
+IND,India,59,Electrical transformers,7.490332e-03,1,,
+IND,India,60,Batteries,2.884499e-03,1,,
+IND,India,61,Electric heaters,8.501546e-04,1,,
+IND,India,62,Telephones,1.317134e-03,1,,
+IND,India,63,Microphones,2.317115e-03,1,,
+IND,India,64,Video recording apparatus,7.381323e-04,1,,
+IND,India,65,"Tapes, cassettes, records and compact disks",8.622630e-03,1,0.5529,0.4545
+IND,India,66,"Transmission apparatus for radio, telephone and TV",4.490343e-03,1,,
+IND,India,67,Reception apparatus for radio broadcasting,1.510376e-03,1,,
+IND,India,68,Monitors and projectors,1.346635e-03,1,,
+IND,India,69,"Parts of radios, telephones, and T.V.s",1.632597e-03,1,,
+IND,India,70,Electrical capacitors,2.281226e-03,1,,
+IND,India,71,Electronic printed circuits,2.843429e-03,1,,
+IND,India,72,Electrical apparatus for < 1k volts,3.192432e-03,1,,
+IND,India,73,Parts for electrical apparatus,6.235841e-03,1,,
+IND,India,74,"Thermionic, cold cathode or photocathode tubes",2.179879e-03,1,,
+IND,India,75,Semiconductor devices,2.437472e-03,1,,
+IND,India,76,Electronic integrated circuits,2.758484e-04,1,,
+IND,India,77,Electrical machines with individual functions n.e.c.,1.362756e-03,1,,
+IND,India,78,Insulated electrical wire,3.263834e-03,1,,
+IND,India,79,Tractors,6.167309e-03,1,,
+IND,India,80,Cars,2.850939e-03,1,,
+IND,India,81,Motor vehicles for transporting goods,3.282326e-03,1,,
+IND,India,82,Parts of motor vehicles,4.704579e-03,1,,
+IND,India,83,Motorcycles,2.738039e-02,1,,
+IND,India,84,Other aircraft and spacecraft,2.305613e-03,1,,
+IND,India,85,Parts of other aircraft,7.058138e-03,1,,
+IND,India,86,Cargo ships and similar vessels,4.189081e-03,1,,
+IND,India,87,Optical fibers,5.365081e-03,1,,
+IND,India,88,Electrostatic photo-copyers,3.858930e-04,1,,
+IND,India,89,Liquid crystal devices,2.559567e-04,1,,
+IND,India,90,Medical instruments,3.146076e-03,1,,
+IND,India,91,Instruments for physical or chemical analysis,9.641057e-04,1,,
+IND,India,92,Instruments for measuring electricity,2.013903e-03,1,,
+IND,India,93,Measuring instruments,1.380909e-03,1,,
+IND,India,94,Automatic regulating instruments,2.372620e-03,1,,
+IND,India,95,Seats,8.379310e-04,1,,
+IND,India,96,Other furniture and parts,3.355322e-03,1,,
+IND,India,97,Toys,9.211333e-04,1,,
+IND,India,98,Commodities not specified according to kind,4.053129e-03,1,,
+IND,India,99,Trade data discrepancies,5.751321e-03,1,,
+ITA,Italy,0,Wheat and meslin,6.466689e-04,1,,
+ITA,Italy,1,Corn,5.082581e-04,1,,
+ITA,Italy,2,Wine,3.772409e-02,1,-0.7243,-0.9515
+ITA,Italy,3,Coal,3.712596e-05,1,,
+ITA,Italy,4,"Petroleum oils, crude",8.317063e-05,1,,
+ITA,Italy,5,"Petroleum oils, refined",5.634709e-03,1,,
+ITA,Italy,6,Petroleum gases,3.965870e-04,1,,
+ITA,Italy,7,Cyclic hydrocarbons,1.715059e-03,1,,
+ITA,Italy,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,4.175796e-03,1,,
+ITA,Italy,9,"Medicaments, packaged",1.211075e-02,1,0.7768,0.9394
+ITA,Italy,10,Industrial monocarboxylic fatty acids,6.444581e-03,1,0.5907,-0.5879
+ITA,Italy,11,Polymers of ethylene,3.662673e-03,1,,
+ITA,Italy,12,Polyacetals,8.132681e-03,1,-0.1598,0.1030
+ITA,Italy,13,"Other plates of plastics, noncellular and not reinforced",1.298603e-02,1,0.3444,0.9515
+ITA,Italy,14,Packing lids,8.122564e-03,1,0.2371,0.9636
+ITA,Italy,15,Other articles of plastic,1.030764e-02,1,0.6641,0.6848
+ITA,Italy,16,New pneumatic tires of rubber,5.398628e-03,1,,
+ITA,Italy,17,Tanned hides of bovines or equines,4.576111e-02,1,-0.1707,-0.8182
+ITA,Italy,18,Trunks or cases,2.558567e-02,1,0.0015,-0.4545
+ITA,Italy,19,Wood sawn lengthwise,1.205818e-03,1,,
+ITA,Italy,20,"Chemical woodpulp, soda or sulfate",3.196453e-04,1,,
+ITA,Italy,21,"Paper and paperboard, coated with kaolin",1.010687e-02,1,-0.2077,0.8545
+ITA,Italy,22,Woven fabrics of synthetic filament yarn,7.832055e-03,1,0.3923,0.8182
+ITA,Italy,23,"T-shirts, knit",7.102431e-03,1,,
+ITA,Italy,24,"Sweaters, pullovers, sweatshirts etc., knit",1.686024e-02,1,0.3506,-0.8545
+ITA,Italy,25,Men's suits and pants,1.329631e-02,1,0.2703,-0.2242
+ITA,Italy,26,Women's suits and pants,1.496303e-02,1,0.2479,-0.9273
+ITA,Italy,27,Leather footwear,3.629274e-02,1,-0.0494,0.9030
+ITA,Italy,28,Diamonds,2.416877e-04,1,,
+ITA,Italy,29,Gold,2.533359e-03,1,,
+ITA,Italy,30,Platinum,6.733885e-03,1,,
+ITA,Italy,31,Jewelry of precious metal,2.660967e-02,1,0.7992,-0.8909
+ITA,Italy,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",6.327410e-03,1,,
+ITA,Italy,33,"Flat rolled iron, width > 600mm, clad",7.210943e-03,1,,
+ITA,Italy,34,Other articles of iron or steel,1.705678e-02,1,-0.0656,0.8545
+ITA,Italy,35,Unwrought aluminum,2.511520e-03,1,,
+ITA,Italy,36,Aluminum plates > 0.2 mm,6.416004e-03,1,,
+ITA,Italy,37,Spark-ignition reciprocating internal combustion piston engines,3.795170e-03,1,,
+ITA,Italy,38,Compression-ignition internal combustion piston engines,9.076496e-03,1,0.2417,0.4788
+ITA,Italy,39,Parts suitable for use with spark-ignition engines,7.852226e-03,1,,
+ITA,Italy,40,Gas turbines,7.087786e-03,1,,
+ITA,Italy,41,Pumps for liquids,1.497506e-02,1,-0.0116,-0.0182
+ITA,Italy,42,"Pumps, compressors, fans, etc.",1.478625e-02,1,0.4409,0.6606
+ITA,Italy,43,Air conditioners,9.378224e-03,1,0.4649,0.1394
+ITA,Italy,44,"Refrigerators, freezers",1.991645e-02,1,0.7707,0.7455
+ITA,Italy,45,Equipment for temperature change of materials,2.057273e-02,1,-0.1645,-0.4667
+ITA,Italy,46,Centrifuges,8.220005e-03,1,-0.0625,0.6970
+ITA,Italy,47,Dish washing machines,4.533276e-02,1,-0.7158,0.1152
+ITA,Italy,48,"Self-propelled bulldozers, excavators and road rollers",5.514020e-03,1,0.6904,0.8424
+ITA,Italy,49,Parts for use with hoists and excavation machinery,9.932000e-03,1,-0.7351,0.2848
+ITA,Italy,50,Printers and copiers,1.001897e-02,1,-0.4919,0.6848
+ITA,Italy,51,Computers,1.212880e-03,1,,
+ITA,Italy,52,Parts and accessories for office machines,1.743586e-03,1,,
+ITA,Italy,53,Machinery for working rubber or plastics,2.026289e-02,1,0.0649,0.8424
+ITA,Italy,54,Machines n.e.c.,1.481578e-02,1,-0.0355,0.9758
+ITA,Italy,55,Appliances for thermostatically controlled valves,2.199290e-02,1,0.3004,0.9273
+ITA,Italy,56,Ball or roller bearings,9.885788e-03,1,0.1251,0.7455
+ITA,Italy,57,Transmission shafts,1.302997e-02,1,-0.1398,-0.8788
+ITA,Italy,58,Electric motors and generators,8.569687e-03,1,0.2772,0.6848
+ITA,Italy,59,Electrical transformers,6.197033e-03,1,,
+ITA,Italy,60,Batteries,4.408036e-03,1,,
+ITA,Italy,61,Electric heaters,1.474047e-02,1,0.6564,0.9273
+ITA,Italy,62,Telephones,2.865744e-03,1,,
+ITA,Italy,63,Microphones,3.362352e-03,1,,
+ITA,Italy,64,Video recording apparatus,5.545578e-04,1,,
+ITA,Italy,65,"Tapes, cassettes, records and compact disks",1.489505e-03,1,,
+ITA,Italy,66,"Transmission apparatus for radio, telephone and TV",1.644620e-03,1,,
+ITA,Italy,67,Reception apparatus for radio broadcasting,9.811216e-04,1,,
+ITA,Italy,68,Monitors and projectors,1.002543e-03,1,,
+ITA,Italy,69,"Parts of radios, telephones, and T.V.s",2.683782e-03,1,,
+ITA,Italy,70,Electrical capacitors,2.008188e-03,1,,
+ITA,Italy,71,Electronic printed circuits,1.687294e-03,1,,
+ITA,Italy,72,Electrical apparatus for < 1k volts,6.722075e-03,1,,
+ITA,Italy,73,Parts for electrical apparatus,6.344344e-03,1,,
+ITA,Italy,74,"Thermionic, cold cathode or photocathode tubes",2.490898e-03,1,,
+ITA,Italy,75,Semiconductor devices,1.401530e-03,1,,
+ITA,Italy,76,Electronic integrated circuits,1.330394e-03,1,,
+ITA,Italy,77,Electrical machines with individual functions n.e.c.,2.571707e-03,1,,
+ITA,Italy,78,Insulated electrical wire,6.121404e-03,1,,
+ITA,Italy,79,Tractors,8.720300e-03,1,0.1946,0.1879
+ITA,Italy,80,Cars,3.934736e-03,1,,
+ITA,Italy,81,Motor vehicles for transporting goods,8.087708e-03,1,-0.6904,0.9273
+ITA,Italy,82,Parts of motor vehicles,8.694114e-03,1,-0.5398,0.0182
+ITA,Italy,83,Motorcycles,1.595625e-02,1,0.2394,0.3091
+ITA,Italy,84,Other aircraft and spacecraft,3.469235e-03,1,-0.1452,-0.0545
+ITA,Italy,85,Parts of other aircraft,6.165127e-03,1,,
+ITA,Italy,86,Cargo ships and similar vessels,7.241448e-03,1,-0.0270,-0.4545
+ITA,Italy,87,Optical fibers,1.685560e-03,1,,
+ITA,Italy,88,Electrostatic photo-copyers,1.622072e-03,1,,
+ITA,Italy,89,Liquid crystal devices,5.421101e-04,1,,
+ITA,Italy,90,Medical instruments,4.271020e-03,1,,
+ITA,Italy,91,Instruments for physical or chemical analysis,3.074700e-03,1,,
+ITA,Italy,92,Instruments for measuring electricity,2.821836e-03,1,,
+ITA,Italy,93,Measuring instruments,7.647760e-03,1,,
+ITA,Italy,94,Automatic regulating instruments,5.126680e-03,1,,
+ITA,Italy,95,Seats,1.652314e-02,1,0.7390,-0.5636
+ITA,Italy,96,Other furniture and parts,2.240866e-02,1,0.2803,0.7333
+ITA,Italy,97,Toys,4.573269e-03,1,,
+ITA,Italy,98,Commodities not specified according to kind,2.943721e-03,1,,
+ITA,Italy,99,Trade data discrepancies,0.000000e+00,0,,
+JPN,Japan,0,Wheat and meslin,7.777977e-06,1,,
+JPN,Japan,1,Corn,1.213755e-06,1,,
+JPN,Japan,2,Wine,1.946027e-05,1,,
+JPN,Japan,3,Coal,1.029346e-05,1,,
+JPN,Japan,4,"Petroleum oils, crude",6.364330e-06,1,,
+JPN,Japan,5,"Petroleum oils, refined",1.894088e-03,1,,
+JPN,Japan,6,Petroleum gases,7.581859e-05,1,,
+JPN,Japan,7,Cyclic hydrocarbons,1.664999e-02,1,0.0224,0.1152
+JPN,Japan,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,5.306971e-03,1,,
+JPN,Japan,9,"Medicaments, packaged",1.437113e-03,1,,
+JPN,Japan,10,Industrial monocarboxylic fatty acids,1.105976e-02,1,0.3382,0.7818
+JPN,Japan,11,Polymers of ethylene,2.571906e-03,1,,
+JPN,Japan,12,Polyacetals,7.472670e-03,1,0.0494,-0.2727
+JPN,Japan,13,"Other plates of plastics, noncellular and not reinforced",1.398738e-02,1,0.2054,-0.1879
+JPN,Japan,14,Packing lids,1.996611e-03,1,,
+JPN,Japan,15,Other articles of plastic,3.731476e-03,1,,
+JPN,Japan,16,New pneumatic tires of rubber,1.176458e-02,1,0.6332,-0.2485
+JPN,Japan,17,Tanned hides of bovines or equines,9.425620e-04,1,,
+JPN,Japan,18,Trunks or cases,2.392567e-04,1,,
+JPN,Japan,19,Wood sawn lengthwise,1.314151e-04,1,,
+JPN,Japan,20,"Chemical woodpulp, soda or sulfate",5.999611e-04,1,,
+JPN,Japan,21,"Paper and paperboard, coated with kaolin",2.266372e-03,1,,
+JPN,Japan,22,Woven fabrics of synthetic filament yarn,7.694095e-03,1,0.3784,0.7576
+JPN,Japan,23,"T-shirts, knit",1.467597e-04,1,,
+JPN,Japan,24,"Sweaters, pullovers, sweatshirts etc., knit",1.854582e-04,1,,
+JPN,Japan,25,Men's suits and pants,1.675166e-04,1,,
+JPN,Japan,26,Women's suits and pants,2.155134e-04,1,,
+JPN,Japan,27,Leather footwear,5.671034e-05,1,,
+JPN,Japan,28,Diamonds,8.306154e-05,1,,
+JPN,Japan,29,Gold,3.310644e-03,1,,
+JPN,Japan,30,Platinum,4.153812e-03,1,,
+JPN,Japan,31,Jewelry of precious metal,1.385088e-03,1,,
+JPN,Japan,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",1.901519e-02,1,0.0888,-0.3212
+JPN,Japan,33,"Flat rolled iron, width > 600mm, clad",1.117260e-02,1,0.5328,-0.0303
+JPN,Japan,34,Other articles of iron or steel,3.267570e-03,1,,
+JPN,Japan,35,Unwrought aluminum,1.729590e-04,1,,
+JPN,Japan,36,Aluminum plates > 0.2 mm,4.550004e-03,1,,
+JPN,Japan,37,Spark-ignition reciprocating internal combustion piston engines,1.717598e-02,1,0.3058,0.1394
+JPN,Japan,38,Compression-ignition internal combustion piston engines,1.229189e-02,1,-0.1946,-0.6000
+JPN,Japan,39,Parts suitable for use with spark-ignition engines,1.545875e-02,1,0.2039,-0.6242
+JPN,Japan,40,Gas turbines,4.855824e-03,1,,
+JPN,Japan,41,Pumps for liquids,9.208047e-03,1,0.0008,0.5758
+JPN,Japan,42,"Pumps, compressors, fans, etc.",1.145637e-02,1,0.2695,-0.1394
+JPN,Japan,43,Air conditioners,6.311393e-03,1,-0.0224,0.9636
+JPN,Japan,44,"Refrigerators, freezers",3.145923e-03,1,,
+JPN,Japan,45,Equipment for temperature change of materials,8.762717e-03,1,0.3436,0.2848
+JPN,Japan,46,Centrifuges,6.266124e-03,1,,
+JPN,Japan,47,Dish washing machines,3.266516e-03,1,,
+JPN,Japan,48,"Self-propelled bulldozers, excavators and road rollers",2.786743e-02,1,0.1992,-0.8303
+JPN,Japan,49,Parts for use with hoists and excavation machinery,5.555576e-03,1,,
+JPN,Japan,50,Printers and copiers,1.457885e-02,1,0.1591,-0.4545
+JPN,Japan,51,Computers,3.374147e-03,1,0.4378,0.7697
+JPN,Japan,52,Parts and accessories for office machines,8.603362e-03,1,0.3290,0.8424
+JPN,Japan,53,Machinery for working rubber or plastics,1.479882e-02,1,0.3575,-0.1273
+JPN,Japan,54,Machines n.e.c.,2.179829e-02,1,0.5251,0.5152
+JPN,Japan,55,Appliances for thermostatically controlled valves,7.730105e-03,1,-0.0386,-0.2242
+JPN,Japan,56,Ball or roller bearings,1.843040e-02,1,0.1336,-0.4424
+JPN,Japan,57,Transmission shafts,1.477376e-02,1,0.1683,0.7939
+JPN,Japan,58,Electric motors and generators,8.737420e-03,1,-0.1004,-0.8788
+JPN,Japan,59,Electrical transformers,6.975106e-03,1,0.0788,0.3576
+JPN,Japan,60,Batteries,1.740030e-02,1,0.4193,0.8909
+JPN,Japan,61,Electric heaters,2.013651e-03,1,,
+JPN,Japan,62,Telephones,5.719880e-03,1,,
+JPN,Japan,63,Microphones,3.233392e-03,1,,
+JPN,Japan,64,Video recording apparatus,1.677553e-02,1,0.5220,0.6242
+JPN,Japan,65,"Tapes, cassettes, records and compact disks",4.085243e-03,1,,
+JPN,Japan,66,"Transmission apparatus for radio, telephone and TV",5.556966e-03,1,0.2726,0.5394
+JPN,Japan,67,Reception apparatus for radio broadcasting,3.424595e-03,1,,
+JPN,Japan,68,Monitors and projectors,4.847588e-03,1,0.5274,0.3455
+JPN,Japan,69,"Parts of radios, telephones, and T.V.s",8.506868e-03,1,0.7629,0.9152
+JPN,Japan,70,Electrical capacitors,3.124927e-02,1,0.3606,-0.9636
+JPN,Japan,71,Electronic printed circuits,1.313805e-02,1,0.7127,-0.7091
+JPN,Japan,72,Electrical apparatus for < 1k volts,1.205686e-02,1,-0.0432,0.9394
+JPN,Japan,73,Parts for electrical apparatus,1.351294e-02,1,0.5483,0.6606
+JPN,Japan,74,"Thermionic, cold cathode or photocathode tubes",1.869847e-02,1,-0.1691,-0.4545
+JPN,Japan,75,Semiconductor devices,1.726563e-02,1,0.6772,0.7576
+JPN,Japan,76,Electronic integrated circuits,1.205472e-02,1,0.3537,-0.0667
+JPN,Japan,77,Electrical machines with individual functions n.e.c.,1.814695e-02,1,0.4309,0.0182
+JPN,Japan,78,Insulated electrical wire,3.473991e-03,1,,
+JPN,Japan,79,Tractors,5.380366e-03,1,,
+JPN,Japan,80,Cars,1.868339e-02,1,-0.5266,-0.5030
+JPN,Japan,81,Motor vehicles for transporting goods,1.107197e-02,1,-0.1730,0.4788
+JPN,Japan,82,Parts of motor vehicles,1.238031e-02,1,-0.6247,0.5394
+JPN,Japan,83,Motorcycles,2.886053e-02,1,0.4417,0.4667
+JPN,Japan,84,Other aircraft and spacecraft,1.383989e-04,1,,
+JPN,Japan,85,Parts of other aircraft,5.571542e-03,1,,
+JPN,Japan,86,Cargo ships and similar vessels,2.419021e-02,1,0.1498,0.4909
+JPN,Japan,87,Optical fibers,2.608357e-02,1,0.7089,-0.9273
+JPN,Japan,88,Electrostatic photo-copyers,2.133729e-02,1,0.1490,-0.8424
+JPN,Japan,89,Liquid crystal devices,1.550201e-02,1,0.0873,0.1879
+JPN,Japan,90,Medical instruments,6.780532e-03,1,0.3050,-0.5758
+JPN,Japan,91,Instruments for physical or chemical analysis,1.366909e-02,1,0.2154,-0.0061
+JPN,Japan,92,Instruments for measuring electricity,1.746490e-02,1,0.3969,-0.7455
+JPN,Japan,93,Measuring instruments,1.453890e-02,1,0.4595,-0.9636
+JPN,Japan,94,Automatic regulating instruments,1.870192e-02,1,0.1019,-0.8909
+JPN,Japan,95,Seats,1.728574e-03,1,,
+JPN,Japan,96,Other furniture and parts,1.603106e-04,1,,
+JPN,Japan,97,Toys,1.056202e-03,1,,
+JPN,Japan,98,Commodities not specified according to kind,1.136510e-02,1,-0.4046,0.8788
+JPN,Japan,99,Trade data discrepancies,2.144011e-03,1,,
+KOR,South Korea,0,Wheat and meslin,1.955779e-05,1,,
+KOR,South Korea,1,Corn,1.255245e-05,1,,
+KOR,South Korea,2,Wine,6.851357e-06,1,,
+KOR,South Korea,3,Coal,2.272880e-05,1,,
+KOR,South Korea,4,"Petroleum oils, crude",4.951372e-05,1,,
+KOR,South Korea,5,"Petroleum oils, refined",1.304352e-02,1,-0.2517,0.5030
+KOR,South Korea,6,Petroleum gases,4.322868e-04,1,,
+KOR,South Korea,7,Cyclic hydrocarbons,3.904022e-02,1,-0.2510,0.1394
+KOR,South Korea,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,1.417073e-03,1,,
+KOR,South Korea,9,"Medicaments, packaged",3.960656e-04,1,,
+KOR,South Korea,10,Industrial monocarboxylic fatty acids,4.952461e-03,1,,
+KOR,South Korea,11,Polymers of ethylene,1.494750e-02,1,0.7089,0.8182
+KOR,South Korea,12,Polyacetals,1.888710e-02,1,-0.1375,0.6121
+KOR,South Korea,13,"Other plates of plastics, noncellular and not reinforced",9.656470e-03,1,-0.0958,0.0909
+KOR,South Korea,14,Packing lids,4.933073e-03,1,,
+KOR,South Korea,15,Other articles of plastic,3.954936e-03,1,,
+KOR,South Korea,16,New pneumatic tires of rubber,1.107441e-02,1,0.3174,-0.7939
+KOR,South Korea,17,Tanned hides of bovines or equines,1.281468e-02,1,0.7730,-0.8303
+KOR,South Korea,18,Trunks or cases,3.295432e-03,1,,
+KOR,South Korea,19,Wood sawn lengthwise,9.328776e-05,1,,
+KOR,South Korea,20,"Chemical woodpulp, soda or sulfate",1.095546e-04,1,,
+KOR,South Korea,21,"Paper and paperboard, coated with kaolin",1.149834e-02,1,0.6795,-0.2364
+KOR,South Korea,22,Woven fabrics of synthetic filament yarn,3.429229e-02,1,0.7050,-0.9515
+KOR,South Korea,23,"T-shirts, knit",2.662731e-03,1,,
+KOR,South Korea,24,"Sweaters, pullovers, sweatshirts etc., knit",2.874487e-03,1,,
+KOR,South Korea,25,Men's suits and pants,1.020895e-03,1,,
+KOR,South Korea,26,Women's suits and pants,2.042865e-03,1,,
+KOR,South Korea,27,Leather footwear,1.266387e-03,1,,
+KOR,South Korea,28,Diamonds,2.803927e-05,1,,
+KOR,South Korea,29,Gold,8.920001e-03,1,0.3181,-0.3818
+KOR,South Korea,30,Platinum,1.686318e-03,1,,
+KOR,South Korea,31,Jewelry of precious metal,1.800141e-03,1,,
+KOR,South Korea,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",1.920710e-02,1,-0.3243,-0.5394
+KOR,South Korea,33,"Flat rolled iron, width > 600mm, clad",2.312618e-02,1,-0.2517,0.2364
+KOR,South Korea,34,Other articles of iron or steel,5.629819e-03,1,,
+KOR,South Korea,35,Unwrought aluminum,1.322954e-03,1,,
+KOR,South Korea,36,Aluminum plates > 0.2 mm,9.471631e-03,1,,
+KOR,South Korea,37,Spark-ignition reciprocating internal combustion piston engines,3.465037e-03,1,,
+KOR,South Korea,38,Compression-ignition internal combustion piston engines,5.516875e-03,1,,
+KOR,South Korea,39,Parts suitable for use with spark-ignition engines,5.312503e-03,1,,
+KOR,South Korea,40,Gas turbines,1.406593e-03,1,,
+KOR,South Korea,41,Pumps for liquids,3.474918e-03,1,,
+KOR,South Korea,42,"Pumps, compressors, fans, etc.",6.790492e-03,1,,
+KOR,South Korea,43,Air conditioners,1.079316e-02,1,0.6463,-0.8424
+KOR,South Korea,44,"Refrigerators, freezers",1.310751e-02,1,0.0502,-0.1879
+KOR,South Korea,45,Equipment for temperature change of materials,9.968680e-03,1,-0.2131,-0.0303
+KOR,South Korea,46,Centrifuges,4.095681e-03,1,,
+KOR,South Korea,47,Dish washing machines,2.974380e-03,1,,
+KOR,South Korea,48,"Self-propelled bulldozers, excavators and road rollers",1.383427e-02,1,-0.3761,-0.7091
+KOR,South Korea,49,Parts for use with hoists and excavation machinery,6.989253e-03,1,,
+KOR,South Korea,50,Printers and copiers,2.837407e-03,1,,
+KOR,South Korea,51,Computers,5.587742e-03,1,0.2178,-0.7697
+KOR,South Korea,52,Parts and accessories for office machines,1.529955e-02,1,-0.2278,0.6848
+KOR,South Korea,53,Machinery for working rubber or plastics,5.307648e-03,1,,
+KOR,South Korea,54,Machines n.e.c.,1.367771e-02,1,,
+KOR,South Korea,55,Appliances for thermostatically controlled valves,4.213438e-03,1,,
+KOR,South Korea,56,Ball or roller bearings,4.150118e-03,1,,
+KOR,South Korea,57,Transmission shafts,3.745687e-03,1,,
+KOR,South Korea,58,Electric motors and generators,4.675754e-03,1,,
+KOR,South Korea,59,Electrical transformers,7.165648e-03,1,,
+KOR,South Korea,60,Batteries,1.929160e-02,1,,
+KOR,South Korea,61,Electric heaters,8.199178e-03,1,0.7761,0.3333
+KOR,South Korea,62,Telephones,5.837697e-03,1,,
+KOR,South Korea,63,Microphones,8.786943e-03,1,0.7529,-0.8545
+KOR,South Korea,64,Video recording apparatus,1.117987e-02,1,0.1514,-0.3818
+KOR,South Korea,65,"Tapes, cassettes, records and compact disks",1.165908e-02,1,,
+KOR,South Korea,66,"Transmission apparatus for radio, telephone and TV",1.610564e-02,1,0.5228,-0.7333
+KOR,South Korea,67,Reception apparatus for radio broadcasting,6.037194e-03,1,0.1135,0.7697
+KOR,South Korea,68,Monitors and projectors,8.712191e-03,1,0.6680,-0.8424
+KOR,South Korea,69,"Parts of radios, telephones, and T.V.s",2.568806e-02,1,0.0309,-0.3455
+KOR,South Korea,70,Electrical capacitors,1.028890e-02,1,0.0749,0.6485
+KOR,South Korea,71,Electronic printed circuits,2.161004e-02,1,-0.2116,-0.2121
+KOR,South Korea,72,Electrical apparatus for < 1k volts,4.827899e-03,1,,
+KOR,South Korea,73,Parts for electrical apparatus,8.382213e-03,1,,
+KOR,South Korea,74,"Thermionic, cold cathode or photocathode tubes",2.197736e-02,1,0.3591,-0.4061
+KOR,South Korea,75,Semiconductor devices,9.693651e-03,1,0.1900,-0.8061
+KOR,South Korea,76,Electronic integrated circuits,3.043121e-02,1,-0.2409,0.2606
+KOR,South Korea,77,Electrical machines with individual functions n.e.c.,9.590200e-03,1,,
+KOR,South Korea,78,Insulated electrical wire,6.129816e-03,1,,
+KOR,South Korea,79,Tractors,1.828726e-03,1,,
+KOR,South Korea,80,Cars,1.156632e-02,1,-0.4348,-0.1152
+KOR,South Korea,81,Motor vehicles for transporting goods,3.465630e-03,1,,
+KOR,South Korea,82,Parts of motor vehicles,8.826824e-03,1,,
+KOR,South Korea,83,Motorcycles,1.463466e-03,1,,
+KOR,South Korea,84,Other aircraft and spacecraft,7.579572e-04,1,,
+KOR,South Korea,85,Parts of other aircraft,2.817627e-03,1,,
+KOR,South Korea,86,Cargo ships and similar vessels,6.019222e-02,1,-0.3259,-0.6000
+KOR,South Korea,87,Optical fibers,1.855978e-02,1,,
+KOR,South Korea,88,Electrostatic photo-copyers,3.972031e-03,1,,
+KOR,South Korea,89,Liquid crystal devices,5.003346e-02,1,0.7645,0.9515
+KOR,South Korea,90,Medical instruments,2.645576e-03,1,,
+KOR,South Korea,91,Instruments for physical or chemical analysis,1.995512e-03,1,,
+KOR,South Korea,92,Instruments for measuring electricity,6.458128e-03,1,,
+KOR,South Korea,93,Measuring instruments,8.408340e-03,1,,
+KOR,South Korea,94,Automatic regulating instruments,3.833150e-03,1,,
+KOR,South Korea,95,Seats,1.894239e-03,1,,
+KOR,South Korea,96,Other furniture and parts,6.770195e-04,1,,
+KOR,South Korea,97,Toys,1.624794e-03,1,,
+KOR,South Korea,98,Commodities not specified according to kind,4.911166e-04,1,,
+KOR,South Korea,99,Trade data discrepancies,8.027141e-04,1,,
+MEX,Mexico,0,Wheat and meslin,1.472537e-03,1,,
+MEX,Mexico,1,Corn,1.230625e-03,1,,
+MEX,Mexico,2,Wine,6.421226e-05,1,,
+MEX,Mexico,3,Coal,3.025668e-05,1,,
+MEX,Mexico,4,"Petroleum oils, crude",1.169923e-02,1,-0.5529,-0.5394
+MEX,Mexico,5,"Petroleum oils, refined",2.327844e-03,1,,
+MEX,Mexico,6,Petroleum gases,3.619285e-04,1,,
+MEX,Mexico,7,Cyclic hydrocarbons,2.093951e-04,1,,
+MEX,Mexico,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,1.089540e-03,1,,
+MEX,Mexico,9,"Medicaments, packaged",1.552812e-03,1,,
+MEX,Mexico,10,Industrial monocarboxylic fatty acids,1.469936e-03,1,,
+MEX,Mexico,11,Polymers of ethylene,1.158797e-03,1,,
+MEX,Mexico,12,Polyacetals,4.521174e-03,1,,
+MEX,Mexico,13,"Other plates of plastics, noncellular and not reinforced",3.515077e-03,1,,
+MEX,Mexico,14,Packing lids,1.215141e-02,1,0.2147,-0.5030
+MEX,Mexico,15,Other articles of plastic,8.470757e-03,1,-0.0309,0.5758
+MEX,Mexico,16,New pneumatic tires of rubber,3.202653e-03,1,,
+MEX,Mexico,17,Tanned hides of bovines or equines,4.213641e-03,1,,
+MEX,Mexico,18,Trunks or cases,2.107855e-03,1,,
+MEX,Mexico,19,Wood sawn lengthwise,3.470668e-04,1,,
+MEX,Mexico,20,"Chemical woodpulp, soda or sulfate",2.416335e-05,1,,
+MEX,Mexico,21,"Paper and paperboard, coated with kaolin",4.336746e-04,1,,
+MEX,Mexico,22,Woven fabrics of synthetic filament yarn,1.006216e-03,1,,
+MEX,Mexico,23,"T-shirts, knit",1.104727e-02,1,0.6718,0.0061
+MEX,Mexico,24,"Sweaters, pullovers, sweatshirts etc., knit",3.787842e-03,1,,
+MEX,Mexico,25,Men's suits and pants,1.477889e-02,1,0.8888,0.7939
+MEX,Mexico,26,Women's suits and pants,7.134562e-03,1,0.6819,-0.3818
+MEX,Mexico,27,Leather footwear,2.750117e-03,1,,
+MEX,Mexico,28,Diamonds,9.894175e-05,1,,
+MEX,Mexico,29,Gold,4.025691e-03,1,,
+MEX,Mexico,30,Platinum,9.238858e-05,1,,
+MEX,Mexico,31,Jewelry of precious metal,3.132892e-03,1,,
+MEX,Mexico,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",2.032105e-03,1,,
+MEX,Mexico,33,"Flat rolled iron, width > 600mm, clad",3.612212e-03,1,,
+MEX,Mexico,34,Other articles of iron or steel,9.579764e-03,1,0.0039,0.0061
+MEX,Mexico,35,Unwrought aluminum,6.165229e-04,1,,
+MEX,Mexico,36,Aluminum plates > 0.2 mm,3.157041e-04,1,,
+MEX,Mexico,37,Spark-ignition reciprocating internal combustion piston engines,2.288917e-02,1,-0.3954,0.0182
+MEX,Mexico,38,Compression-ignition internal combustion piston engines,7.739199e-03,1,,
+MEX,Mexico,39,Parts suitable for use with spark-ignition engines,1.710912e-02,1,0.9081,-0.8909
+MEX,Mexico,40,Gas turbines,5.556678e-03,1,,
+MEX,Mexico,41,Pumps for liquids,7.311782e-03,1,,
+MEX,Mexico,42,"Pumps, compressors, fans, etc.",9.198927e-03,1,,
+MEX,Mexico,43,Air conditioners,1.874767e-02,1,0.5405,-0.9394
+MEX,Mexico,44,"Refrigerators, freezers",2.534661e-02,1,0.6749,-0.2364
+MEX,Mexico,45,Equipment for temperature change of materials,6.983049e-03,1,,
+MEX,Mexico,46,Centrifuges,1.059231e-02,1,,
+MEX,Mexico,47,Dish washing machines,6.530283e-04,1,,
+MEX,Mexico,48,"Self-propelled bulldozers, excavators and road rollers",6.042523e-04,1,,
+MEX,Mexico,49,Parts for use with hoists and excavation machinery,6.818693e-03,1,,
+MEX,Mexico,50,Printers and copiers,9.238455e-04,1,,
+MEX,Mexico,51,Computers,1.719326e-02,1,0.7197,-0.1636
+MEX,Mexico,52,Parts and accessories for office machines,5.254622e-03,1,,
+MEX,Mexico,53,Machinery for working rubber or plastics,8.002274e-04,1,,
+MEX,Mexico,54,Machines n.e.c.,3.556232e-03,1,,
+MEX,Mexico,55,Appliances for thermostatically controlled valves,1.051312e-02,1,0.0803,0.0909
+MEX,Mexico,56,Ball or roller bearings,2.027440e-03,1,,
+MEX,Mexico,57,Transmission shafts,5.863090e-03,1,,
+MEX,Mexico,58,Electric motors and generators,2.189143e-02,1,0.3544,0.0424
+MEX,Mexico,59,Electrical transformers,1.530545e-02,1,0.0494,0.1273
+MEX,Mexico,60,Batteries,1.329192e-02,1,-0.2039,-0.6364
+MEX,Mexico,61,Electric heaters,1.003295e-02,1,0.0201,-0.5879
+MEX,Mexico,62,Telephones,1.419825e-02,1,0.3274,0.1152
+MEX,Mexico,63,Microphones,2.049985e-02,1,0.7151,0.8182
+MEX,Mexico,64,Video recording apparatus,4.347523e-03,1,-0.4579,-0.5273
+MEX,Mexico,65,"Tapes, cassettes, records and compact disks",3.822364e-03,1,,
+MEX,Mexico,66,"Transmission apparatus for radio, telephone and TV",9.743997e-03,1,0.4409,0.9515
+MEX,Mexico,67,Reception apparatus for radio broadcasting,3.402296e-02,1,0.0602,-0.7818
+MEX,Mexico,68,Monitors and projectors,6.121488e-02,1,0.7243,0.6848
+MEX,Mexico,69,"Parts of radios, telephones, and T.V.s",1.146756e-02,1,-0.0100,0.8061
+MEX,Mexico,70,Electrical capacitors,1.946660e-02,1,0.2749,0.5758
+MEX,Mexico,71,Electronic printed circuits,3.817096e-03,1,,
+MEX,Mexico,72,Electrical apparatus for < 1k volts,1.610165e-02,1,-0.5305,0.7697
+MEX,Mexico,73,Parts for electrical apparatus,9.699065e-03,1,,
+MEX,Mexico,74,"Thermionic, cold cathode or photocathode tubes",4.803976e-03,1,0.7560,0.5030
+MEX,Mexico,75,Semiconductor devices,4.540195e-03,1,,
+MEX,Mexico,76,Electronic integrated circuits,1.908190e-03,1,,
+MEX,Mexico,77,Electrical machines with individual functions n.e.c.,1.312635e-02,1,0.0270,-0.2848
+MEX,Mexico,78,Insulated electrical wire,3.828378e-02,1,0.1900,-0.2242
+MEX,Mexico,79,Tractors,2.547094e-02,1,,
+MEX,Mexico,80,Cars,1.451695e-02,1,0.0417,-0.1879
+MEX,Mexico,81,Motor vehicles for transporting goods,4.163116e-02,1,0.2425,-0.5394
+MEX,Mexico,82,Parts of motor vehicles,1.736689e-02,1,0.9583,-0.9030
+MEX,Mexico,83,Motorcycles,3.031884e-04,1,,
+MEX,Mexico,84,Other aircraft and spacecraft,7.243297e-04,1,,
+MEX,Mexico,85,Parts of other aircraft,1.904676e-03,1,,
+MEX,Mexico,86,Cargo ships and similar vessels,7.695409e-05,1,,
+MEX,Mexico,87,Optical fibers,5.279628e-03,1,,
+MEX,Mexico,88,Electrostatic photo-copyers,5.263425e-03,1,,
+MEX,Mexico,89,Liquid crystal devices,1.488310e-03,1,,
+MEX,Mexico,90,Medical instruments,1.776341e-02,1,0.6819,-0.0424
+MEX,Mexico,91,Instruments for physical or chemical analysis,2.226864e-03,1,,
+MEX,Mexico,92,Instruments for measuring electricity,2.088996e-03,1,,
+MEX,Mexico,93,Measuring instruments,3.455351e-03,1,,
+MEX,Mexico,94,Automatic regulating instruments,2.091231e-02,1,0.6255,0.4061
+MEX,Mexico,95,Seats,2.385322e-02,1,0.6085,0.5758
+MEX,Mexico,96,Other furniture and parts,5.154018e-03,1,,
+MEX,Mexico,97,Toys,7.661291e-03,1,-0.4826,-0.5515
+MEX,Mexico,98,Commodities not specified according to kind,8.444039e-03,1,,
+MEX,Mexico,99,Trade data discrepancies,8.622826e-03,1,-0.1938,0.4182
+RUS,Russia,0,Wheat and meslin,5.183217e-02,1,0.0579,-0.6606
+RUS,Russia,1,Corn,4.845422e-03,1,0.2224,0.7091
+RUS,Russia,2,Wine,1.268521e-04,1,,
+RUS,Russia,3,Coal,5.982213e-02,1,-0.7236,-0.6848
+RUS,Russia,4,"Petroleum oils, crude",6.737618e-02,1,-0.6672,-0.3091
+RUS,Russia,5,"Petroleum oils, refined",5.263826e-02,1,-0.7197,0.9636
+RUS,Russia,6,Petroleum gases,6.914157e-02,1,0.1544,-0.4667
+RUS,Russia,7,Cyclic hydrocarbons,1.107042e-02,1,0.6880,0.6121
+RUS,Russia,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,5.156573e-03,1,0.2486,-0.6121
+RUS,Russia,9,"Medicaments, packaged",6.477436e-04,1,0.2348,0.3576
+RUS,Russia,10,Industrial monocarboxylic fatty acids,1.247732e-03,1,0.1696,-0.3091
+RUS,Russia,11,Polymers of ethylene,5.682571e-03,1,0.0412,-0.5758
+RUS,Russia,12,Polyacetals,1.251456e-03,1,0.9593,0.3576
+RUS,Russia,13,"Other plates of plastics, noncellular and not reinforced",1.502181e-03,1,0.9068,0.2727
+RUS,Russia,14,Packing lids,1.341139e-03,1,0.8942,0.3212
+RUS,Russia,15,Other articles of plastic,6.438431e-04,1,0.9165,-0.5152
+RUS,Russia,16,New pneumatic tires of rubber,6.545679e-03,1,0.2155,0.8424
+RUS,Russia,17,Tanned hides of bovines or equines,4.807990e-03,1,,
+RUS,Russia,18,Trunks or cases,2.418714e-04,1,0.3181,-0.3333
+RUS,Russia,19,Wood sawn lengthwise,4.857398e-02,1,-0.7606,-0.7212
+RUS,Russia,20,"Chemical woodpulp, soda or sulfate",2.182106e-02,1,0.2865,-0.3455
+RUS,Russia,21,"Paper and paperboard, coated with kaolin",5.703692e-04,1,0.8455,0.0909
+RUS,Russia,22,Woven fabrics of synthetic filament yarn,3.414688e-04,1,,
+RUS,Russia,23,"T-shirts, knit",4.052067e-04,1,,
+RUS,Russia,24,"Sweaters, pullovers, sweatshirts etc., knit",2.900801e-04,1,,
+RUS,Russia,25,Men's suits and pants,6.771792e-04,1,,
+RUS,Russia,26,Women's suits and pants,6.413217e-04,1,0.7126,0.0061
+RUS,Russia,27,Leather footwear,5.681092e-04,1,0.4163,0.4061
+RUS,Russia,28,Diamonds,1.981743e-02,1,-0.4780,-0.0667
+RUS,Russia,29,Gold,7.143141e-03,1,0.5785,-0.7333
+RUS,Russia,30,Platinum,8.829127e-02,1,0.0672,-0.2000
+RUS,Russia,31,Jewelry of precious metal,7.741868e-04,1,0.4868,-0.1758
+RUS,Russia,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",3.945452e-02,1,0.5475,0.6606
+RUS,Russia,33,"Flat rolled iron, width > 600mm, clad",7.242475e-03,1,0.4765,0.2970
+RUS,Russia,34,Other articles of iron or steel,3.463847e-03,1,0.3949,0.0788
+RUS,Russia,35,Unwrought aluminum,8.746017e-02,1,0.3220,-0.1394
+RUS,Russia,36,Aluminum plates > 0.2 mm,7.988062e-03,1,0.5861,0.7455
+RUS,Russia,37,Spark-ignition reciprocating internal combustion piston engines,9.012723e-04,1,0.8102,-0.2727
+RUS,Russia,38,Compression-ignition internal combustion piston engines,2.752225e-03,1,0.4708,0.6848
+RUS,Russia,39,Parts suitable for use with spark-ignition engines,1.444606e-03,1,0.3518,0.4909
+RUS,Russia,40,Gas turbines,7.201023e-03,1,-0.0108,0.4788
+RUS,Russia,41,Pumps for liquids,3.180730e-03,1,0.6097,0.6364
+RUS,Russia,42,"Pumps, compressors, fans, etc.",1.315064e-03,1,0.4777,0.8182
+RUS,Russia,43,Air conditioners,4.939617e-04,1,,-0.6727
+RUS,Russia,44,"Refrigerators, freezers",2.800927e-03,1,0.8585,0.3818
+RUS,Russia,45,Equipment for temperature change of materials,4.082369e-03,1,0.2845,-0.5152
+RUS,Russia,46,Centrifuges,1.636430e-03,1,0.7460,0.6364
+RUS,Russia,47,Dish washing machines,9.434817e-04,1,,
+RUS,Russia,48,"Self-propelled bulldozers, excavators and road rollers",2.197926e-03,1,0.6223,0.6364
+RUS,Russia,49,Parts for use with hoists and excavation machinery,2.059632e-03,1,0.2073,0.6727
+RUS,Russia,50,Printers and copiers,3.302005e-04,1,,
+RUS,Russia,51,Computers,3.596089e-04,1,0.0216,0.6848
+RUS,Russia,52,Parts and accessories for office machines,5.758581e-04,1,0.1599,0.8424
+RUS,Russia,53,Machinery for working rubber or plastics,6.492036e-04,1,,
+RUS,Russia,54,Machines n.e.c.,1.068912e-03,1,0.6919,0.7939
+RUS,Russia,55,Appliances for thermostatically controlled valves,2.681440e-03,1,0.5496,0.2970
+RUS,Russia,56,Ball or roller bearings,3.665522e-03,1,,
+RUS,Russia,57,Transmission shafts,2.176454e-03,1,-0.0411,-0.9879
+RUS,Russia,58,Electric motors and generators,2.922122e-03,1,0.6409,0.6485
+RUS,Russia,59,Electrical transformers,1.214931e-03,1,,-0.9152
+RUS,Russia,60,Batteries,1.336378e-03,1,,-0.7979
+RUS,Russia,61,Electric heaters,1.305882e-03,1,0.6083,0.3576
+RUS,Russia,62,Telephones,4.169778e-04,1,0.3059,-0.0303
+RUS,Russia,63,Microphones,3.531315e-04,1,,
+RUS,Russia,64,Video recording apparatus,9.976774e-04,1,,
+RUS,Russia,65,"Tapes, cassettes, records and compact disks",3.130961e-03,1,,
+RUS,Russia,66,"Transmission apparatus for radio, telephone and TV",3.211232e-04,1,0.5020,0.4667
+RUS,Russia,67,Reception apparatus for radio broadcasting,4.797424e-04,1,,
+RUS,Russia,68,Monitors and projectors,1.454005e-03,1,0.4525,0.1758
+RUS,Russia,69,"Parts of radios, telephones, and T.V.s",9.848125e-04,1,0.5318,0.7091
+RUS,Russia,70,Electrical capacitors,4.331833e-04,1,,
+RUS,Russia,71,Electronic printed circuits,5.676579e-05,1,,
+RUS,Russia,72,Electrical apparatus for < 1k volts,9.925439e-04,1,0.8432,0.4909
+RUS,Russia,73,Parts for electrical apparatus,8.523748e-04,1,,
+RUS,Russia,74,"Thermionic, cold cathode or photocathode tubes",8.964552e-03,1,,
+RUS,Russia,75,Semiconductor devices,5.663204e-04,1,0.1540,0.4424
+RUS,Russia,76,Electronic integrated circuits,1.609373e-04,1,0.7137,0.9394
+RUS,Russia,77,Electrical machines with individual functions n.e.c.,2.014562e-03,1,,-0.9265
+RUS,Russia,78,Insulated electrical wire,2.157036e-03,1,0.8385,0.5515
+RUS,Russia,79,Tractors,1.694463e-03,1,0.7391,0.4545
+RUS,Russia,80,Cars,7.968507e-04,1,-0.0564,0.7091
+RUS,Russia,81,Motor vehicles for transporting goods,2.197991e-03,1,0.2680,0.8424
+RUS,Russia,82,Parts of motor vehicles,7.991155e-04,1,0.2402,0.3455
+RUS,Russia,83,Motorcycles,3.994320e-04,1,,
+RUS,Russia,84,Other aircraft and spacecraft,4.145677e-03,1,0.2974,0.7333
+RUS,Russia,85,Parts of other aircraft,3.098722e-03,1,-0.0293,0.5636
+RUS,Russia,86,Cargo ships and similar vessels,3.966277e-03,1,0.3052,0.6364
+RUS,Russia,87,Optical fibers,1.000610e-03,1,,
+RUS,Russia,88,Electrostatic photo-copyers,1.516224e-04,1,,
+RUS,Russia,89,Liquid crystal devices,1.872225e-03,1,-0.2080,0.6000
+RUS,Russia,90,Medical instruments,4.255278e-04,1,0.2775,0.6364
+RUS,Russia,91,Instruments for physical or chemical analysis,9.397994e-04,1,,-0.5872
+RUS,Russia,92,Instruments for measuring electricity,2.357956e-03,1,,
+RUS,Russia,93,Measuring instruments,4.240286e-03,1,,-0.7599
+RUS,Russia,94,Automatic regulating instruments,3.080162e-03,1,,
+RUS,Russia,95,Seats,5.964953e-04,1,0.6897,-0.3697
+RUS,Russia,96,Other furniture and parts,1.780268e-03,1,0.3545,0.3333
+RUS,Russia,97,Toys,6.125823e-04,1,,
+RUS,Russia,98,Commodities not specified according to kind,2.970580e-02,1,0.1544,0.2364
+RUS,Russia,99,Trade data discrepancies,3.820246e-02,1,-0.6556,0.4667
+SAU,Saudi Arabia,0,Wheat and meslin,4.860152e-04,1,,
+SAU,Saudi Arabia,1,Corn,4.625088e-05,1,,
+SAU,Saudi Arabia,2,Wine,3.721122e-05,1,,
+SAU,Saudi Arabia,3,Coal,2.989063e-04,1,,
+SAU,Saudi Arabia,4,"Petroleum oils, crude",3.240929e-01,1,-0.1699,0.7939
+SAU,Saudi Arabia,5,"Petroleum oils, refined",5.318909e-02,1,-0.0680,-0.0061
+SAU,Saudi Arabia,6,Petroleum gases,5.584779e-02,1,0.1320,-0.9758
+SAU,Saudi Arabia,7,Cyclic hydrocarbons,7.224469e-02,1,-0.0046,-0.9273
+SAU,Saudi Arabia,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,8.040757e-04,1,,
+SAU,Saudi Arabia,9,"Medicaments, packaged",1.059854e-03,1,,
+SAU,Saudi Arabia,10,Industrial monocarboxylic fatty acids,1.818716e-03,1,,
+SAU,Saudi Arabia,11,Polymers of ethylene,1.618462e-01,1,-0.1282,0.9152
+SAU,Saudi Arabia,12,Polyacetals,1.571213e-02,1,,
+SAU,Saudi Arabia,13,"Other plates of plastics, noncellular and not reinforced",7.749976e-03,1,,
+SAU,Saudi Arabia,14,Packing lids,6.924141e-03,1,,
+SAU,Saudi Arabia,15,Other articles of plastic,8.351761e-04,1,,
+SAU,Saudi Arabia,16,New pneumatic tires of rubber,3.445676e-04,1,,
+SAU,Saudi Arabia,17,Tanned hides of bovines or equines,7.146031e-04,1,,
+SAU,Saudi Arabia,18,Trunks or cases,2.821223e-04,1,,
+SAU,Saudi Arabia,19,Wood sawn lengthwise,5.480518e-04,1,,
+SAU,Saudi Arabia,20,"Chemical woodpulp, soda or sulfate",1.689058e-04,1,,
+SAU,Saudi Arabia,21,"Paper and paperboard, coated with kaolin",8.750638e-04,1,,
+SAU,Saudi Arabia,22,Woven fabrics of synthetic filament yarn,3.028229e-03,1,,
+SAU,Saudi Arabia,23,"T-shirts, knit",1.520515e-04,1,,
+SAU,Saudi Arabia,24,"Sweaters, pullovers, sweatshirts etc., knit",5.900492e-05,1,,
+SAU,Saudi Arabia,25,Men's suits and pants,5.513214e-04,1,,
+SAU,Saudi Arabia,26,Women's suits and pants,3.099513e-04,1,,
+SAU,Saudi Arabia,27,Leather footwear,1.399654e-04,1,,
+SAU,Saudi Arabia,28,Diamonds,1.108535e-03,1,,
+SAU,Saudi Arabia,29,Gold,4.579629e-03,1,,
+SAU,Saudi Arabia,30,Platinum,1.353940e-03,1,,
+SAU,Saudi Arabia,31,Jewelry of precious metal,1.061064e-02,1,,
+SAU,Saudi Arabia,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",7.156527e-03,1,,
+SAU,Saudi Arabia,33,"Flat rolled iron, width > 600mm, clad",2.107429e-03,1,,
+SAU,Saudi Arabia,34,Other articles of iron or steel,2.369498e-03,1,,
+SAU,Saudi Arabia,35,Unwrought aluminum,1.287465e-02,1,,
+SAU,Saudi Arabia,36,Aluminum plates > 0.2 mm,9.982908e-03,1,,
+SAU,Saudi Arabia,37,Spark-ignition reciprocating internal combustion piston engines,6.869217e-03,1,,
+SAU,Saudi Arabia,38,Compression-ignition internal combustion piston engines,2.339657e-04,1,,
+SAU,Saudi Arabia,39,Parts suitable for use with spark-ignition engines,2.069775e-03,1,,
+SAU,Saudi Arabia,40,Gas turbines,5.065407e-03,1,,
+SAU,Saudi Arabia,41,Pumps for liquids,1.458120e-03,1,,
+SAU,Saudi Arabia,42,"Pumps, compressors, fans, etc.",1.235941e-03,1,,
+SAU,Saudi Arabia,43,Air conditioners,9.634204e-03,1,,
+SAU,Saudi Arabia,44,"Refrigerators, freezers",8.407702e-04,1,,
+SAU,Saudi Arabia,45,Equipment for temperature change of materials,6.626245e-04,1,,
+SAU,Saudi Arabia,46,Centrifuges,1.665738e-03,1,,
+SAU,Saudi Arabia,47,Dish washing machines,5.791337e-04,1,,
+SAU,Saudi Arabia,48,"Self-propelled bulldozers, excavators and road rollers",1.475677e-03,1,,
+SAU,Saudi Arabia,49,Parts for use with hoists and excavation machinery,3.527273e-03,1,,
+SAU,Saudi Arabia,50,Printers and copiers,4.395548e-04,1,,
+SAU,Saudi Arabia,51,Computers,3.121769e-04,1,,
+SAU,Saudi Arabia,52,Parts and accessories for office machines,2.390980e-04,1,,
+SAU,Saudi Arabia,53,Machinery for working rubber or plastics,3.910249e-04,1,,
+SAU,Saudi Arabia,54,Machines n.e.c.,8.049682e-04,1,,
+SAU,Saudi Arabia,55,Appliances for thermostatically controlled valves,6.614411e-04,1,,
+SAU,Saudi Arabia,56,Ball or roller bearings,1.663969e-04,1,,
+SAU,Saudi Arabia,57,Transmission shafts,6.575828e-04,1,,
+SAU,Saudi Arabia,58,Electric motors and generators,1.196303e-03,1,,
+SAU,Saudi Arabia,59,Electrical transformers,1.914104e-03,1,,
+SAU,Saudi Arabia,60,Batteries,2.123132e-03,1,,
+SAU,Saudi Arabia,61,Electric heaters,8.129046e-04,1,,
+SAU,Saudi Arabia,62,Telephones,4.886860e-04,1,,
+SAU,Saudi Arabia,63,Microphones,5.749977e-04,1,,
+SAU,Saudi Arabia,64,Video recording apparatus,3.304262e-04,1,,
+SAU,Saudi Arabia,65,"Tapes, cassettes, records and compact disks",3.914540e-04,1,,
+SAU,Saudi Arabia,66,"Transmission apparatus for radio, telephone and TV",2.973265e-03,1,,
+SAU,Saudi Arabia,67,Reception apparatus for radio broadcasting,3.013681e-04,1,,
+SAU,Saudi Arabia,68,Monitors and projectors,2.735885e-04,1,,
+SAU,Saudi Arabia,69,"Parts of radios, telephones, and T.V.s",3.384894e-04,1,,
+SAU,Saudi Arabia,70,Electrical capacitors,1.581529e-04,1,,
+SAU,Saudi Arabia,71,Electronic printed circuits,1.476764e-04,1,,
+SAU,Saudi Arabia,72,Electrical apparatus for < 1k volts,4.147869e-04,1,,
+SAU,Saudi Arabia,73,Parts for electrical apparatus,7.393771e-04,1,,
+SAU,Saudi Arabia,74,"Thermionic, cold cathode or photocathode tubes",3.453882e-04,1,,
+SAU,Saudi Arabia,75,Semiconductor devices,3.384261e-05,1,,
+SAU,Saudi Arabia,76,Electronic integrated circuits,5.072106e-05,1,,
+SAU,Saudi Arabia,77,Electrical machines with individual functions n.e.c.,3.820542e-04,1,,
+SAU,Saudi Arabia,78,Insulated electrical wire,8.829601e-03,1,,
+SAU,Saudi Arabia,79,Tractors,4.836887e-04,1,,
+SAU,Saudi Arabia,80,Cars,1.424370e-03,1,,
+SAU,Saudi Arabia,81,Motor vehicles for transporting goods,2.587714e-03,1,,
+SAU,Saudi Arabia,82,Parts of motor vehicles,3.605087e-04,1,,
+SAU,Saudi Arabia,83,Motorcycles,3.128342e-04,1,,
+SAU,Saudi Arabia,84,Other aircraft and spacecraft,1.928867e-03,1,,
+SAU,Saudi Arabia,85,Parts of other aircraft,1.103449e-02,1,,
+SAU,Saudi Arabia,86,Cargo ships and similar vessels,4.354638e-03,1,,
+SAU,Saudi Arabia,87,Optical fibers,8.977300e-05,1,,
+SAU,Saudi Arabia,88,Electrostatic photo-copyers,2.265449e-04,1,,
+SAU,Saudi Arabia,89,Liquid crystal devices,4.191372e-04,1,,
+SAU,Saudi Arabia,90,Medical instruments,4.126140e-04,1,,
+SAU,Saudi Arabia,91,Instruments for physical or chemical analysis,2.827954e-04,1,,
+SAU,Saudi Arabia,92,Instruments for measuring electricity,1.001846e-03,1,,
+SAU,Saudi Arabia,93,Measuring instruments,2.552438e-03,1,,
+SAU,Saudi Arabia,94,Automatic regulating instruments,5.390920e-04,1,,
+SAU,Saudi Arabia,95,Seats,3.010065e-04,1,,
+SAU,Saudi Arabia,96,Other furniture and parts,7.090199e-04,1,,
+SAU,Saudi Arabia,97,Toys,1.965761e-04,1,,
+SAU,Saudi Arabia,98,Commodities not specified according to kind,1.981033e-03,1,,
+SAU,Saudi Arabia,99,Trade data discrepancies,1.822721e-03,1,,
+TUR,Turkiye,0,Wheat and meslin,5.743929e-03,1,-0.0942,0.7333
+TUR,Turkiye,1,Corn,3.019004e-03,1,,
+TUR,Turkiye,2,Wine,5.288482e-04,1,,
+TUR,Turkiye,3,Coal,1.317246e-04,1,,
+TUR,Turkiye,4,"Petroleum oils, crude",7.981018e-04,1,0.0835,-0.3697
+TUR,Turkiye,5,"Petroleum oils, refined",8.086519e-03,1,0.0070,0.4909
+TUR,Turkiye,6,Petroleum gases,1.337199e-03,1,,
+TUR,Turkiye,7,Cyclic hydrocarbons,5.238341e-03,1,,
+TUR,Turkiye,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,3.986755e-04,1,,
+TUR,Turkiye,9,"Medicaments, packaged",2.139107e-03,1,0.5480,-0.2242
+TUR,Turkiye,10,Industrial monocarboxylic fatty acids,2.862406e-03,1,,
+TUR,Turkiye,11,Polymers of ethylene,1.574513e-03,1,,
+TUR,Turkiye,12,Polyacetals,7.436281e-03,1,,
+TUR,Turkiye,13,"Other plates of plastics, noncellular and not reinforced",1.528253e-02,1,0.5954,-0.1273
+TUR,Turkiye,14,Packing lids,1.411523e-02,1,-0.0247,-0.3697
+TUR,Turkiye,15,Other articles of plastic,4.045965e-03,1,,
+TUR,Turkiye,16,New pneumatic tires of rubber,1.762277e-02,1,0.3081,-0.2000
+TUR,Turkiye,17,Tanned hides of bovines or equines,6.092410e-03,1,,
+TUR,Turkiye,18,Trunks or cases,4.366243e-03,1,,
+TUR,Turkiye,19,Wood sawn lengthwise,7.590206e-04,1,,
+TUR,Turkiye,20,"Chemical woodpulp, soda or sulfate",5.542433e-04,1,,
+TUR,Turkiye,21,"Paper and paperboard, coated with kaolin",1.481633e-03,1,,
+TUR,Turkiye,22,Woven fabrics of synthetic filament yarn,3.033120e-02,1,-0.0625,-0.9030
+TUR,Turkiye,23,"T-shirts, knit",1.016797e-01,1,0.1344,0.9152
+TUR,Turkiye,24,"Sweaters, pullovers, sweatshirts etc., knit",5.773419e-02,1,0.1212,-0.8667
+TUR,Turkiye,25,Men's suits and pants,3.716570e-02,1,0.6687,-0.6000
+TUR,Turkiye,26,Women's suits and pants,5.305280e-02,1,0.6371,-0.1758
+TUR,Turkiye,27,Leather footwear,5.798158e-03,1,,
+TUR,Turkiye,28,Diamonds,1.477987e-04,1,,
+TUR,Turkiye,29,Gold,1.106648e-02,1,,
+TUR,Turkiye,30,Platinum,3.608552e-04,1,,
+TUR,Turkiye,31,Jewelry of precious metal,3.731682e-02,1,0.8023,-0.9030
+TUR,Turkiye,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",1.636320e-02,1,,
+TUR,Turkiye,33,"Flat rolled iron, width > 600mm, clad",1.078303e-02,1,,
+TUR,Turkiye,34,Other articles of iron or steel,1.060517e-02,1,,
+TUR,Turkiye,35,Unwrought aluminum,2.562302e-03,1,,
+TUR,Turkiye,36,Aluminum plates > 0.2 mm,1.397360e-02,1,0.7629,0.5030
+TUR,Turkiye,37,Spark-ignition reciprocating internal combustion piston engines,2.343108e-03,1,,
+TUR,Turkiye,38,Compression-ignition internal combustion piston engines,2.609917e-03,1,,
+TUR,Turkiye,39,Parts suitable for use with spark-ignition engines,2.063586e-02,1,0.1799,-0.5636
+TUR,Turkiye,40,Gas turbines,4.238507e-03,1,,
+TUR,Turkiye,41,Pumps for liquids,6.111987e-03,1,,
+TUR,Turkiye,42,"Pumps, compressors, fans, etc.",4.417651e-03,1,,
+TUR,Turkiye,43,Air conditioners,6.358051e-03,1,,
+TUR,Turkiye,44,"Refrigerators, freezers",3.825428e-02,1,0.8409,0.0788
+TUR,Turkiye,45,Equipment for temperature change of materials,6.149598e-03,1,0.0108,-0.2000
+TUR,Turkiye,46,Centrifuges,5.206281e-03,1,,
+TUR,Turkiye,47,Dish washing machines,1.453828e-02,1,,
+TUR,Turkiye,48,"Self-propelled bulldozers, excavators and road rollers",3.743472e-03,1,,
+TUR,Turkiye,49,Parts for use with hoists and excavation machinery,7.048196e-03,1,,
+TUR,Turkiye,50,Printers and copiers,2.079575e-03,1,,
+TUR,Turkiye,51,Computers,3.980644e-04,1,0.0046,-0.0545
+TUR,Turkiye,52,Parts and accessories for office machines,2.771404e-04,1,0.6239,-0.4061
+TUR,Turkiye,53,Machinery for working rubber or plastics,4.814179e-03,1,,
+TUR,Turkiye,54,Machines n.e.c.,2.867627e-03,1,,
+TUR,Turkiye,55,Appliances for thermostatically controlled valves,5.291033e-03,1,,
+TUR,Turkiye,56,Ball or roller bearings,3.378732e-03,1,,
+TUR,Turkiye,57,Transmission shafts,5.888580e-03,1,,
+TUR,Turkiye,58,Electric motors and generators,3.061273e-03,1,,
+TUR,Turkiye,59,Electrical transformers,9.749919e-03,1,,
+TUR,Turkiye,60,Batteries,6.244951e-03,1,,
+TUR,Turkiye,61,Electric heaters,2.031664e-02,1,-0.0100,-0.8061
+TUR,Turkiye,62,Telephones,1.004561e-03,1,,
+TUR,Turkiye,63,Microphones,3.201979e-04,1,,
+TUR,Turkiye,64,Video recording apparatus,8.118348e-04,1,,
+TUR,Turkiye,65,"Tapes, cassettes, records and compact disks",1.078326e-03,1,,
+TUR,Turkiye,66,"Transmission apparatus for radio, telephone and TV",4.258805e-04,1,0.0135,-0.5394
+TUR,Turkiye,67,Reception apparatus for radio broadcasting,7.205253e-04,1,,
+TUR,Turkiye,68,Monitors and projectors,3.146374e-02,1,0.2919,-0.2000
+TUR,Turkiye,69,"Parts of radios, telephones, and T.V.s",7.261799e-04,1,,
+TUR,Turkiye,70,Electrical capacitors,2.899920e-04,1,,
+TUR,Turkiye,71,Electronic printed circuits,4.827333e-04,1,,
+TUR,Turkiye,72,Electrical apparatus for < 1k volts,4.854739e-03,1,,
+TUR,Turkiye,73,Parts for electrical apparatus,3.393275e-03,1,,
+TUR,Turkiye,74,"Thermionic, cold cathode or photocathode tubes",5.818969e-04,1,,
+TUR,Turkiye,75,Semiconductor devices,6.383543e-04,1,,
+TUR,Turkiye,76,Electronic integrated circuits,6.822227e-05,1,,
+TUR,Turkiye,77,Electrical machines with individual functions n.e.c.,9.777293e-04,1,,
+TUR,Turkiye,78,Insulated electrical wire,2.099882e-02,1,0.0278,0.6848
+TUR,Turkiye,79,Tractors,1.009697e-02,1,,
+TUR,Turkiye,80,Cars,9.440615e-03,1,-0.2889,-0.5273
+TUR,Turkiye,81,Motor vehicles for transporting goods,2.616437e-02,1,0.1599,-0.9152
+TUR,Turkiye,82,Parts of motor vehicles,8.909473e-03,1,-0.3607,0.6970
+TUR,Turkiye,83,Motorcycles,9.702342e-04,1,,
+TUR,Turkiye,84,Other aircraft and spacecraft,3.407577e-03,1,-0.1259,0.4788
+TUR,Turkiye,85,Parts of other aircraft,5.076627e-03,1,,
+TUR,Turkiye,86,Cargo ships and similar vessels,1.042926e-02,1,,
+TUR,Turkiye,87,Optical fibers,4.453861e-04,1,,
+TUR,Turkiye,88,Electrostatic photo-copyers,4.146602e-04,1,,
+TUR,Turkiye,89,Liquid crystal devices,7.282039e-04,1,,
+TUR,Turkiye,90,Medical instruments,1.674375e-03,1,,
+TUR,Turkiye,91,Instruments for physical or chemical analysis,6.191653e-04,1,,
+TUR,Turkiye,92,Instruments for measuring electricity,5.965154e-04,1,,
+TUR,Turkiye,93,Measuring instruments,9.897997e-04,1,,
+TUR,Turkiye,94,Automatic regulating instruments,2.362074e-03,1,,
+TUR,Turkiye,95,Seats,1.008685e-02,1,,
+TUR,Turkiye,96,Other furniture and parts,1.118599e-02,1,,
+TUR,Turkiye,97,Toys,1.068943e-03,1,,
+TUR,Turkiye,98,Commodities not specified according to kind,4.208722e-03,1,0.3103,0.7091
+TUR,Turkiye,99,Trade data discrepancies,8.514344e-04,1,0.4781,0.4424
+USA,United States of America,0,Wheat and meslin,1.686712e-02,1,-0.4873,0.5030
+USA,United States of America,1,Corn,3.260866e-02,1,-0.5460,0.1394
+USA,United States of America,2,Wine,3.059755e-03,1,,
+USA,United States of America,3,Coal,8.372229e-03,1,,0.6833
+USA,United States of America,4,"Petroleum oils, crude",2.469140e-03,1,-0.2309,-0.7697
+USA,United States of America,5,"Petroleum oils, refined",8.528513e-03,1,0.2427,-0.4182
+USA,United States of America,6,Petroleum gases,5.282561e-03,1,,0.3505
+USA,United States of America,7,Cyclic hydrocarbons,9.327176e-03,1,-0.4981,0.4545
+USA,United States of America,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,5.338096e-03,1,,
+USA,United States of America,9,"Medicaments, packaged",5.983046e-03,1,0.8561,-0.6606
+USA,United States of America,10,Industrial monocarboxylic fatty acids,8.332167e-03,1,,
+USA,United States of America,11,Polymers of ethylene,1.131546e-02,1,-0.3707,-0.4303
+USA,United States of America,12,Polyacetals,9.923512e-03,1,-0.2958,0.6364
+USA,United States of America,13,"Other plates of plastics, noncellular and not reinforced",8.776581e-03,1,0.1305,0.3818
+USA,United States of America,14,Packing lids,9.182358e-03,1,0.1730,-0.7212
+USA,United States of America,15,Other articles of plastic,9.249697e-03,1,0.5992,-0.4424
+USA,United States of America,16,New pneumatic tires of rubber,5.793999e-03,1,,
+USA,United States of America,17,Tanned hides of bovines or equines,5.673166e-03,1,,
+USA,United States of America,18,Trunks or cases,1.940191e-03,1,,
+USA,United States of America,19,Wood sawn lengthwise,6.452182e-03,1,,
+USA,United States of America,20,"Chemical woodpulp, soda or sulfate",1.242590e-02,1,-0.6911,-0.2364
+USA,United States of America,21,"Paper and paperboard, coated with kaolin",5.592018e-03,1,,
+USA,United States of America,22,Woven fabrics of synthetic filament yarn,2.582733e-03,1,,
+USA,United States of America,23,"T-shirts, knit",2.714006e-03,1,,
+USA,United States of America,24,"Sweaters, pullovers, sweatshirts etc., knit",1.161211e-03,1,,
+USA,United States of America,25,Men's suits and pants,1.416213e-03,1,,
+USA,United States of America,26,Women's suits and pants,1.074889e-03,1,,
+USA,United States of America,27,Leather footwear,8.208599e-04,1,,
+USA,United States of America,28,Diamonds,1.095592e-02,1,,
+USA,United States of America,29,Gold,8.181485e-03,1,-0.0077,0.0545
+USA,United States of America,30,Platinum,8.889496e-03,1,,
+USA,United States of America,31,Jewelry of precious metal,7.583149e-03,1,,
+USA,United States of America,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",2.516499e-03,1,,
+USA,United States of America,33,"Flat rolled iron, width > 600mm, clad",2.551261e-03,1,,
+USA,United States of America,34,Other articles of iron or steel,8.653458e-03,1,0.5058,-0.3333
+USA,United States of America,35,Unwrought aluminum,2.121321e-03,1,,
+USA,United States of America,36,Aluminum plates > 0.2 mm,1.027609e-02,1,-0.1382,0.3212
+USA,United States of America,37,Spark-ignition reciprocating internal combustion piston engines,1.249421e-02,1,-0.2641,-0.7455
+USA,United States of America,38,Compression-ignition internal combustion piston engines,1.127721e-02,1,-0.1591,-0.4061
+USA,United States of America,39,Parts suitable for use with spark-ignition engines,8.848923e-03,1,0.2896,0.7091
+USA,United States of America,40,Gas turbines,1.528569e-02,1,0.1073,0.4303
+USA,United States of America,41,Pumps for liquids,1.111521e-02,1,-0.4263,0.1152
+USA,United States of America,42,"Pumps, compressors, fans, etc.",9.057350e-03,1,-0.0780,0.2000
+USA,United States of America,43,Air conditioners,7.121024e-03,1,0.4849,0.5030
+USA,United States of America,44,"Refrigerators, freezers",6.693240e-03,1,0.2456,-0.2121
+USA,United States of America,45,Equipment for temperature change of materials,8.802677e-03,1,-0.1985,-0.2970
+USA,United States of America,46,Centrifuges,1.318038e-02,1,-0.0270,-0.2485
+USA,United States of America,47,Dish washing machines,4.211349e-03,1,,
+USA,United States of America,48,"Self-propelled bulldozers, excavators and road rollers",9.926277e-03,1,-0.5012,0.5636
+USA,United States of America,49,Parts for use with hoists and excavation machinery,1.652868e-02,1,0.2502,0.7455
+USA,United States of America,50,Printers and copiers,5.865004e-03,1,,
+USA,United States of America,51,Computers,8.769435e-03,1,0.5081,-0.4788
+USA,United States of America,52,Parts and accessories for office machines,1.199214e-02,1,0.0849,0.0667
+USA,United States of America,53,Machinery for working rubber or plastics,6.032537e-03,1,,
+USA,United States of America,54,Machines n.e.c.,1.048676e-02,1,0.6216,0.4788
+USA,United States of America,55,Appliances for thermostatically controlled valves,1.054550e-02,1,-0.2463,0.7333
+USA,United States of America,56,Ball or roller bearings,6.162424e-03,1,,
+USA,United States of America,57,Transmission shafts,8.510211e-03,1,,
+USA,United States of America,58,Electric motors and generators,6.456345e-03,1,,
+USA,United States of America,59,Electrical transformers,6.581297e-03,1,0.6278,0.7697
+USA,United States of America,60,Batteries,5.375551e-03,1,,
+USA,United States of America,61,Electric heaters,2.816971e-03,1,,
+USA,United States of America,62,Telephones,1.006131e-02,1,0.3946,-0.5636
+USA,United States of America,63,Microphones,8.717123e-03,1,0.2000,-0.4182
+USA,United States of America,64,Video recording apparatus,3.394543e-03,1,,
+USA,United States of America,65,"Tapes, cassettes, records and compact disks",1.320081e-02,1,0.4000,-0.5636
+USA,United States of America,66,"Transmission apparatus for radio, telephone and TV",6.146662e-03,1,-0.2300,-0.4667
+USA,United States of America,67,Reception apparatus for radio broadcasting,6.889519e-03,1,,
+USA,United States of America,68,Monitors and projectors,3.376750e-03,1,,
+USA,United States of America,69,"Parts of radios, telephones, and T.V.s",6.626083e-03,1,0.3127,0.8424
+USA,United States of America,70,Electrical capacitors,7.751545e-03,1,0.5421,-0.3455
+USA,United States of America,71,Electronic printed circuits,6.649721e-03,1,0.5104,0.5636
+USA,United States of America,72,Electrical apparatus for < 1k volts,9.911812e-03,1,0.2147,-0.1636
+USA,United States of America,73,Parts for electrical apparatus,1.077394e-02,1,0.1969,-0.1636
+USA,United States of America,74,"Thermionic, cold cathode or photocathode tubes",1.206179e-02,1,-0.2517,-0.5394
+USA,United States of America,75,Semiconductor devices,8.019112e-03,1,0.3560,0.5515
+USA,United States of America,76,Electronic integrated circuits,1.171263e-02,1,0.6116,0.2000
+USA,United States of America,77,Electrical machines with individual functions n.e.c.,1.127445e-02,1,-0.3598,0.5152
+USA,United States of America,78,Insulated electrical wire,8.051997e-03,1,0.5158,0.4667
+USA,United States of America,79,Tractors,8.966384e-03,1,-0.3822,-0.0182
+USA,United States of America,80,Cars,5.767440e-03,1,0.0548,0.2485
+USA,United States of America,81,Motor vehicles for transporting goods,9.592718e-03,1,-0.2734,-0.0303
+USA,United States of America,82,Parts of motor vehicles,1.114013e-02,1,0.2819,0.5636
+USA,United States of America,83,Motorcycles,4.275729e-03,1,,
+USA,United States of America,84,Other aircraft and spacecraft,2.351355e-02,1,0.1274,0.9030
+USA,United States of America,85,Parts of other aircraft,1.689932e-02,1,-0.0981,0.2364
+USA,United States of America,86,Cargo ships and similar vessels,2.386284e-04,1,,
+USA,United States of America,87,Optical fibers,1.193237e-02,1,0.6934,0.4667
+USA,United States of America,88,Electrostatic photo-copyers,5.266593e-03,1,,
+USA,United States of America,89,Liquid crystal devices,7.261366e-03,1,0.0000,-0.9273
+USA,United States of America,90,Medical instruments,2.053130e-02,1,-0.3838,-0.1758
+USA,United States of America,91,Instruments for physical or chemical analysis,1.972776e-02,1,-0.4996,0.0182
+USA,United States of America,92,Instruments for measuring electricity,2.312465e-02,1,-0.0355,0.4788
+USA,United States of America,93,Measuring instruments,1.342388e-02,1,-0.0842,-0.6848
+USA,United States of America,94,Automatic regulating instruments,1.103588e-02,1,0.4525,-0.1879
+USA,United States of America,95,Seats,5.748715e-03,1,,
+USA,United States of America,96,Other furniture and parts,3.242801e-03,1,,
+USA,United States of America,97,Toys,3.077657e-03,1,,
+USA,United States of America,98,Commodities not specified according to kind,1.915541e-02,1,-0.1776,0.3212
+USA,United States of America,99,Trade data discrepancies,4.722790e-04,1,-0.2675,0.4062
+ZAF,South Africa,0,Wheat and meslin,1.987456e-03,1,,
+ZAF,South Africa,1,Corn,1.610016e-02,1,0.4594,-0.5879
+ZAF,South Africa,2,Wine,2.079150e-02,1,0.5854,0.7212
+ZAF,South Africa,3,Coal,5.639047e-02,1,0.4324,0.5515
+ZAF,South Africa,4,"Petroleum oils, crude",3.695503e-04,1,0.3299,0.3333
+ZAF,South Africa,5,"Petroleum oils, refined",3.819086e-03,1,-0.3553,0.8061
+ZAF,South Africa,6,Petroleum gases,4.234267e-04,1,,
+ZAF,South Africa,7,Cyclic hydrocarbons,1.726280e-04,1,,
+ZAF,South Africa,8,Heterocyclic compounds with nitrogen hetero-atom(s) only,2.469797e-04,1,,
+ZAF,South Africa,9,"Medicaments, packaged",1.005070e-03,1,,
+ZAF,South Africa,10,Industrial monocarboxylic fatty acids,2.706898e-03,1,,
+ZAF,South Africa,11,Polymers of ethylene,1.694920e-03,1,,
+ZAF,South Africa,12,Polyacetals,1.515634e-03,1,,
+ZAF,South Africa,13,"Other plates of plastics, noncellular and not reinforced",9.973853e-04,1,,
+ZAF,South Africa,14,Packing lids,3.606899e-03,1,,
+ZAF,South Africa,15,Other articles of plastic,1.547385e-03,1,,
+ZAF,South Africa,16,New pneumatic tires of rubber,4.642557e-03,1,0.5047,0.7455
+ZAF,South Africa,17,Tanned hides of bovines or equines,6.554789e-03,1,0.4825,-0.1273
+ZAF,South Africa,18,Trunks or cases,7.177537e-04,1,,
+ZAF,South Africa,19,Wood sawn lengthwise,1.342293e-03,1,,
+ZAF,South Africa,20,"Chemical woodpulp, soda or sulfate",4.093614e-03,1,0.4125,0.3333
+ZAF,South Africa,21,"Paper and paperboard, coated with kaolin",1.064902e-03,1,,
+ZAF,South Africa,22,Woven fabrics of synthetic filament yarn,1.172181e-03,1,,
+ZAF,South Africa,23,"T-shirts, knit",1.358349e-03,1,,
+ZAF,South Africa,24,"Sweaters, pullovers, sweatshirts etc., knit",4.444058e-04,1,,
+ZAF,South Africa,25,Men's suits and pants,1.854369e-03,1,,
+ZAF,South Africa,26,Women's suits and pants,8.971402e-04,1,,
+ZAF,South Africa,27,Leather footwear,1.016636e-03,1,,
+ZAF,South Africa,28,Diamonds,3.022739e-02,1,-0.4010,-0.7818
+ZAF,South Africa,29,Gold,4.041082e-02,1,0.5071,0.7333
+ZAF,South Africa,30,Platinum,2.645965e-01,1,0.6264,0.0182
+ZAF,South Africa,31,Jewelry of precious metal,1.571938e-03,1,,
+ZAF,South Africa,32,"Flat-rolled iron, width > 600mm, hot-rolled, not clad",9.023867e-03,1,0.5008,0.7333
+ZAF,South Africa,33,"Flat rolled iron, width > 600mm, clad",6.766599e-03,1,0.5572,0.2727
+ZAF,South Africa,34,Other articles of iron or steel,4.253943e-03,1,,
+ZAF,South Africa,35,Unwrought aluminum,2.518272e-02,1,-0.6057,-0.2485
+ZAF,South Africa,36,Aluminum plates > 0.2 mm,1.477816e-02,1,0.5675,0.7576
+ZAF,South Africa,37,Spark-ignition reciprocating internal combustion piston engines,2.817984e-03,1,,
+ZAF,South Africa,38,Compression-ignition internal combustion piston engines,3.287751e-03,1,,
+ZAF,South Africa,39,Parts suitable for use with spark-ignition engines,4.039421e-03,1,,
+ZAF,South Africa,40,Gas turbines,7.452597e-04,1,,
+ZAF,South Africa,41,Pumps for liquids,4.799816e-03,1,,
+ZAF,South Africa,42,"Pumps, compressors, fans, etc.",1.124597e-03,1,,
+ZAF,South Africa,43,Air conditioners,1.714122e-03,1,,
+ZAF,South Africa,44,"Refrigerators, freezers",3.443424e-03,1,0.4666,0.7939
+ZAF,South Africa,45,Equipment for temperature change of materials,1.743471e-03,1,,
+ZAF,South Africa,46,Centrifuges,4.013414e-02,1,0.5834,-0.2485
+ZAF,South Africa,47,Dish washing machines,1.387584e-03,1,,
+ZAF,South Africa,48,"Self-propelled bulldozers, excavators and road rollers",5.197946e-03,1,,
+ZAF,South Africa,49,Parts for use with hoists and excavation machinery,5.658292e-03,1,,
+ZAF,South Africa,50,Printers and copiers,2.055206e-03,1,,
+ZAF,South Africa,51,Computers,5.953481e-04,1,,
+ZAF,South Africa,52,Parts and accessories for office machines,7.287343e-04,1,,
+ZAF,South Africa,53,Machinery for working rubber or plastics,7.218461e-04,1,,
+ZAF,South Africa,54,Machines n.e.c.,1.286147e-03,1,,
+ZAF,South Africa,55,Appliances for thermostatically controlled valves,1.759003e-03,1,,
+ZAF,South Africa,56,Ball or roller bearings,1.972926e-03,1,,
+ZAF,South Africa,57,Transmission shafts,3.125473e-03,1,,
+ZAF,South Africa,58,Electric motors and generators,1.839840e-03,1,,
+ZAF,South Africa,59,Electrical transformers,1.569350e-03,1,,
+ZAF,South Africa,60,Batteries,1.507462e-03,1,,
+ZAF,South Africa,61,Electric heaters,1.718486e-03,1,,
+ZAF,South Africa,62,Telephones,8.150421e-04,1,,
+ZAF,South Africa,63,Microphones,6.434469e-04,1,,
+ZAF,South Africa,64,Video recording apparatus,5.582560e-04,1,,
+ZAF,South Africa,65,"Tapes, cassettes, records and compact disks",8.125180e-04,1,,
+ZAF,South Africa,66,"Transmission apparatus for radio, telephone and TV",8.347222e-04,1,,
+ZAF,South Africa,67,Reception apparatus for radio broadcasting,1.868609e-03,1,,
+ZAF,South Africa,68,Monitors and projectors,1.228419e-03,1,,
+ZAF,South Africa,69,"Parts of radios, telephones, and T.V.s",8.039042e-04,1,,
+ZAF,South Africa,70,Electrical capacitors,1.119336e-04,1,,
+ZAF,South Africa,71,Electronic printed circuits,1.498785e-04,1,,
+ZAF,South Africa,72,Electrical apparatus for < 1k volts,1.478294e-03,1,,
+ZAF,South Africa,73,Parts for electrical apparatus,1.399661e-03,1,,
+ZAF,South Africa,74,"Thermionic, cold cathode or photocathode tubes",8.555871e-04,1,,
+ZAF,South Africa,75,Semiconductor devices,8.410230e-04,1,,
+ZAF,South Africa,76,Electronic integrated circuits,8.830580e-05,1,,
+ZAF,South Africa,77,Electrical machines with individual functions n.e.c.,9.542326e-04,1,,
+ZAF,South Africa,78,Insulated electrical wire,2.111025e-03,1,,
+ZAF,South Africa,79,Tractors,2.454319e-03,1,,
+ZAF,South Africa,80,Cars,7.152358e-03,1,,
+ZAF,South Africa,81,Motor vehicles for transporting goods,1.867475e-02,1,,
+ZAF,South Africa,82,Parts of motor vehicles,2.550636e-03,1,,
+ZAF,South Africa,83,Motorcycles,9.572823e-04,1,,
+ZAF,South Africa,84,Other aircraft and spacecraft,1.911975e-03,1,,
+ZAF,South Africa,85,Parts of other aircraft,2.050763e-03,1,,
+ZAF,South Africa,86,Cargo ships and similar vessels,3.769500e-04,1,,
+ZAF,South Africa,87,Optical fibers,3.543927e-04,1,,
+ZAF,South Africa,88,Electrostatic photo-copyers,9.860207e-04,1,,
+ZAF,South Africa,89,Liquid crystal devices,2.517825e-04,1,,
+ZAF,South Africa,90,Medical instruments,9.276393e-04,1,,
+ZAF,South Africa,91,Instruments for physical or chemical analysis,9.150064e-04,1,,
+ZAF,South Africa,92,Instruments for measuring electricity,9.844604e-04,1,,
+ZAF,South Africa,93,Measuring instruments,1.456638e-03,1,,
+ZAF,South Africa,94,Automatic regulating instruments,9.223439e-04,1,,
+ZAF,South Africa,95,Seats,5.585385e-03,1,0.5163,0.8303
+ZAF,South Africa,96,Other furniture and parts,2.274529e-03,1,0.4332,0.7697
+ZAF,South Africa,97,Toys,4.951169e-04,1,,
+ZAF,South Africa,98,Commodities not specified according to kind,7.195991e-04,1,,
+ZAF,South Africa,99,Trade data discrepancies,1.640893e-02,1,-0.4486,-0.6869

@@ -1,0 +1,22 @@
+{
+  "kappa": 0.002216374175700614,
+  "sigma": 3.060627230104649,
+  "h_P": 4.4743746484026925,
+  "s_pi_P": 43.70777025121255,
+  "a_C": 0.17189868347552306,
+  "b_C": 0.32996765868158096,
+  "a_P": 0.40621214651131154,
+  "b_P": 0.3535259357376337,
+  "beta_declining_delta": -0.1143425472775381,
+  "beta_rising_delta": -0.05874878148710498,
+  "beta_stable_delta": 0.19734182365830008,
+  "_mode": "alpha_frozen",
+  "_country_summary": "calibration/calibration_results/country_wise_alpha_frozen/summary.csv",
+  "_years": [
+    1988,
+    2014
+  ],
+  "_loss": 2.123606783080925,
+  "_nfev": 336,
+  "_message": "Maximum number of iterations has been exceeded."
+}
