@@ -62,7 +62,7 @@ class _SolveTimeout(RuntimeError):
 @contextmanager
 def _wall_clock_timeout(timeout_s):
     """
-    Hard time limit for ODE solves via SIGALRM.
+    Time limit for ODE solves via SIGALRM.
     simulate() can only check for timeouts between years, not mid-solve.
     """
     # Disable SIGALRM in subprocess workers
@@ -165,6 +165,27 @@ def load_data(extracted_dir=EXTRACTED_DIR, years=None):
     else:
         data["pi_competition"] = None
 
+    # Product-product competition matrix from product growth regression. Already
+    # in the (positive) C_PP form (max(-a_k,0) on diag, max(-b_k,0)*phi off-diag);
+    # scaled by free s_pi_P during calibration.
+    pi_P_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "calibration_results", "growth_regression", "pi_competition_P.npy",
+    )
+    if os.path.exists(pi_P_path):
+        data["pi_competition_P"] = np.load(pi_P_path).astype(float)
+    else:
+        data["pi_competition_P"] = None
+
+    r_P_reg_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "calibration_results", "growth_regression", "r_P_regression.npy",
+    )
+    if os.path.exists(r_P_reg_path):
+        data["r_P_regression"] = np.load(r_P_reg_path).astype(float)
+    else:
+        data["r_P_regression"] = None
+
     print(f"Data loaded: SC={data['SC']}, SP={data['SP']}, "
           f"years={min(data['alpha_obs'])}–{max(data['alpha_obs'])}, "
           f"growth_rate_periods={len(data['r_P_periods'])}")
@@ -225,17 +246,25 @@ def build_model(theta, data):
     return model
 
 
-def _patch_model(model, data, params=None, h_mean=None, C_diag_mean=None, C_offdiag_mean=None, s_pi=None):
+def _patch_model(model, data, params=None, h_mean=None, C_diag_mean=None, C_offdiag_mean=None, s_pi=None,
+                 h_C_mean=None, h_P_mean=None, s_pi_P=None,
+                 G_vec=None, nu_vec=None, entry_threshold_vec=None):
     """
     Overwrite randomly generated parameters with empirical/fixed values.
 
     If `s_pi` is provided and `data["pi_competition"]` is available, the country
-    competition matrix C_CC is set to `s_pi * pi_competition`,
-    overriding `C_diag_mean`/`C_offdiag_mean` for C_CC.
+    competition matrix C_CC is set from `pi_competition`. A scalar `s_pi`
+    applies a global scale, while a shape-(SC,) vector applies country-specific
+    row scaling.
+
+    Optionally override G, nu, or entry_threshold with vector values via
+    G_vec, nu_vec, entry_threshold_vec (each must be shape (SC,)).
     """
     fp = FIXED
-    if h_mean is None:
-        h_mean = fp.get("h_mean", 0.225)
+    if h_C_mean is None:
+        h_C_mean = h_mean if h_mean is not None else fp.get("h_mean", 0.225)
+    if h_P_mean is None:
+        h_P_mean = h_mean if h_mean is not None else fp.get("h_mean", 0.225)
     if C_diag_mean is None:
         C_diag_mean = fp.get("C_diag_mean", 0.95)
     if C_offdiag_mean is None:
@@ -266,18 +295,37 @@ def _patch_model(model, data, params=None, h_mean=None, C_diag_mean=None, C_offd
     row_s[row_s == 0] = 1.0
     model.alpha = alpha / row_s
 
-    bt = model.beta_trade_off
-    KC_bt = np.maximum(model.KC, 1)[:, np.newaxis] ** bt
-    KP_bt = np.maximum(model.KP, 1)[np.newaxis, :] ** bt
-    alpha_safe = np.where(mask, np.maximum(model.alpha, 1e-10), 1.0)
-    # cap[j,i] replaces the uniform random draw in Terpstra et al.
-    model.beta_C = np.where(mask, cap / (KC_bt * alpha_safe), 0.0)
-    model.beta_P = np.where(mask, cap / (KP_bt * alpha_safe), 0.0)
+    bt_raw = model.beta_trade_off
+    if np.isscalar(bt_raw):
+        bt = np.full(model.SC, float(bt_raw))
+    else:
+        bt = np.asarray(bt_raw, dtype=float)
+        assert bt.shape == (model.SC,), \
+            f"beta_trade_off must be scalar or shape ({model.SC},), got {bt.shape}"
+    bt_col = bt[:, np.newaxis]  # (SC, 1) — applied to country dimension of beta matrices
+    KC_bt = np.maximum(model.KC, 1)[:, np.newaxis] ** bt_col  # (SC, 1)
+    KP_bt = np.maximum(model.KP, 1)[np.newaxis, :] ** bt_col  # (SC, SP)
+    # cap[j,i] is an empirical capability weight. Do not divide by alpha_init:
+    # alpha is the observed resource allocation share, so using it in the
+    # denominator makes capability explode for products with zero or tiny
+    # initial shares and couples beta to an arbitrary start year.
+    model.beta_C = np.where(mask, cap / KC_bt, 0.0)
+    model.beta_P = np.where(mask, cap / KP_bt, 0.0)
 
-    model.h_P = np.full(model.SP, h_mean)
-    model.h_C = np.full(model.SC, h_mean)
-    model.C_PP = np.full((model.SP, model.SP), C_offdiag_mean)
-    np.fill_diagonal(model.C_PP, C_diag_mean)
+    model.h_P = np.full(model.SP, h_P_mean) if np.isscalar(h_P_mean) else np.asarray(h_P_mean, dtype=float).copy()
+    model.h_C = np.full(model.SC, h_C_mean) if np.isscalar(h_C_mean) else np.asarray(h_C_mean, dtype=float).copy()
+    assert model.h_C.shape == (model.SC,), f"h_C must be shape ({model.SC},), got {model.h_C.shape}"
+    assert model.h_P.shape == (model.SP,), f"h_P must be shape ({model.SP},), got {model.h_P.shape}"
+    if s_pi_P is not None:
+        if data.get("pi_competition_P") is None:
+            raise ValueError(
+                "s_pi_P was provided but data['pi_competition_P'] is missing. "
+                "Expected pi_competition_P.npy in calibration_results/growth_regression/."
+            )
+        model.C_PP = float(s_pi_P) * data["pi_competition_P"].astype(float)
+    else:
+        model.C_PP = np.full((model.SP, model.SP), C_offdiag_mean)
+        np.fill_diagonal(model.C_PP, C_diag_mean)
 
     if s_pi is not None:
         if data.get("pi_competition") is None:
@@ -285,10 +333,31 @@ def _patch_model(model, data, params=None, h_mean=None, C_diag_mean=None, C_offd
                 "s_pi was provided but data['pi_competition'] is missing. "
                 "Expected pi_matrix_fixed.npy in calibration_results/growth_regression/."
             )
-        model.C_CC = float(s_pi) * data["pi_competition"].astype(float)
+        pi_comp = data["pi_competition"].astype(float)
+        if np.isscalar(s_pi):
+            model.C_CC = float(s_pi) * pi_comp
+        else:
+            s_pi_arr = np.asarray(s_pi, dtype=float)
+            assert s_pi_arr.shape == (model.SC,), \
+                f"s_pi must be scalar or shape ({model.SC},), got {s_pi_arr.shape}"
+            model.C_CC = s_pi_arr[:, np.newaxis] * pi_comp
     else:
         model.C_CC = np.full((model.SC, model.SC), C_offdiag_mean)
         np.fill_diagonal(model.C_CC, C_diag_mean)
+
+    if G_vec is not None:
+        G_arr = np.asarray(G_vec, dtype=float)
+        assert G_arr.shape == (model.SC,), f"G_vec must be shape ({model.SC},), got {G_arr.shape}"
+        model.G = G_arr.copy()
+    if nu_vec is not None:
+        nu_arr = np.asarray(nu_vec, dtype=float)
+        assert nu_arr.shape == (model.SC,), f"nu_vec must be shape ({model.SC},), got {nu_arr.shape}"
+        model.nu = nu_arr.copy()
+    if entry_threshold_vec is not None:
+        et_arr = np.asarray(entry_threshold_vec, dtype=float)
+        assert et_arr.shape == (model.SC,), \
+            f"entry_threshold_vec must be shape ({model.SC},), got {et_arr.shape}"
+        model.entry_threshold = et_arr.copy()
 
     model.phi_space = data["phi_space"].astype(float)
     model._build_product_space_matrices()
@@ -298,9 +367,12 @@ def _patch_model(model, data, params=None, h_mean=None, C_diag_mean=None, C_offd
 
 def _update_growth_rates(model, data, year):
     """
-    Switch model product growth rates to the period covering the given year.
-    Country growth rates (r_C) are set by group-level free parameters and not updated here.
+    Update model r_P to the piecewise-OLS period covering `year`.
+    No-op when r_P_regression is provided (regression values are kept live).
+    r_C is not touched here — set by free parameters elsewhere.
     """
+    if data.get("r_P_regression") is not None:
+        return
     r_P_periods = data.get("r_P_periods")
     if r_P_periods is None:
         return

@@ -5,7 +5,7 @@ Phi_space are fixed at YEAR_REF (2000); beta_C uses the full series.
 Intrinsic growth rates r_C and r_P are estimated by OLS on log-exports over the full series.
 
 Outputs (extracted_data/):
-  annual/alpha_{year}.npy  (SC × SP)  row-normalised RCA per year
+  annual/alpha_{year}.npy  (SC × SP)  country export-share allocation per year
   annual/C_{year}.npy      (SC,)      normalised country export totals
   annual/P_{year}.npy      (SP,)      normalised world product exports
   phi_space.npy            (SP × SP)  proximity matrix (from YEAR_REF)
@@ -72,6 +72,7 @@ G20_ISO3 = {
 countries_lookup = countries_lookup[countries_lookup["country_iso3_code"].isin(G20_ISO3)].copy()
 
 valid_countries = countries_lookup["country_iso3_code"].tolist()
+products_lookup = products_lookup[products_lookup["product_hs92_code"].astype(str) != "XXXX"].copy()
 valid_products  = products_lookup["product_hs92_code"].tolist()
 
 print(f"Products in lookup (4-digit): {len(valid_products)}")
@@ -115,7 +116,7 @@ print(f"Countries (SC): {SC},  Products (SP): {SP}")
 
 
 
-# Save index files (position → code + name) for countries and products, aligned to the fixed network
+# Save index files (position = code + name) for countries and products, aligned to the fixed network
 products_df = (
     pd.DataFrame({"position": range(SP), "hs_product_code": PRODUCTS})
     .merge(
@@ -151,6 +152,35 @@ print(f"phi_space: min={phi_space.min():.3f}  max={phi_space.max():.3f}")
 
 
 
+def compute_rca_from_exports(exports):
+    """
+    Compute Balassa RCA from an exports matrix (countries x products).
+
+    RCA is kept as a capability/intensity diagnostic. Alpha is not RCA: alpha is
+    the observed share of a country's exports allocated to each product.
+    """
+    exports = np.asarray(exports, dtype=float)
+    country_totals = exports.sum(axis=1, keepdims=True)
+    product_totals = exports.sum(axis=0, keepdims=True)
+    world_total = float(exports.sum())
+    if world_total <= 0:
+        return np.zeros_like(exports)
+
+    country_share = np.divide(
+        exports,
+        country_totals,
+        out=np.zeros_like(exports, dtype=float),
+        where=country_totals > 0,
+    )
+    world_share = product_totals / world_total
+    return np.divide(
+        country_share,
+        world_share,
+        out=np.zeros_like(exports, dtype=float),
+        where=world_share > 0,
+    )
+
+
 # Extract matrices for one year using fixed network
 def extract_year(year):
     '''
@@ -160,21 +190,28 @@ def extract_year(year):
     df = filter_year(trade, year)
     df = df[df["hs_product_code"].isin(PRODUCTS)]
 
-    rca_t = (
+    exports_t = (
         df.pivot_table(index="location_code", columns="hs_product_code",
-                       values="export_rca", aggfunc="first")
+                       values="export_value", aggfunc="sum")
         .reindex(index=COUNTRIES, columns=PRODUCTS).fillna(0.0)
     )
-    rca_vals = rca_t.values.copy()
+    export_vals = exports_t.values.astype(float, copy=True)
 
-    # Row-normalised RCA (alpha)
-    row_sums = rca_vals.sum(axis=1, keepdims=True)
-    row_sums[row_sums == 0] = 1.0
-    alpha_t = rca_vals / row_sums
+    # Resource allocation alpha: product export shares within each country.
+    country_totals = export_vals.sum(axis=1, keepdims=True)
+    alpha_t = np.divide(
+        export_vals,
+        country_totals,
+        out=np.zeros_like(export_vals, dtype=float),
+        where=country_totals > 0,
+    )
+
+    # RCA is computed from export values because the source export_rca field is
+    # missing for early years even when export values exist.
+    rca_vals = compute_rca_from_exports(export_vals)
 
     # World exports per product
-    world_exp = (df.groupby("hs_product_code")["export_value"]
-                   .sum().reindex(PRODUCTS).fillna(0.0).values.astype(float))
+    world_exp = export_vals.sum(axis=0)
     mean_P    = world_exp[world_exp > 0].mean() if (world_exp > 0).any() else 1.0
     P_t = world_exp / mean_P
     P_t = np.where(P_t == 0, 0.01, P_t) # Avoid zeros
@@ -223,7 +260,9 @@ ever_exported = (rca_stack > 0).any(axis=0) # (SC, SP) bool
 frequency = (rca_stack > 0).mean(axis=0) # Fraction of years with any export
 
 rca_when_active = np.where(rca_stack > 0, rca_stack, np.nan)
-mean_rca_active = np.nanmean(rca_when_active, axis=0) # nan where never exported
+mean_rca_active = np.zeros_like(frequency)
+if ever_exported.any():
+    mean_rca_active[ever_exported] = np.nanmean(rca_when_active[:, ever_exported], axis=0)
 mean_rca_active = np.where(ever_exported, mean_rca_active, 0.0)
 
 # Normalise intensity: cap at 95th percentile of active entries to limit outlier influence
