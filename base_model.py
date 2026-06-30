@@ -3,8 +3,8 @@ BaseModel: product-country model adapted from
 the original AdaptiveModel (Terpstra 2022, https://github.com/TerpstraS/pollcomm.git).
 
 Variable mapping  (from original):
-Plants       →  Products  (SP = 15, index 0..SP-1  in state vector)
-Pollinators  →  Countries (SC = 35, index SP..SP+SC-1 in state vector)
+Plants = Products  (SP = 15, index 0..SP-1 in state vector)
+Pollinators = Countries (SC = 35, index SP..SP+SC-1 in state vector)
 
 The find_critical_points method is a direct port of experiments.hysteresis().
 """
@@ -44,10 +44,18 @@ class BaseModel:
         self.seed = seed
         self.rng = np.random.default_rng(seed)
 
-        self.nu = nu
-        self.G = G
+        self.nu = np.full(self.SC, float(nu)) if np.isscalar(nu) else np.asarray(nu, dtype=float).copy()
+        self.G  = np.full(self.SC, float(G))  if np.isscalar(G)  else np.asarray(G,  dtype=float).copy()
+        assert self.nu.shape == (self.SC,), f"nu must be scalar or shape ({self.SC},), got {self.nu.shape}"
+        assert self.G.shape  == (self.SC,), f"G must be scalar or shape ({self.SC},), got {self.G.shape}"
         self.q = q
-        self.beta_trade_off = beta_trade_off
+        if np.isscalar(beta_trade_off):
+            self.beta_trade_off = float(beta_trade_off)
+        else:
+            bt_arr = np.asarray(beta_trade_off, dtype=float).copy()
+            assert bt_arr.shape == (self.SC,), \
+                f"beta_trade_off must be scalar or shape ({self.SC},), got {bt_arr.shape}"
+            self.beta_trade_off = bt_arr
         self.mu = mu
         self.extinct_threshold = 0.01
 
@@ -200,16 +208,17 @@ class BaseModel:
             )
 
         # Beta matrices
-        bt = self.beta_trade_off # Eta
+        bt = self.beta_trade_off # Eta (scalar or shape (SC,))
         low, high = 0.8, 1.2
 
         beta_0_P = self.rng.uniform(low, high, (self.SC, self.SP))
         beta_0_C = self.rng.uniform(low, high, (self.SC, self.SP))
 
-        mask = self.adj_matrix > 0                 
+        mask = self.adj_matrix > 0
 
-        KP_bt = self.KP[np.newaxis, :] ** bt # (1,  SP)
-        KC_bt = self.KC[:, np.newaxis] ** bt # (SC, 1)
+        bt_col = np.atleast_1d(bt).astype(float)[:, np.newaxis] # (1,1) if scalar, (SC,1) if vector
+        KP_bt = self.KP[np.newaxis, :] ** bt_col # (1, SP) or (SC, SP)
+        KC_bt = self.KC[:, np.newaxis] ** bt_col # (SC, 1)
 
         with np.errstate(divide="ignore", invalid="ignore"):
             self.beta_P = np.where(mask, beta_0_P / (KP_bt * self.alpha), 0.0)
@@ -581,13 +590,14 @@ def _nestedness_fast(network):
 def _nu_term(alpha, beta_C, SC, SP, nu):
     """
     Numba-accelerated stabilising (nu) term in the alpha ODE.
+    nu is a length-SC vector.
     """
     nu_term = np.zeros((SC, SP))
     for i in numba.prange(SC):
         for j in range(SP):
             if beta_C[i, j] != 0:
-                nu_term[i, j] = 1.0 / np.count_nonzero(beta_C[i, :]) - alpha[i, j]
-    return nu_term * nu
+                nu_term[i, j] = (1.0 / np.count_nonzero(beta_C[i, :]) - alpha[i, j]) * nu[i]
+    return nu_term
 
 
 @numba.njit(cache=True)
@@ -639,16 +649,17 @@ def _odes_inner_base(
 
     # Adaptive foraging dynamics
     dalpha = np.zeros((SC, SP))
-    if nu != 1.0 and G != 0.0:
-        nu_term = _nu_term(alpha, beta_C, SC, SP, nu)
-        for j in range(SC):
-            for i in range(SP):
-                if beta_C[j, i] != 0.0:
-                    dalpha[j, i] = G * (
-                        (1.0 - nu) * alpha[j, i] * (
-                            beta_C[j, i] * phi[i] - alpha_beta_phi[j]
-                        )
-                        + nu_term[j, i]
+    nu_term = _nu_term(alpha, beta_C, SC, SP, nu)
+    for j in range(SC):
+        if G[j] == 0.0:
+            continue
+        for i in range(SP):
+            if beta_C[j, i] != 0.0:
+                dalpha[j, i] = G[j] * (
+                    (1.0 - nu[j]) * alpha[j, i] * (
+                        beta_C[j, i] * phi[i] - alpha_beta_phi[j]
                     )
+                    + nu_term[j, i]
+                )
 
     return dP, dC, dalpha

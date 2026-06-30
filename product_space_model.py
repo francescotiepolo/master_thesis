@@ -54,7 +54,7 @@ class ProductSpaceModel(BaseModel):
         self.sigma = sigma
         self._phi_space_init = phi_space
         self.enable_entry = enable_entry
-        self.entry_threshold = entry_threshold
+        self._entry_threshold_raw = entry_threshold  # deferred; broadcast after super().__init__ sets self.SC
 
         super().__init__(
             N_products=N_products,
@@ -72,6 +72,16 @@ class ProductSpaceModel(BaseModel):
             feasible_iters=feasible_iters,
             patch_network=patch_network,
         )
+
+        # Now self.SC is set — broadcast entry_threshold to per-country vector
+        et = self._entry_threshold_raw
+        self.entry_threshold = (
+            np.full(self.SC, float(et))
+            if np.isscalar(et)
+            else np.asarray(et, dtype=float).copy()
+        )
+        assert self.entry_threshold.shape == (self.SC,), \
+            f"entry_threshold must be scalar or shape ({self.SC},), got {self.entry_threshold.shape}"
 
 
 
@@ -136,7 +146,7 @@ class ProductSpaceModel(BaseModel):
 
         # Only consider currently-inactive pairs
         inactive = self.beta_C == 0.0
-        candidates = inactive & (signal > self.entry_threshold)
+        candidates = inactive & (signal > self.entry_threshold[:, np.newaxis])
 
         n_new = candidates.sum()
         if n_new == 0:
@@ -334,19 +344,20 @@ def _odes_inner(
 
     # Adaptive specialisation
     dalpha = np.zeros((SC, SP))
-    if nu != 1.0 and G != 0.0:
-        for j in range(SC):
-            n_active = np.count_nonzero(beta_C[j, :])
-            if n_active == 0:
-                continue
-            for i in range(SP):
-                if beta_C[j, i] != 0.0:
-                    nu_stab = (1.0 / n_active - alpha[j, i]) * nu
-                    dalpha[j, i] = G * (
-                        (1.0 - nu) * alpha[j, i] * (
-                            beta_C[j, i] * xi[i] - rho_C[j]
-                        )
-                        + nu_stab
+    for j in range(SC):
+        if G[j] == 0.0:
+            continue
+        n_active = np.count_nonzero(beta_C[j, :])
+        if n_active == 0:
+            continue
+        for i in range(SP):
+            if beta_C[j, i] != 0.0:
+                nu_stab = (1.0 / n_active - alpha[j, i]) * nu[j]
+                dalpha[j, i] = G[j] * (
+                    (1.0 - nu[j]) * alpha[j, i] * (
+                        beta_C[j, i] * xi[i] - rho_C[j]
                     )
+                    + nu_stab
+                )
 
     return dP, dC, dalpha
