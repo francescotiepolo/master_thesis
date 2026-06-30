@@ -49,10 +49,32 @@ WORKER_MEM_MB = int(os.environ.get("SA_WORKER_MEM_MB", "3000"))
 
 RESULTS_DIR = os.path.join(_this_dir, "results")
 
-# Fix r_C groups to 0
+# Screen the model's dynamical parameters, including the product-space
+# couplings (s, c, c', gamma) that are otherwise held in calibration_config.FIXED.
+# Excluded from the screening (and left at their non-screened defaults inside
+# _build_model_sa / _patch_model):
+#   - the competition-matrix scale means (C_diag_mean, C_offdiag_mean): data-derived
+#     transforms of the regression competition matrices, not free dynamical params;
+#   - the r_C growth groups: empirical regression growth rates (data["r_C"]);
+#   - the congestion exponent q (fixed at 1) and mu, d_C (numerical / redundant).
+EXCLUDE_FROM_SA = {"C_offdiag_mean", "C_diag_mean",
+                   "r_C_declining", "r_C_rising", "r_C_stable"}
+EXTRA_SA = {
+    "s":       (0.0, 1.0),     # knowledge spillover
+    "c":       (0.001, 2.0),   # related-product competition
+    "c_prime": (0.0, 2.0),     # unrelated-product competition
+    "gamma":   (0.0, 5.0),     # capability amplification
+}
+# Pin the r_C growth groups to 0 (as in the original run): they are NOT screened,
+# but if left out of `params` entirely _patch_model falls back to the raw
+# regression r_C (up to ~+7/yr), which makes the 25-year ODE blow up and the
+# solves crawl. C_diag/C_offdiag are excluded here too and safely use the
+# benign _patch_model defaults (0.95 / 0.03).
 _SA_FIXED = {"r_C_declining": 0.0, "r_C_rising": 0.0, "r_C_stable": 0.0}
-SA_PARAM_NAMES = [p for p in PARAM_NAMES if p not in _SA_FIXED]
-SA_PARAM_BOUNDS = [b for p, b in zip(PARAM_NAMES, PARAM_BOUNDS) if p not in _SA_FIXED]
+SA_PARAM_NAMES = ([p for p in PARAM_NAMES if p not in EXCLUDE_FROM_SA]
+                  + list(EXTRA_SA))
+SA_PARAM_BOUNDS = ([b for p, b in zip(PARAM_NAMES, PARAM_BOUNDS) if p not in EXCLUDE_FROM_SA]
+                   + [list(v) for v in EXTRA_SA.values()])
 
 PROBLEM = {
     "num_vars": len(SA_PARAM_NAMES),
@@ -85,15 +107,15 @@ def _build_model_sa(params_dict, data):
         patch_network = True,
         seed = 133,
         phi_space = data["phi_space"],
-        s = float(fp["s"]),
-        c = float(fp["c"]),
-        c_prime = float(fp["c_prime"]),
-        gamma = float(fp["gamma"]),
+        s = float(params_dict.get("s", fp["s"])),
+        c = float(params_dict.get("c", fp["c"])),
+        c_prime = float(params_dict.get("c_prime", fp["c_prime"])),
+        gamma = float(params_dict.get("gamma", fp["gamma"])),
         kappa = float(params_dict["kappa"]),
         sigma = float(params_dict["sigma"]),
         nu = float(params_dict["nu"]),
         G = float(params_dict["G"]),
-        q = float(fp["q"]),
+        q = float(params_dict.get("q", fp["q"])),
         mu = float(fp["mu"]),
         beta_trade_off = float(params_dict["beta_trade_off"]),
         enable_entry = bool(fp.get("enable_entry", True)),
@@ -101,8 +123,8 @@ def _build_model_sa(params_dict, data):
     )
     _patch_model(model, data, params=params_dict,
                  h_mean=float(params_dict["h_mean"]),
-                 C_diag_mean=float(params_dict["C_diag_mean"]),
-                 C_offdiag_mean=float(params_dict["C_offdiag_mean"]))
+                 C_diag_mean=(float(params_dict["C_diag_mean"]) if "C_diag_mean" in params_dict else None),
+                 C_offdiag_mean=(float(params_dict["C_offdiag_mean"]) if "C_offdiag_mean" in params_dict else None))
     return model
 
 
